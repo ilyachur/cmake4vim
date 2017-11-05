@@ -19,6 +19,11 @@ COMMANDS                                        *cmake-commands*
 
 :CMakeClean                         cleans the project (it is equal of the execution make clean).
 
+:CMakeSelectTarget[Args]            selects a target for project. You can put target name as a parameter
+                                    for the command. If you don't put the target name as a parameter, 
+                                    plugin collects targets as a list and you will be able to choose target
+                                    from this list.
+
 VARIABLES                                        *cmake-variables*
 
 g:cmake_build_dir                   allows to set cmake build directory. Default is empty.

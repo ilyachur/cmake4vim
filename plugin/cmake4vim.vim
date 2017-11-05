@@ -67,8 +67,8 @@ function! s:select_target(...)
 
     if g:cmake4vim_change_build_command
         let s:cmake_target = ''
-        if exists('a:0') && a:0 != ""
-            let s:cmake_target = a:0
+        if exists('a:1') && a:1 != ""
+            let s:cmake_target = a:1
         else
             let s:res = split(system('cmake --build ' . shellescape(s:build_dir) . ' --target help'), "\n")[1:]
             let s:targets = ['Select target:']
