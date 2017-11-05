@@ -48,7 +48,7 @@ command! -nargs=? CMake call s:generate_cmake(<f-args>)
 command! -nargs=? CMakeResetAndReload call s:reset_reload_cmake(<f-args>)
 command! CMakeReset call s:reset_cmake()
 command! CMakeClean call s:clean_cmake()
-" }}} Public interfaces "za
+" }}} Public interfaces "
 
 " Main functionality {{{ "
 function! s:generate_cmake(...)
