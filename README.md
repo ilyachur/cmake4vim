@@ -1,6 +1,9 @@
 # **cmake4vim**
 
-I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find plugin which was integrated with quickfix list and etc. This plugin shows cmake results using quickfix list. Also if you installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, it will be use it.
+I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find plugin which was satisfied my requrements.
+
+This plugin shows cmake results using quickfix list. If you installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, it will be use it, this means that if you are using vim with tmux, cmake output will being print in a separate window. Also this plugin allow to specify cmake targets in order to avoid building of all project. 
+If you want to generate make command from cmake, you can use this plugin to set some flags for make command (for example -jN and etc).
 
 ## **Installation**
 
@@ -36,4 +39,4 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty.
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
- - **`g:cmake_usr_args`** allows to set user arguments for cmake Default is empty.
+ - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
