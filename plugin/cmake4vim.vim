@@ -46,12 +46,13 @@ endfunction
 " Public interfaces {{{ "
 command! -nargs=? CMake call s:generate_cmake(<f-args>)
 command! -nargs=? CMakeResetAndReload call s:reset_reload_cmake(<f-args>)
+command! -nargs=? CMakeSelectTarget call s:select_target(<f-args>)
 command! CMakeReset call s:reset_cmake()
 command! CMakeClean call s:clean_cmake()
 " }}} Public interfaces "
 
 " Main functionality {{{ "
-function! s:generate_cmake(...)
+function! s:select_target(...)
     if !exists("g:cmake_build_dir")
         let g:cmake_build_dir = 'build'
     endif
@@ -65,13 +66,44 @@ function! s:generate_cmake(...)
     endif
 
     if g:cmake4vim_change_build_command
-        if !exists('g:cmake_build_target')
-            let g:cmake_build_target = 'all'
+        let s:cmake_target = ''
+        if exists('a:0') && a:0 != ""
+            let s:cmake_target = a:0
+        else
+            let s:res = split(system('cmake --build ' . shellescape(s:build_dir) . ' --target help'), "\n")[1:]
+            let s:targets = ['Select target:']
+            let s:sorted_targets = []
+            let s:count = 1
+            for value in s:res
+                let s:sorted_targets += [split(value)[1]]
+            endfor
+            let s:sorted_targets = sort(s:sorted_targets)
+            for value in s:sorted_targets
+                let s:targets += [s:count.'. '.value]
+                let s:count += 1
+            endfor
+            let s:target = inputlist(s:targets)
+            if s:target < 1 || s:target >= len(s:targets)
+                echohl WarningMsg |
+                            \ echomsg "Index of target is out of range!" |
+                            \ echohl None
+                return
+            endif
+            let s:cmake_target = split(get(s:targets, s:target))[1]
         endif
         if !exists('g:make_arguments')
             let g:make_arguments = ''
         endif
-        let &makeprg='cmake --build ' . shellescape(s:build_dir) . ' --target ' . g:cmake_build_target . ' -- ' . g:make_arguments
+        let &makeprg='cmake --build ' . shellescape(s:build_dir) . ' --target ' . s:cmake_target . ' -- ' . g:make_arguments
+    endif
+endfunction
+
+function! s:generate_cmake(...)
+    if g:cmake4vim_change_build_command
+        if !exists('g:cmake_build_target')
+            let g:cmake_build_target = 'all'
+        endif
+        silent call s:select_target(g:cmake_build_target)
     endif
 
     let l:cmake_args = []
