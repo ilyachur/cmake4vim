@@ -1,8 +1,8 @@
-#**cmake4vim**
+# **cmake4vim**
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find plugin which was integrated with quickfix list and etc. This plugin shows cmake results using quickfix list. Also if you installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, it will be use it.
 
-##**Installation**
+## **Installation**
 
 You can use VimPlug for installation:
 ```vim
