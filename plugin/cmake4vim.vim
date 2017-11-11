@@ -33,13 +33,41 @@ function! s:make_dir(dir)
     return s:directory
 endfunction
 
-function! s:exec_command(cmd)
+function! s:exec_command(cmd, dir)
+    let s:old_error = &efm
+    let s:ErrorFormatCMake =
+                \ ' %#%f:%l %#(%m),'
+                \ .'See also "%f".,'
+                \ .'%E%>CMake Error at %f:%l (%[%^)]%#):,'
+                \ .'%Z  %m,'
+                \ .'%W%>Cmake Warning at %f:%l (%[%^)]%#):,'
+                \ .'%Z  %m,'
+                \ .'%E%>CMake Error: Error in cmake code at,'
+                \ .'%C%>%f:%l:,'
+                \ .'%Z%m,'
+                \ .'%E%>CMake Error in %.%#:,'
+                \ .'%C%>  %m,'
+                \ .'%C%>,'
+                \ .'%C%>    %f:%l (if),'
+                \ .'%C%>,'
+                \ .'%Z  %m,'
+
+    let s:old_directory = getcwd()
+    let &efm = s:ErrorFormatCMake
     if exists("g:loaded_dispatch")
-        silent execute 'Dispatch '.a:cmd
+        let s:old_mkprog = &makeprg
+        let &makeprg = 'cd '.s:fnameescape(a:dir).' && '.a:cmd.' && cd '.s:fnameescape(s:old_directory)
+        silent execute 'Make'
+        let &makeprg = s:old_mkprog
+        silent exec 'cd' s:fnameescape(s:old_directory)
     else
-        silent cexpr system(a:cmd)
+        silent exec 'cd' s:fnameescape(a:dir)
+        let s:s_out = system(a:cmd)
+        silent exec 'cd' s:fnameescape(s:old_directory)
+        silent cgetexpr s:s_out
         copen
     endif
+    let &efm = s:old_error
 endfunction
 " }}} Utility functions "
 
@@ -127,13 +155,9 @@ function! s:generate_cmake(...)
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let s:old_directory = getcwd()
-    silent exec 'cd' s:fnameescape(s:build_dir)
-    let s:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' ' . s:old_directory
+    let s:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' ' . getcwd()
 
-    silent call s:exec_command(s:cmake_cmd)
-
-    silent exec 'cd' s:fnameescape(s:old_directory)
+    silent call s:exec_command(s:cmake_cmd, s:build_dir)
 endfunction
 
 function! s:reset_cmake()
