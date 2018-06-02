@@ -24,6 +24,8 @@ COMMANDS                                        *cmake-commands*
                                     plugin collects targets as a list and you will be able to choose target
                                     from this list.
 
+:CtrlPCMakeTarget		    you can use CtrlP in order to select a target for project.
+
 VARIABLES                                        *cmake-variables*
 
 g:cmake_build_dir                   allows to set cmake build directory. Default is empty.
