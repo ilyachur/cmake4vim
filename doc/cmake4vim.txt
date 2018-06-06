@@ -11,16 +11,16 @@ COMMANDS                                        *cmake-commands*
 :CMake[Args]                        creates a build directory (if it is necessary)
                                     and generates cmake project. All arguments are directly
                                     passed on to CMake.
-                                    
+
 :CMakeResetAndReload[Args]          removes cmake cache and re-generates cmake project.
                                     All arguments are directly passed on to CMake.
-                                    
+
 :CMakeReset                         removes cmake cache (this command removes the cmake build directory).
 
 :CMakeClean                         cleans the project (it is equal of the execution make clean).
 
 :CMakeSelectTarget[Args]            selects a target for project. You can put target name as a parameter
-                                    for the command. If you don't put the target name as a parameter, 
+                                    for the command. If you don't put the target name as a parameter,
                                     plugin collects targets as a list and you will be able to choose target
                                     from this list.
 
@@ -28,17 +28,19 @@ COMMANDS                                        *cmake-commands*
 
 VARIABLES                                        *cmake-variables*
 
-g:cmake_build_dir                   allows to set cmake build directory. Default is empty.
-                                    If variable is empty plugin uses build directory in the current folder.
-                                    
+g:cmake_reload_after_save           if this variable is not equal 0, plugin will reload CMake project after saving CMake files. Default is 1.
+
 g:cmake4vim_change_build_command    if this variable is not equal 0, plugin will change the make command. Default is 1.
 
-g:cmake_build_target                set the target name for build. Default is empty. 
+g:cmake_build_dir                   allows to set cmake build directory. Default is empty.
+                                    If variable is empty plugin uses build directory in the current folder.
+
+g:cmake_build_target                set the target name for build. Default is empty.
                                     If variable is empty, plugin uses the all target for build.
-                                    
+
 g:make_arguments                    allows to set custom parameters for make command. Default is empty.
                                     If variable is empty, plugin launches make without arguments.
-                                    
+
 g:cmake_project_generator           allows to set the project generator for build scripts. Default is empty.
 
 g:cmake_install_prefix              allows to change -DCMAKE_INSTALL_PREFIX. Default is empty.

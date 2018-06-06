@@ -15,6 +15,9 @@ endif
 if !exists('g:cmake_build_target')
     let g:cmake_build_target = 'all'
 endif
+if !exists('g:cmake4vim_change_build_command')
+    let g:cmake4vim_change_build_command = 1
+endif
 " }}} Options "
 
 " Private functions {{{ "

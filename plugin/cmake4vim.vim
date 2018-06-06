@@ -9,8 +9,13 @@ if exists("loaded_cmake4vim_plugin")
   finish
 endif
 let loaded_cmake4vim_plugin = 1
-if !exists('g:cmake4vim_change_build_command')
-    let g:cmake4vim_change_build_command = 1
+if !exists('g:cmake_reload_after_save')
+    let g:cmake_reload_after_save = 1
+endif
+
+if g:cmake_reload_after_save
+    autocmd BufWritePre *.cmake call cmake4vim#ResetAndReloadCMake()
+    autocmd BufWritePre CMakeLists.txt call cmake4vim#ResetAndReloadCMake()
 endif
 " }}} Initialization "
 
