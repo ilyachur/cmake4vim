@@ -6,7 +6,7 @@
 if !exists("g:cmake_build_dir")
     let g:cmake_build_dir = 'build'
 endif
-if exists("g:cmake_build_type")
+if !exists("g:cmake_build_type")
     let g:cmake_build_type = 'Release'
 endif
 if !exists('g:make_arguments')
@@ -39,6 +39,12 @@ function! s:make_dir(dir)
         silent call mkdir(a:dir, 'p')
         let s:directory = finddir(a:dir, getcwd().';.')
     endif
+    if s:directory == ""
+        echohl WarningMsg |
+                    \ echomsg "Cannot create a build directory: ".a:dir |
+                    \ echohl None
+        return
+    endif
     return s:directory
 endfunction
 
@@ -64,11 +70,7 @@ function! s:exec_command(cmd, dir)
     let s:old_directory = getcwd()
     let &efm = s:ErrorFormatCMake
     if exists("g:loaded_dispatch")
-        let s:old_mkprog = &makeprg
-        let &makeprg = 'cd '.s:fnameescape(a:dir).' && '.a:cmd.' && cd '.s:fnameescape(s:old_directory)
-        silent execute 'Make'
-        let &makeprg = s:old_mkprog
-        silent exec 'cd' s:fnameescape(s:old_directory)
+        silent execute 'Start -wait=error -dir='.s:fnameescape(a:dir).' '.a:cmd
     else
         silent exec 'cd' s:fnameescape(a:dir)
         let s:s_out = system(a:cmd)
@@ -113,12 +115,6 @@ endfunction
 
 function! cmake4vim#GetAllTargets()
     let s:build_dir = s:make_dir(g:cmake_build_dir)
-    if s:build_dir == ""
-        echohl WarningMsg |
-                    \ echomsg "Cannot create a build directory: ".g:cmake_build_dir |
-                    \ echohl None
-        return
-    endif
     let s:res = split(system('cmake --build ' . shellescape(s:build_dir) . ' --target help'), "\n")[1:]
 
     let s:list_targets = []
@@ -130,10 +126,7 @@ function! cmake4vim#GetAllTargets()
 endfunction
 
 function! cmake4vim#GenerateCMake(...)
-    if g:cmake4vim_change_build_command
-        silent call cmake4vim#SelectTarget(g:cmake_build_target)
-    endif
-
+    let s:build_dir = s:make_dir(g:cmake_build_dir)
     let l:cmake_args = []
 
     if exists("g:cmake_project_generator")
@@ -158,16 +151,14 @@ function! cmake4vim#GenerateCMake(...)
     let s:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' ' . getcwd()
 
     silent call s:exec_command(s:cmake_cmd, s:build_dir)
+
+    if g:cmake4vim_change_build_command
+        silent call cmake4vim#SelectTarget(g:cmake_build_target)
+    endif
 endfunction
 
 function! cmake4vim#SelectTarget(...)
     let s:build_dir = s:make_dir(g:cmake_build_dir)
-    if s:build_dir == ""
-        echohl WarningMsg |
-                    \ echomsg "Cannot create a build directory: ".g:cmake_build_dir |
-                    \ echohl None
-        return
-    endif
 
     if g:cmake4vim_change_build_command
         let s:cmake_target = ''
