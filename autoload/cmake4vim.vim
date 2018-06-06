@@ -18,6 +18,9 @@ endif
 if !exists('g:cmake4vim_change_build_command')
     let g:cmake4vim_change_build_command = 1
 endif
+if !exists('g:cmake_reload_after_save')
+    let g:cmake_reload_after_save = 1
+endif
 " }}} Options "
 
 " Private functions {{{ "
@@ -89,6 +92,12 @@ endfunction
 function! cmake4vim#ResetAndReloadCMake(...)
     silent call cmake4vim#ResetCMakeCache()
     silent call cmake4vim#GenerateCMake(join(a:000))
+endfunction
+
+function! cmake4vim#CMakeFileSaved()
+    if g:cmake_reload_after_save
+        silent call cmake4vim#ResetAndReloadCMake()
+    endif
 endfunction
 
 function! cmake4vim#CleanCMake()
