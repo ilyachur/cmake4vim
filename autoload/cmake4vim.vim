@@ -33,7 +33,7 @@ function! s:fnameescape(file) abort
     endif
 endfunction
 
-function! s:make_dir(dir)
+function! s:makeDir(dir)
     let s:directory = finddir(a:dir, getcwd().';.')
     if s:directory == ""
         silent call mkdir(a:dir, 'p')
@@ -48,8 +48,21 @@ function! s:make_dir(dir)
     return s:directory
 endfunction
 
-function! s:exec_command(cmd, dir)
+function! s:runDispatch(cmd, errFormat)
+    silent execute 'Start -wait=error '.a:cmd
+endfunction
+
+function! s:runSystem(cmd, errFormat)
     let s:old_error = &efm
+
+    let &efm = a:errFormat
+    let s:s_out = system(a:cmd)
+    silent cgetexpr s:s_out
+    copen
+    let &efm = s:old_error
+endfunction
+
+function! s:executeCommand(cmd)
     let s:ErrorFormatCMake =
                 \ ' %#%f:%l %#(%m),'
                 \ .'See also "%f".,'
@@ -66,19 +79,11 @@ function! s:exec_command(cmd, dir)
                 \ .'%C%>    %f:%l (if),'
                 \ .'%C%>,'
                 \ .'%Z  %m,'
-
-    let s:old_directory = getcwd()
-    let &efm = s:ErrorFormatCMake
-    if exists("g:loaded_dispatch")
-        silent execute 'Start -wait=error -dir='.s:fnameescape(a:dir).' '.a:cmd
+    if exists(':Dispatch')
+        silent call s:runDispatch(a:cmd, s:ErrorFormatCMake)
     else
-        silent exec 'cd' s:fnameescape(a:dir)
-        let s:s_out = system(a:cmd)
-        silent exec 'cd' s:fnameescape(s:old_directory)
-        silent cgetexpr s:s_out
-        copen
+        silent call s:runSystem(a:cmd, s:ErrorFormatCMake)
     endif
-    let &efm = s:old_error
 endfunction
 " }}} Private functions "
 
@@ -110,11 +115,11 @@ function! cmake4vim#CleanCMake()
 
     let s:cmake_clean_cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target clean -- ' . g:make_arguments
 
-    silent call s:exec_command(s:cmake_clean_cmd)
+    silent call s:executeCommand(s:cmake_clean_cmd)
 endfunction
 
 function! cmake4vim#GetAllTargets()
-    let s:build_dir = s:make_dir(g:cmake_build_dir)
+    let s:build_dir = s:makeDir(g:cmake_build_dir)
     let s:res = split(system('cmake --build ' . shellescape(s:build_dir) . ' --target help'), "\n")[1:]
 
     let s:list_targets = []
@@ -126,7 +131,7 @@ function! cmake4vim#GetAllTargets()
 endfunction
 
 function! cmake4vim#GenerateCMake(...)
-    let s:build_dir = s:make_dir(g:cmake_build_dir)
+    let s:build_dir = s:makeDir(g:cmake_build_dir)
     let l:cmake_args = []
 
     if exists("g:cmake_project_generator")
@@ -148,9 +153,9 @@ function! cmake4vim#GenerateCMake(...)
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let s:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' ' . getcwd()
+    let s:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.s:build_dir
 
-    silent call s:exec_command(s:cmake_cmd, s:build_dir)
+    silent call s:executeCommand(s:cmake_cmd)
 
     if g:cmake4vim_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
@@ -158,7 +163,7 @@ function! cmake4vim#GenerateCMake(...)
 endfunction
 
 function! cmake4vim#SelectTarget(...)
-    let s:build_dir = s:make_dir(g:cmake_build_dir)
+    let s:build_dir = s:makeDir(g:cmake_build_dir)
 
     if g:cmake4vim_change_build_command
         let s:cmake_target = ''
