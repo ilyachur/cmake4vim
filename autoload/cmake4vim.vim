@@ -19,7 +19,7 @@ if !exists('g:cmake4vim_change_build_command')
     let g:cmake4vim_change_build_command = 1
 endif
 if !exists('g:cmake_reload_after_save')
-    let g:cmake_reload_after_save = 1
+    let g:cmake_reload_after_save = 0
 endif
 " }}} Options "
 
