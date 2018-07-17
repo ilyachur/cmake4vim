@@ -6,11 +6,8 @@
 if !exists("g:cmake_build_dir")
     let g:cmake_build_dir = 'build'
 endif
-if !exists("g:cmake_build_type")
-    let g:cmake_build_type = 'Release'
-endif
 if !exists('g:make_arguments')
-    let g:make_arguments = '-j8'
+    let g:make_arguments = ''
 endif
 if !exists('g:cmake_build_target')
     let g:cmake_build_target = 'all'
@@ -130,18 +127,35 @@ function! cmake4vim#GetAllTargets()
     return s:list_targets
 endfunction
 
+function! cmake4vim#DetectBuildType()
+    if exists("g:cmake_build_type")
+        return g:cmake_build_type
+    endif
+    let s:build_dir = finddir(g:cmake_build_dir, getcwd().';.')
+
+    if s:build_dir != ""
+        let s:res = split(system('cmake -L -N ' . shellescape(s:build_dir)), "\n")
+        for value in s:res
+            let s:split_res = split(value, "=")
+            if len(s:split_res) > 1 && s:split_res[0] == 'CMAKE_BUILD_TYPE:STRING'
+                return s:split_res[1]
+            endif
+        endfor
+    endif
+
+    return 'Release'
+endfunction
+
 function! cmake4vim#GenerateCMake(...)
     let s:build_dir = s:makeDir(g:cmake_build_dir)
     let l:cmake_args = []
 
+    let l:cmake_args += ["-DCMAKE_BUILD_TYPE=" . cmake4vim#DetectBuildType()]
     if exists("g:cmake_project_generator")
         let l:cmake_args += ["-G \"" . g:cmake_project_generator . "\""]
     endif
     if exists("g:cmake_install_prefix")
         let l:cmake_args += ["-DCMAKE_INSTALL_PREFIX=" . g:cmake_install_prefix]
-    endif
-    if exists("g:cmake_build_type")
-        let l:cmake_args += ["-DCMAKE_BUILD_TYPE=" . g:cmake_build_type]
     endif
     if exists("g:cmake_c_compiler")
         let l:cmake_args += ["-DCMAKE_C_COMPILER=" . g:cmake_c_compiler]

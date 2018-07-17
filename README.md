@@ -38,12 +38,13 @@ Plugin supports special global variables which are allow to change behaviour of 
 
  - **`g:cmake_reload_after_save`** if this variable is not equal 0, plugin will reload CMake project after saving CMake files. Default is 0.
  - **`g:cmake4vim_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
- - **`g:cmake_build_dir`** allows to set cmake build directory. Default is empty. If variable is empty plugin uses **build** directory in the current folder.
- - **`g:cmake_build_target`** set the target name for build. Default is empty. If variable is empty, plugin uses the **all** target for build.
+ - **`g:cmake_build_dir`** allows to set cmake build directory. Default is 'build'. If variable is empty plugin uses **build** directory in the current folder.
+ - **`g:cmake_build_target`** set the target name for build. Default is 'all'. If variable is empty, plugin uses the **all** target for build.
  - **`g:make_arguments`** allows to set custom parameters for make command. Default is empty. If variable is empty, plugin launches `make` without arguments.
  - **`g:cmake_project_generator`** allows to set the project generator for build scripts. Default is empty.
  - **`g:cmake_install_prefix`** allows to change **`-DCMAKE_INSTALL_PREFIX`**. Default is empty.
- - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty.
+ - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty. If variable is empty, plugin tries to detect cached build type. And selects 'Release' type if cmake cache doesn't exist.
+
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
  - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
