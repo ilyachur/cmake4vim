@@ -48,3 +48,13 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
  - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
+
+## **References**
+
+### Author
+
+Ilya Churaev ilyachur@gmail.com
+
+### Licence
+
+GPL-3.0
