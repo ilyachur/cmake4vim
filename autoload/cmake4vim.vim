@@ -18,6 +18,12 @@ endif
 if !exists('g:cmake_reload_after_save')
     let g:cmake_reload_after_save = 0
 endif
+if !exists('g:cmake_compile_commands')
+    let g:cmake_compile_commands = 0
+endif
+if !exists('g:cmake_compile_commands_link')
+    let g:cmake_compile_commands_link = ""
+endif
 " }}} Options "
 
 " Private functions {{{ "
@@ -93,6 +99,14 @@ function! cmake4vim#ResetCMakeCache()
     echon "Cmake cache was removed!"
 endfunction
 
+function! cmake4vim#CreateLink()
+    let s:build_dir = finddir(g:cmake_build_dir, getcwd().';.')
+    if s:build_dir == "" || !g:cmake_compile_commands || g:cmake_compile_commands_link == "" || !filereadable(shellescape(s:build_dir) . "/compile_commands.json") || has("win32")
+        return
+    endif
+    silent call system("ln -s " . shellescape(s:build_dir) . "/compile_commands.json" . shellescape(g:cmake_compile_commands_link) . "/compile_commands.json")
+endfunction
+
 function! cmake4vim#ResetAndReloadCMake(...)
     silent call cmake4vim#ResetCMakeCache()
     silent call cmake4vim#GenerateCMake(join(a:000))
@@ -163,6 +177,9 @@ function! cmake4vim#GenerateCMake(...)
     if exists("g:cmake_cxx_compiler")
         let l:cmake_args += ["-DCMAKE_CXX_COMPILER=" . g:cmake_cxx_compiler]
     endif
+    if g:cmake_compile_commands
+        let l:cmake_args += ["-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"]
+    endif
     if exists("g:cmake_usr_args")
         let l:cmake_args += [g:cmake_usr_args]
     endif
@@ -171,6 +188,9 @@ function! cmake4vim#GenerateCMake(...)
 
     silent call s:executeCommand(s:cmake_cmd)
 
+    if g:cmake_compile_commands && g:cmake_compile_commands_link != ""
+        silent call cmake4vim#CreateLink()
+    endif
     if g:cmake4vim_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
     endif

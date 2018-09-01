@@ -54,3 +54,8 @@ g:cmake_c_compiler                  allows to change -DCMAKE_C_COMPILER. Default
 g:cmake_cxx_compiler                allows to change -DCMAKE_CXX_COMPILER. Default is empty.
 
 g:cmake_usr_args                    allows to set user arguments for cmake Default is empty.
+
+g:cmake_compile_commands            if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
+
+g:cmake_compile_commands_link       if this variable is not empty and plugin generates compile commands data base,
+                                    plugin will copy generated data base to the path from this variable. Default is empty.
