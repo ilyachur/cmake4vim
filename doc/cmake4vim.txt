@@ -58,4 +58,4 @@ g:cmake_usr_args                    allows to set user arguments for cmake Defau
 g:cmake_compile_commands            if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
 
 g:cmake_compile_commands_link       if this variable is not empty and plugin generates compile commands data base,
-                                    plugin will copy generated data base to the path from this variable. Default is empty.
+                                    plugin will create a link on generated data base using the path from this variable. Default is empty.
