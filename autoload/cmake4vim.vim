@@ -101,7 +101,7 @@ endfunction
 
 function! cmake4vim#CreateLink()
     let s:build_dir = finddir(g:cmake_build_dir, getcwd().';.')
-    if s:build_dir == "" || !g:cmake_compile_commands || g:cmake_compile_commands_link == "" || !filereadable(shellescape(s:build_dir) . "/compile_commands.json") || has("win32")
+    if s:build_dir == "" || !g:cmake_compile_commands || g:cmake_compile_commands_link == "" || has("win32")
         return
     endif
     silent call system("ln -s " . shellescape(s:build_dir) . "/compile_commands.json" . shellescape(g:cmake_compile_commands_link) . "/compile_commands.json")
