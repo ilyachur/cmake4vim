@@ -104,7 +104,7 @@ function! cmake4vim#CreateLink()
     if s:build_dir == "" || !g:cmake_compile_commands || g:cmake_compile_commands_link == "" || has("win32")
         return
     endif
-    silent call system("ln -s " . shellescape(s:build_dir) . "/compile_commands.json" . shellescape(g:cmake_compile_commands_link) . "/compile_commands.json")
+    silent call system("ln -s " . shellescape(s:build_dir) . "/compile_commands.json " . shellescape(g:cmake_compile_commands_link) . "/compile_commands.json")
 endfunction
 
 function! cmake4vim#ResetAndReloadCMake(...)
