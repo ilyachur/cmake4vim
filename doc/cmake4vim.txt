@@ -24,7 +24,9 @@ COMMANDS                                        *cmake-commands*
                                     plugin collects targets as a list and you will be able to choose target
                                     from this list.
 
-:CtrlPCMakeTarget		    you can use CtrlP in order to select a target for project.
+:CtrlPCMakeTarget                   you can use CtrlP in order to select a target for project.
+
+:FZFCMakeSelectTarget               you can use FZF in order to select a target for project.
 
 VARIABLES                                        *cmake-variables*
 
