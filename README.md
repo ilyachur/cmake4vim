@@ -4,7 +4,7 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 
 This plugin shows cmake results using quickfix list. If you installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, it will be use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window.
 
-This plugin allow to specify cmake targets in order to avoid building of all project. If you use **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [FZF](https://github.com/junegunn/fzf.vim)** you can use them to select cmake target.
+This plugin allow to specify cmake targets in order to avoid building of all project. If you use **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)** or **[FZF](https://github.com/junegunn/fzf.vim)** you can use them to select cmake target.
 
 If you want to generate a make command from cmake, you can use this plugin to set some flags for the make command (for example -jN and etc).
 
