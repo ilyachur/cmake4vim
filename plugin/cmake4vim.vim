@@ -1,8 +1,5 @@
 " cmake4vim.vim - Vim plugin for cmake integration
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
-" Version:      0.3
-
-let s:cmake4vim_plugin_version = '0.3'
 
 " Initialization {{{ "
 if exists("loaded_cmake4vim_plugin")

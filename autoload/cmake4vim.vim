@@ -1,6 +1,5 @@
 " autoload/cmake4vim.vim - Cmake4vim common functionality
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
-" Version:      0.3
 
 " Options {{{ "
 if !exists("g:cmake_build_dir")

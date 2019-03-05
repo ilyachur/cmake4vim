@@ -1,67 +1,99 @@
-**cmake4vim.txt** cmake integration for Vim
+*cmake4vim.txt* cmake integration for Vim
 
-Authors: Ilya Churaev <https://github.com/ilyachur>
+Authors:    Ilya Churaev <https://github.com/ilyachur>
+Licence:    GPLv3
+Version:    0.3.1
 
-INTRODUCTION                                    *cmake*
+INTRODUCTION                                                             *cmake*
 
 Plugin add CMake integration to Vim.
 
-COMMANDS                                        *cmake-commands*
+COMMANDS                                                        *cmake-commands*
 
-:CMake[Args]                        creates a build directory (if it is necessary)
-                                    and generates cmake project. All arguments are directly
-                                    passed on to CMake.
+:CMake[{Args}]                                                          *:CMake*
+    Creates a build directory (if it is necessary) and generates cmake
+    project.  All arguments are directly passed on to CMake.
 
-:CMakeResetAndReload[Args]          removes cmake cache and re-generates cmake project.
-                                    All arguments are directly passed on to CMake.
+:CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
+    Removes cmake cache and re-generates cmake project.  All arguments are
+    directly passed on to CMake.
 
-:CMakeReset                         removes cmake cache (this command removes the cmake build directory).
+:CMakeReset                                                        *:CMakeReset*
+    Removes cmake cache (this command removes the cmake build directory).
 
-:CMakeClean                         cleans the project (it is equal of the execution make clean).
+:CMakeClean                                                        *:CMakeClean*
+    Cleans the project (it is equal of the execution make clean).
 
-:CMakeCompile                       run project compilation by using `:Dispatch` if it is available or by using `:make`
+:CMakeCompile                                                    *:CMakeCompile*
+    Run project compilation by using `:Dispatch` if it is available or by
+    using `:make`
 
-:CMakeSelectTarget[Args]            selects a target for project. You can put target name as a parameter
-                                    for the command. If you don't put the target name as a parameter,
-                                    plugin collects targets as a list and you will be able to choose target
-                                    from this list.
+:CMakeSelectTarget[{Args}]                                  *:CMakeSelectTarget*
+    Selects a target for project. You can put target name as a parameter for
+    the command. If you don't put the target name as a parameter, plugin
+    collects targets as a list and you will be able to choose target from this
+    list.
 
-:CtrlPCMakeTarget                   you can use CtrlP in order to select a target for project.
+:CtrlPCMakeTarget                                            *:CtrlPCMakeTarget*
+    You can use CtrlP in order to select a target for project.
 
-:FZFCMakeSelectTarget               you can use FZF in order to select a target for project.
+:FZFCMakeSelectTarget                                    *:FZFCMakeSelectTarget*
+    You can use FZF in order to select a target for project.
 
-VARIABLES                                        *cmake-variables*
+VARIABLES                                                      *cmake-variables*
 
-g:cmake_reload_after_save           if this variable is not equal 0, plugin will reload CMake project after saving CMake files. Default is 0.
+*g:cmake_reload_after_save*           if this variable is not equal 0, plugin
+                                    will reload CMake project after saving
+                                    CMake files. Default is 0.
 
-g:cmake4vim_change_build_command    if this variable is not equal 0, plugin will change the make command. Default is 1.
+*g:cmake4vim_change_build_command*    if this variable is not equal 0, plugin
+                                    will change the make command. Default is 1.
 
-g:cmake_build_dir                   allows to set cmake build directory. Default is 'build'.
-                                    If variable is empty plugin uses build directory in the current folder.
+*g:cmake_build_dir*                   allows to set cmake build directory.
+                                    Default is 'build'.
+                                    If variable is empty plugin uses build
+                                    directory in the current folder.
 
-g:cmake_build_target                set the target name for build. Default is 'all'.
-                                    If variable is empty, plugin uses the all target for build.
+*g:cmake_build_target*                set the target name for build.
+                                    Default is 'all'.
+                                    If variable is empty, plugin uses the all
+                                    target for build.
 
-g:make_arguments                    allows to set custom parameters for make command. Default is empty.
-                                    If variable is empty, plugin launches make without arguments.
+*g:make_arguments*                    allows to set custom parameters for make
+                                    command. Default is empty.
+                                    If variable is empty, plugin launches make
+                                    without arguments.
 
-g:cmake_project_generator           allows to set the project generator for build scripts. Default is empty.
+*g:cmake_project_generator*           allows to set the project generator for
+                                    build scripts. Default is empty.
 
-g:cmake_install_prefix              allows to change -DCMAKE_INSTALL_PREFIX. Default is empty.
+*g:cmake_install_prefix*              allows to change -DCMAKE_INSTALL_PREFIX.
+                                    Default is empty.
 
-g:cmake_build_type                  allows to change -DCMAKE_BUILD_TYPE. Default is empty.
-                                    If variable is empty, plugin tries to detect cached build type.
-                                    And selects 'Release' type if cmake cache doesn't exist.
+*g:cmake_build_type*                  allows to change -DCMAKE_BUILD_TYPE.
+                                    Default is empty.
+                                    If variable is empty, plugin tries to
+                                    detect cached build type.
+                                    And selects 'Release' type if cmake cache
+                                    doesn't exist.
 
-g:cmake_c_compiler                  allows to change -DCMAKE_C_COMPILER. Default is empty.
+*g:cmake_c_compiler*                  allows to change -DCMAKE_C_COMPILER.
+                                    Default is empty.
 
-g:cmake_cxx_compiler                allows to change -DCMAKE_CXX_COMPILER. Default is empty.
+*g:cmake_cxx_compiler*                allows to change -DCMAKE_CXX_COMPILER.
+                                    Default is empty.
 
-g:cmake_usr_args                    allows to set user arguments for cmake Default is empty.
+*g:cmake_usr_args*                    allows to set user arguments for cmake
+                                    Default is empty.
 
-g:cmake_compile_commands            if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
+*g:cmake_compile_commands*            if this variable is not equal 0, plugin
+                                    will generate compile commands data base.
+                                    Default is 0.
 
-g:cmake_compile_commands_link       if this variable is not empty and plugin generates compile commands data base,
-                                    plugin will create a link on generated data base using the path from this variable. Default is empty.
+*g:cmake_compile_commands_link*       if this variable is not empty and plugin
+                                    generates compile commands data base,
+                                    plugin will create a link on generated data
+                                    base using the path from this variable.
+                                    Default is empty.
 
- vim: tw=78 ts=8 sw=4 sts=4 et ft=help
+ vim: tw=79 ts=8 sw=4 sts=4 et ft=help
