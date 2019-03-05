@@ -19,6 +19,8 @@ COMMANDS                                        *cmake-commands*
 
 :CMakeClean                         cleans the project (it is equal of the execution make clean).
 
+:CMakeCompile                       run project compilation by using `:Dispatch` if it is available or by using `:make`
+
 :CMakeSelectTarget[Args]            selects a target for project. You can put target name as a parameter
                                     for the command. If you don't put the target name as a parameter,
                                     plugin collects targets as a list and you will be able to choose target
@@ -61,3 +63,5 @@ g:cmake_compile_commands            if this variable is not equal 0, plugin will
 
 g:cmake_compile_commands_link       if this variable is not empty and plugin generates compile commands data base,
                                     plugin will create a link on generated data base using the path from this variable. Default is empty.
+
+ vim: tw=78 ts=8 sw=4 sts=4 et ft=help

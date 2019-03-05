@@ -1,6 +1,6 @@
 " autoload/cmake4vim.vim - Cmake4vim common functionality
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
-" Version:      0.2
+" Version:      0.3
 
 " Options {{{ "
 if !exists("g:cmake_build_dir")
@@ -226,4 +226,14 @@ function! cmake4vim#SelectTarget(...)
     endif
 endfunction
 
+function! cmake4vim#Compile()
+    if getwinvar("%", "&ft") == "qf"
+        quit
+    endif
+    if exists(':Dispatch')
+        Dispatch
+    else
+        make
+    endif
+endfunction
 " }}} Public functions "
