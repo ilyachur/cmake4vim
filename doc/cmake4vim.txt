@@ -2,7 +2,7 @@
 
 Authors:    Ilya Churaev <https://github.com/ilyachur>
 Licence:    GPLv3
-Version:    0.3.1
+Version:    0.3.2
 
 INTRODUCTION                                                             *cmake*
 
@@ -46,7 +46,7 @@ VARIABLES                                                      *cmake-variables*
                                     will reload CMake project after saving
                                     CMake files. Default is 0.
 
-*g:cmake4vim_change_build_command*    if this variable is not equal 0, plugin
+*g:cmake_change_build_command*        if this variable is not equal 0, plugin
                                     will change the make command. Default is 1.
 
 *g:cmake_build_dir*                   allows to set cmake build directory.
