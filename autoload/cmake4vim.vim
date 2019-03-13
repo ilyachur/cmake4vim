@@ -51,7 +51,14 @@ function! s:makeDir(dir)
 endfunction
 
 function! s:runDispatch(cmd, errFormat)
-    silent execute 'Start -wait=error '.a:cmd
+    let s:old_error = &efm
+    let s:old_make = &makeprg
+
+    let &efm = a:errFormat
+    let &makeprg = a:cmd
+    silent execute 'Make'
+    let &efm = s:old_error
+    let &makeprg = s:old_make
 endfunction
 
 function! s:runSystem(cmd, errFormat)
@@ -68,6 +75,8 @@ function! s:executeCommand(cmd)
     let s:ErrorFormatCMake =
                 \ ' %#%f:%l %#(%m),'
                 \ .'See also "%f".,'
+                \ .'%E%>CMake Error at %f:%l:,'
+                \ .'%Z  %m,'
                 \ .'%E%>CMake Error at %f:%l (%[%^)]%#):,'
                 \ .'%Z  %m,'
                 \ .'%W%>Cmake Warning at %f:%l (%[%^)]%#):,'
