@@ -17,6 +17,5 @@ command! -nargs=? CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! -nargs=? CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
-command! CMakeCompile call cmake4vim#Compile()
 " }}} Commands "
 

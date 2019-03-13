@@ -224,15 +224,4 @@ function! cmake4vim#SelectTarget(...)
         echon 'Cmake target: ' . s:cmake_target . ' selected!'
     endif
 endfunction
-
-function! cmake4vim#Compile()
-    if getwinvar("%", "&ft") == "qf"
-        quit
-    endif
-    if exists(':Dispatch')
-        Dispatch
-    else
-        make
-    endif
-endfunction
 " }}} Public functions "

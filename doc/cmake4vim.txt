@@ -24,10 +24,6 @@ COMMANDS                                                        *cmake-commands*
 :CMakeClean                                                        *:CMakeClean*
     Cleans the project (it is equal of the execution make clean).
 
-:CMakeCompile                                                    *:CMakeCompile*
-    Run project compilation by using `:Dispatch` if it is available or by
-    using `:make`
-
 :CMakeSelectTarget[{Args}]                                  *:CMakeSelectTarget*
     Selects a target for project. You can put target name as a parameter for
     the command. If you don't put the target name as a parameter, plugin
