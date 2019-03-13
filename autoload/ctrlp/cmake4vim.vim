@@ -1,6 +1,6 @@
 " autoload/ctrlp.vim - CtrlP functionality for cmake4vim plugin
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
-" Version:      0.2
+
 if exists("loaded_ctrlp_cmake4vim")
   finish
 endif

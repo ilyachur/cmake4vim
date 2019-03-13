@@ -1,6 +1,5 @@
 " autoload/cmake4vim.vim - Cmake4vim common functionality
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
-" Version:      0.2
 
 " Options {{{ "
 if !exists("g:cmake_build_dir")
@@ -12,8 +11,8 @@ endif
 if !exists('g:cmake_build_target')
     let g:cmake_build_target = 'all'
 endif
-if !exists('g:cmake4vim_change_build_command')
-    let g:cmake4vim_change_build_command = 1
+if !exists('g:cmake_change_build_command')
+    let g:cmake_change_build_command = 1
 endif
 if !exists('g:cmake_reload_after_save')
     let g:cmake_reload_after_save = 0
@@ -191,7 +190,7 @@ function! cmake4vim#GenerateCMake(...)
     if g:cmake_compile_commands && g:cmake_compile_commands_link != ""
         silent call cmake4vim#CreateLink()
     endif
-    if g:cmake4vim_change_build_command
+    if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
     endif
 endfunction
@@ -199,7 +198,7 @@ endfunction
 function! cmake4vim#SelectTarget(...)
     let s:build_dir = s:makeDir(g:cmake_build_dir)
 
-    if g:cmake4vim_change_build_command
+    if g:cmake_change_build_command
         let s:cmake_target = ''
         if exists('a:1') && a:1 != ""
             let s:cmake_target = a:1
@@ -226,4 +225,14 @@ function! cmake4vim#SelectTarget(...)
     endif
 endfunction
 
+function! cmake4vim#Compile()
+    if getwinvar("%", "&ft") == "qf"
+        quit
+    endif
+    if exists(':Dispatch')
+        Dispatch
+    else
+        make
+    endif
+endfunction
 " }}} Public functions "
