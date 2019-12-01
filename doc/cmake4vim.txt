@@ -46,7 +46,7 @@ VARIABLES                                                      *cmake-variables*
                                     will change the make command. Default is 1.
 
 *g:cmake_build_dir*                   allows to set cmake build directory.
-                                    Default is 'build'.
+                                    Default is 'cmake-build-${g:cmake_build_type}'.
                                     If variable is empty plugin uses build
                                     directory in the current folder.
 

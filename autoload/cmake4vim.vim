@@ -2,9 +2,6 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 " Options {{{ "
-if !exists("g:cmake_build_dir")
-    let g:cmake_build_dir = 'build'
-endif
 if !exists('g:make_arguments')
     let g:make_arguments = ''
 endif
@@ -100,7 +97,8 @@ endfunction
 
 " Public functions {{{ "
 function! cmake4vim#ResetCMakeCache()
-    let s:directory = finddir(g:cmake_build_dir, getcwd().';.')
+    let s:build_dir = cmake4vim#DetectBuildDir()
+    let s:directory = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
     if s:directory != ""
         silent call system("rm -rf '".s:directory."'")
     endif
@@ -108,7 +106,7 @@ function! cmake4vim#ResetCMakeCache()
 endfunction
 
 function! cmake4vim#CreateLink()
-    let s:build_dir = finddir(g:cmake_build_dir, getcwd().';.')
+    let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
     if s:build_dir == "" || !g:cmake_compile_commands || g:cmake_compile_commands_link == "" || has("win32")
         return
     endif
@@ -127,7 +125,7 @@ function! cmake4vim#CMakeFileSaved()
 endfunction
 
 function! cmake4vim#CleanCMake()
-    let s:build_dir = finddir(g:cmake_build_dir, getcwd().';.')
+    let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
     if s:build_dir == ""
         return
     endif
@@ -138,7 +136,7 @@ function! cmake4vim#CleanCMake()
 endfunction
 
 function! cmake4vim#GetAllTargets()
-    let s:build_dir = s:makeDir(g:cmake_build_dir)
+    let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
     let s:res = split(system('cmake --build ' . shellescape(s:build_dir) . ' --target help'), "\n")[1:]
 
     let s:list_targets = []
@@ -153,7 +151,7 @@ function! cmake4vim#DetectBuildType()
     if exists("g:cmake_build_type")
         return g:cmake_build_type
     endif
-    let s:build_dir = finddir(g:cmake_build_dir, getcwd().';.')
+    let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
 
     if s:build_dir != ""
         let s:res = split(system('cmake -L -N ' . shellescape(s:build_dir)), "\n")
@@ -168,8 +166,19 @@ function! cmake4vim#DetectBuildType()
     return 'Release'
 endfunction
 
+function! cmake4vim#DetectBuildDir()
+    if exists("g:cmake_build_dir")
+        return g:cmake_build_dir
+    endif
+    let s:build_type = tolower(cmake4vim#DetectBuildType())
+    if s:build_type == ""
+        return 'cmake-build'
+    endif
+    return 'cmake-build-'.s:build_type
+endfunction
+
 function! cmake4vim#GenerateCMake(...)
-    let s:build_dir = s:makeDir(g:cmake_build_dir)
+    let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
     let l:cmake_args = []
 
     let l:cmake_args += ["-DCMAKE_BUILD_TYPE=" . cmake4vim#DetectBuildType()]
@@ -205,7 +214,7 @@ function! cmake4vim#GenerateCMake(...)
 endfunction
 
 function! cmake4vim#SelectTarget(...)
-    let s:build_dir = s:makeDir(g:cmake_build_dir)
+    let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
 
     if g:cmake_change_build_command
         let s:cmake_target = ''
