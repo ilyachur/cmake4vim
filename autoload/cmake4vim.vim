@@ -152,7 +152,18 @@ function! cmake4vim#DetectBuildType()
     if exists("g:cmake_build_type")
         return g:cmake_build_type
     endif
-    let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+    " WA for recursive DetectBuildDir, try to find the first valid cmake directory
+    let s:build_dir = ""
+    if !exists("g:cmake_build_dir")
+        for value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build']
+            let s:build_dir = finddir(value, getcwd().';.')
+            if s:build_dir != ""
+                break
+            endif
+        endfor
+    else
+        let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+    endif
 
     if s:build_dir != ""
         let s:res = split(system('cmake -L -N ' . shellescape(s:build_dir)), "\n")
