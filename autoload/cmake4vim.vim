@@ -20,6 +20,27 @@ endif
 if !exists('g:cmake_compile_commands_link')
     let g:cmake_compile_commands_link = ""
 endif
+if !exists("g:cmake_build_type")
+    let g:cmake_build_type=""
+endif
+if !exists("g:cmake_build_dir")
+    let g:cmake_build_dir=""
+endif
+if !exists("g:cmake_project_generator")
+    let g:cmake_project_generator=""
+endif
+if !exists("g:cmake_install_prefix")
+    let g:cmake_install_prefix=""
+endif
+if !exists("g:cmake_c_compiler")
+    let g:cmake_c_compiler=""
+endif
+if !exists("g:cmake_cxx_compiler")
+    let g:cmake_cxx_compiler=""
+endif
+if !exists("g:cmake_usr_args")
+    let g:cmake_usr_args=""
+endif
 " }}} Options "
 
 " Private functions {{{ "
@@ -149,12 +170,12 @@ function! cmake4vim#GetAllTargets()
 endfunction
 
 function! cmake4vim#DetectBuildType()
-    if exists("g:cmake_build_type")
+    if g:cmake_build_type != ""
         return g:cmake_build_type
     endif
     " WA for recursive DetectBuildDir, try to find the first valid cmake directory
     let s:build_dir = ""
-    if !exists("g:cmake_build_dir")
+    if g:cmake_build_dir == ""
         for value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build']
             let s:build_dir = finddir(value, getcwd().';.')
             if s:build_dir != ""
@@ -179,7 +200,7 @@ function! cmake4vim#DetectBuildType()
 endfunction
 
 function! cmake4vim#DetectBuildDir()
-    if exists("g:cmake_build_dir")
+    if g:cmake_build_dir != ""
         return g:cmake_build_dir
     endif
     let s:build_type = tolower(cmake4vim#DetectBuildType())
@@ -194,22 +215,22 @@ function! cmake4vim#GenerateCMake(...)
     let l:cmake_args = []
 
     let l:cmake_args += ["-DCMAKE_BUILD_TYPE=" . cmake4vim#DetectBuildType()]
-    if exists("g:cmake_project_generator")
+    if g:cmake_project_generator != ""
         let l:cmake_args += ["-G \"" . g:cmake_project_generator . "\""]
     endif
-    if exists("g:cmake_install_prefix")
+    if g:cmake_install_prefix != ""
         let l:cmake_args += ["-DCMAKE_INSTALL_PREFIX=" . g:cmake_install_prefix]
     endif
-    if exists("g:cmake_c_compiler")
+    if g:cmake_c_compiler != ""
         let l:cmake_args += ["-DCMAKE_C_COMPILER=" . g:cmake_c_compiler]
     endif
-    if exists("g:cmake_cxx_compiler")
+    if g:cmake_cxx_compiler != ""
         let l:cmake_args += ["-DCMAKE_CXX_COMPILER=" . g:cmake_cxx_compiler]
     endif
     if g:cmake_compile_commands
         let l:cmake_args += ["-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"]
     endif
-    if exists("g:cmake_usr_args")
+    if g:cmake_usr_args != ""
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
