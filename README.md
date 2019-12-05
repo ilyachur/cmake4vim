@@ -1,5 +1,7 @@
 # **cmake4vim**
 
+![](https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg)
+
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 
 This plugin shows cmake results using quickfix list. If you installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, it will be use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window.
