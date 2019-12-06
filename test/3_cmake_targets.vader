@@ -1,4 +1,3 @@
-
 Before:
     cd test_proj
     echo system("rm -rf cmake-build*")
@@ -31,3 +30,24 @@ Execute (Generate cmake project with default settings):
     silent make
     Assert filereadable("cmake-build-release/app/test_app"), "app should be built"
     Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
+
+Execute (Generate cmake project with default settings):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent make
+    Assert filereadable("cmake-build-release/app/test_app"), "app should be built"
+    Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
+    CMakeClean
+    Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
+    Assert !filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib shouldn't exist"
+
+Execute (Build only library with arguments):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    CMakeSelectTarget test_lib
+    silent make
+    Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
+    Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
+
