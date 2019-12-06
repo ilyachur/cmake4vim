@@ -44,15 +44,6 @@ endif
 " }}} Options "
 
 " Private functions {{{ "
-" Thanks to tpope/vim-fugitive
-function! s:fnameescape(file) abort
-    if exists('*fnameescape')
-        return fnameescape(a:file)
-    else
-        return escape(a:file," \t\n*?[{`$\\%#'\"|!<")
-    endif
-endfunction
-
 function! s:makeDir(dir)
     let s:directory = finddir(a:dir, getcwd().';.')
     if s:directory == ""
