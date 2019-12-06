@@ -1,6 +1,7 @@
 # **cmake4vim**
 
 ![](https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg)
+[![codecov](https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg)](https://codecov.io/gh/ilyachur/cmake4vim)
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 

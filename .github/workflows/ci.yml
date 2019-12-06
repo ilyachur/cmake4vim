@@ -25,8 +25,8 @@ jobs:
     - name: Generate coverage report
       run: |
           python3 -m covimerage write_coverage /tmp/vim-profile.txt
-          cat .coverage_covimerage
           python3 -m coverage xml
+          cat coverage.xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
