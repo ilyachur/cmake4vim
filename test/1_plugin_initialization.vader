@@ -1,0 +1,25 @@
+Before:
+    cd test_proj
+    echo system("rm -rf cmake-build*")
+    echo system("rm -rf compile_commands.json")
+
+After:
+    echo system("rm -rf cmake-build*")
+    echo system("rm -rf compile_commands.json")
+    cd ..
+
+Execute (Check default initialization):
+    CMake
+    Assert g:cmake_compile_commands_link == "", "g:cmake_compile_commands_link != \"\""
+    Assert g:cmake_compile_commands == 0, "g:cmake_compile_commands != 0"
+    Assert g:cmake_usr_args == "", "g:cmake_usr_args != \"\""
+    Assert g:cmake_cxx_compiler == "", "g:cmake_cxx_compiler != \"\""
+    Assert g:cmake_c_compiler == "", "g:cmake_c_compiler != \"\""
+    Assert g:cmake_build_type == "", "g:cmake_build_type != \"\""
+    Assert g:cmake_install_prefix == "", "g:cmake_install_prefix != \"\""
+    Assert g:cmake_project_generator == "", "g:cmake_project_generator != \"\""
+    Assert g:make_arguments == "", "g:make_arguments != \"\""
+    Assert g:cmake_build_target == "all", "g:cmake_build_target != \"all\""
+    Assert g:cmake_build_dir == "", "g:cmake_build_dir != \"\""
+    Assert g:cmake_change_build_command == 1, "g:cmake_change_build_command != 1"
+    Assert g:cmake_reload_after_save == 0, "g:cmake_reload_after_save != 0"

@@ -20,6 +20,7 @@ Before:
 After:
     echo system("rm -rf cmake-build*")
     echo system("rm -rf compile_commands.json")
+    echo system("rm -rf build_test")
     cd ..
 
 Execute (Generate cmake project with default settings):
@@ -59,3 +60,10 @@ Execute (Generate cmake project with link to compilation database):
     Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
     Assert filereadable("compile_commands.json"), "Link to compile_commands.json should be generated"
     echo system("rm -rf cmake-build-release")
+
+Execute (Generate cmake project in custom build folder):
+    Assert !isdirectory("build_test"), "Build directory shouldn't exist"
+    let g:cmake_build_dir='build_test'
+    CMakeResetAndReload
+    Assert filereadable("build_test/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    echo system("rm -rf build_test")
