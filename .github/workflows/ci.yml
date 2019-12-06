@@ -3,12 +3,33 @@ name: CI
 on: [push]
 
 jobs:
-  build:
+  run:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      run: |
+          pip install covimerage --user
+          pip install coveralls --user
+
     - name: Run tests
       run: |
         ./test/local_run.sh
+
+    - name: Generate coverage report
+      run: |
+          covimerage write_coverage /tmp/vim-profile.txt
+          coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+          token: ${{ secrets.CODECOV_TOKEN  }}
+          file: ./coverage.xml
+          flags: tests
+          name: codecov-umbrella #optional
+          yml: ./codecov.yml #optional
+          fail_ci_if_error: true
