@@ -11,10 +11,12 @@ jobs:
     - uses: actions/checkout@v1
     - name: Setup python modules
       uses: actions/setup-python@master
+      with:
+          python-version: 3.7
     - name: Install covimerage
       run: |
-          pip install covimerage --user
-          pip install coveralls --user
+          pip3 install covimerage --user
+          pip3 install coveralls --user
 
     - name: Run tests
       run: |
@@ -22,8 +24,8 @@ jobs:
 
     - name: Generate coverage report
       run: |
-          covimerage write_coverage /tmp/vim-profile.txt
-          coverage xml
+          python3 -m covimerage write_coverage /tmp/vim-profile.txt
+          python3 -m coverage xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
