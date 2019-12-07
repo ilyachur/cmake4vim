@@ -76,7 +76,7 @@ function! s:runSystem(cmd, errFormat)
     let &efm = a:errFormat
     let s:s_out = system(a:cmd)
     silent cgetexpr s:s_out
-    copen
+    silent copen
     let &efm = s:old_error
 endfunction
 
