@@ -51,3 +51,9 @@ Execute (Build only library with arguments):
     Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
     Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
 
+Execute (Check all targets):
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let targets = cmake4vim#GetAllTargets()
+    Assert len(targets) == 7, "test project should contain 7 targets"
+
