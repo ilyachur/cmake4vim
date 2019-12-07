@@ -33,5 +33,5 @@ Execute (Change in cmake file should call project generation):
     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
     let g:cmake_reload_after_save=1
     :e CMakeLists.txt
-    :w
+    :silent! w
     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
