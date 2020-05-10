@@ -1,0 +1,37 @@
+Before:
+    cd test_proj
+    echo system("rm -rf cmake-build*")
+    echo system("rm -rf compile_commands.json")
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target="all"
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+
+After:
+    echo system("rm -rf cmake-build*")
+    echo system("rm -rf compile_commands.json")
+    echo system("rm -rf build_test")
+    cd ..
+
+Execute (Generate cmake project with default settings):
+    let old_rtp = &rtp
+    set rtp+=${HOME}/.vim/plugged/vim-dispatch
+    set rtp+=${HOME}/.vim/plugged/vim-dispatch/autoload
+    set rtp+=${HOME}/.vim/plugged/vim-dispatch/plugin
+    source ${HOME}/.vim/plugged/vim-dispatch/plugin/dispatch.vim
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    CMake
+    sleep 4
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    echo system("rm -rf cmake-build-release")
+    let &rtp = old_rtp

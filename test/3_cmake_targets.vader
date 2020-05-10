@@ -51,6 +51,15 @@ Execute (Build only library with arguments):
     Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
     Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
 
+Execute (CMakeBuild for test library):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    silent! CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent! CMakeBuild test_lib
+    silent! make
+    Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
+    Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
+
 Execute (Check all targets):
     silent! CMake
     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"

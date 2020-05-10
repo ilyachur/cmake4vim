@@ -62,14 +62,14 @@ endfunction
 function! s:runDispatch(cmd, ...)
     let s:old_error = &efm
     let s:old_make = &makeprg
-    let errFormat = get(a:, 1, 0)
+    let errFormat = get(a:, 1, "")
 
-    if errFormat
+    if errFormat != ""
         let &efm = errFormat
     endif
     let &makeprg = a:cmd
-    silent execute 'Make'
-    if errFormat
+    silent! execute 'Make'
+    if errFormat != ""
         let &efm = s:old_error
     endif
     let &makeprg = s:old_make
@@ -77,15 +77,15 @@ endfunction
 
 function! s:runSystem(cmd, ...)
     let s:old_error = &efm
-    let errFormat = get(a:, 1, 0)
+    let errFormat = get(a:, 1, "")
 
-    if errFormat
+    if errFormat != ""
         let &efm = errFormat
     endif
     let s:s_out = system(a:cmd)
     silent cgetexpr s:s_out
     silent copen
-    if errFormat
+    if errFormat != ""
         let &efm = s:old_error
     endif
 endfunction
@@ -111,7 +111,7 @@ function! s:GetCMakeErrorFormat()
 endfunction
 
 function! s:executeCommand(cmd, ...)
-    let errFormat = get(a:, 1, 0)
+    let errFormat = get(a:, 1, "")
     if exists(':Dispatch')
         silent call s:runDispatch(a:cmd, errFormat)
     else
