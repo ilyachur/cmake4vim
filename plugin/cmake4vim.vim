@@ -12,10 +12,11 @@ autocmd BufWritePre CMakeLists.txt call cmake4vim#CMakeFileSaved()
 " }}} Initialization "
 
 " Commands {{{ "
-command! -nargs=? CMake call cmake4vim#GenerateCMake(<f-args>)
-command! -nargs=? CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args>)
+command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMake call cmake4vim#GenerateCMake(<f-args>)
+command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args>)
+command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeBuild call cmake4vim#CMakeBuild(<f-args>)
+command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
-command! -nargs=? CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
 " }}} Commands "
 

@@ -57,3 +57,19 @@ Execute (Check all targets):
     let targets = cmake4vim#GetAllTargets()
     Assert len(targets) == 7, "test project should contain 7 targets"
 
+# Execute (Compile cmake targets):
+#     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+#     silent! CMake
+#     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+#     execute "normal! :CMakeSelectTarget test_l\<C-I>\<CR>"
+#     silent! make
+#     Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
+#     Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
+#
+# Execute (FZF cmake targets):
+#     unlet! g:fzf_layout g:fzf_action g:fzf_history_dir
+#     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+#     silent! CMake
+#     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+#     let result = fzf#cmake4vim#SelectTarget()
+#     AssertEqual ['all'], result

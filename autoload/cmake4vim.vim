@@ -59,50 +59,63 @@ function! s:makeDir(dir)
     return s:directory
 endfunction
 
-function! s:runDispatch(cmd, errFormat)
+function! s:runDispatch(cmd, ...)
     let s:old_error = &efm
     let s:old_make = &makeprg
+    let errFormat = get(a:, 1, 0)
 
-    let &efm = a:errFormat
+    if errFormat
+        let &efm = errFormat
+    endif
     let &makeprg = a:cmd
     silent execute 'Make'
-    let &efm = s:old_error
+    if errFormat
+        let &efm = s:old_error
+    endif
     let &makeprg = s:old_make
 endfunction
 
-function! s:runSystem(cmd, errFormat)
+function! s:runSystem(cmd, ...)
     let s:old_error = &efm
+    let errFormat = get(a:, 1, 0)
 
-    let &efm = a:errFormat
+    if errFormat
+        let &efm = errFormat
+    endif
     let s:s_out = system(a:cmd)
     silent cgetexpr s:s_out
     silent copen
-    let &efm = s:old_error
+    if errFormat
+        let &efm = s:old_error
+    endif
 endfunction
 
-function! s:executeCommand(cmd)
-    let s:ErrorFormatCMake =
-                \ ' %#%f:%l %#(%m),'
-                \ .'See also "%f".,'
-                \ .'%E%>CMake Error at %f:%l:,'
-                \ .'%Z  %m,'
-                \ .'%E%>CMake Error at %f:%l (%[%^)]%#):,'
-                \ .'%Z  %m,'
-                \ .'%W%>Cmake Warning at %f:%l (%[%^)]%#):,'
-                \ .'%Z  %m,'
-                \ .'%E%>CMake Error: Error in cmake code at,'
-                \ .'%C%>%f:%l:,'
-                \ .'%Z%m,'
-                \ .'%E%>CMake Error in %.%#:,'
-                \ .'%C%>  %m,'
-                \ .'%C%>,'
-                \ .'%C%>    %f:%l (if),'
-                \ .'%C%>,'
-                \ .'%Z  %m,'
+function! s:GetCMakeErrorFormat()
+    return ' %#%f:%l %#(%m),'
+            \ .'See also "%f".,'
+            \ .'%E%>CMake Error at %f:%l:,'
+            \ .'%Z  %m,'
+            \ .'%E%>CMake Error at %f:%l (%[%^)]%#):,'
+            \ .'%Z  %m,'
+            \ .'%W%>Cmake Warning at %f:%l (%[%^)]%#):,'
+            \ .'%Z  %m,'
+            \ .'%E%>CMake Error: Error in cmake code at,'
+            \ .'%C%>%f:%l:,'
+            \ .'%Z%m,'
+            \ .'%E%>CMake Error in %.%#:,'
+            \ .'%C%>  %m,'
+            \ .'%C%>,'
+            \ .'%C%>    %f:%l (if),'
+            \ .'%C%>,'
+            \ .'%Z  %m,'
+endfunction
+
+function! s:executeCommand(cmd, ...)
+    let errFormat = get(a:, 1, 0)
     if exists(':Dispatch')
-        silent call s:runDispatch(a:cmd, s:ErrorFormatCMake)
+        silent call s:runDispatch(a:cmd, errFormat)
     else
-        silent call s:runSystem(a:cmd, s:ErrorFormatCMake)
+        silent call s:runSystem(a:cmd, errFormat)
     endif
 endfunction
 " }}} Private functions "
@@ -145,7 +158,7 @@ function! cmake4vim#CleanCMake()
 
     let s:cmake_clean_cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target clean -- ' . g:make_arguments
 
-    silent call s:executeCommand(s:cmake_clean_cmd)
+    silent call s:executeCommand(s:cmake_clean_cmd, s:GetCMakeErrorFormat())
 endfunction
 
 function! cmake4vim#GetAllTargets()
@@ -158,6 +171,11 @@ function! cmake4vim#GetAllTargets()
     endfor
 
     return s:list_targets
+endfunction
+
+function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos)
+    let s:sorted_targets = cmake4vim#GetAllTargets()
+    return join(s:sorted_targets, "\n")
 endfunction
 
 function! cmake4vim#DetectBuildType()
@@ -227,7 +245,7 @@ function! cmake4vim#GenerateCMake(...)
 
     let s:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.s:build_dir
 
-    silent call s:executeCommand(s:cmake_cmd)
+    silent call s:executeCommand(s:cmake_cmd, s:GetCMakeErrorFormat())
 
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
@@ -240,30 +258,38 @@ function! cmake4vim#SelectTarget(...)
         silent call cmake4vim#CreateLink()
     endif
 
-    if g:cmake_change_build_command
-        let s:cmake_target = ''
-        if exists('a:1') && a:1 != ""
-            let s:cmake_target = a:1
-        else
-            let s:targets = ['Select target:']
-            let s:sorted_targets = cmake4vim#GetAllTargets()
-            let s:count = 1
-            let s:sorted_targets = sort(s:sorted_targets)
-            for value in s:sorted_targets
-                let s:targets += [s:count.'. '.value]
-                let s:count += 1
-            endfor
-            let s:target = inputlist(s:targets)
-            if s:target < 1 || s:target >= len(s:targets)
-                echohl WarningMsg |
-                            \ echomsg "Index of target is out of range!" |
-                            \ echohl None
-                return
-            endif
-            let s:cmake_target = split(get(s:targets, s:target))[1]
+    let s:cmake_target = ''
+    if exists('a:1') && a:1 != ""
+        let s:cmake_target = a:1
+    else
+        let s:targets = ['Select target:']
+        let s:sorted_targets = cmake4vim#GetAllTargets()
+        let s:count = 1
+        let s:sorted_targets = sort(s:sorted_targets)
+        for value in s:sorted_targets
+            let s:targets += [s:count.'. '.value]
+            let s:count += 1
+        endfor
+        let s:target = inputlist(s:targets)
+        if s:target < 1 || s:target >= len(s:targets)
+            echohl WarningMsg |
+                        \ echomsg "Index of target is out of range!" |
+                        \ echohl None
+            return
         endif
-        let &makeprg='cmake --build ' . shellescape(s:build_dir) . ' --target ' . s:cmake_target . ' -- ' . g:make_arguments
-        echon 'Cmake target: ' . s:cmake_target . ' selected!'
+        let s:cmake_target = split(get(s:targets, s:target))[1]
     endif
+    let g:cmake_build_target = s:cmake_target
+    let cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target ' . s:cmake_target . ' -- ' . g:make_arguments
+    if g:cmake_change_build_command
+        let &makeprg=cmd
+    endif
+    echon 'Cmake target: ' . s:cmake_target . ' selected!'
+    return cmd
+endfunction
+
+function! cmake4vim#CMakeBuild(...)
+    let result = cmake4vim#SelectTarget(join(a:000))
+    silent call s:executeCommand(result)
 endfunction
 " }}} Public functions "
