@@ -10,3 +10,6 @@ set rtp+=${HOME}/.vim/plugged/vader.vim
 " set rtp+=${HOME}/.fzf
 " set rtp+=${HOME}/.vim/plugged/fzf.vim
 set rtp+=${PLUGIN_HOME}
+
+set wmh=0
+set wh=999
