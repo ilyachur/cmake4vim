@@ -10,9 +10,13 @@ This plugin shows cmake results using quickfix list. If you installed **[vim-dis
 
 This plugin allow to specify cmake targets in order to avoid building of all project. If you use **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)** or **[FZF](https://github.com/junegunn/fzf.vim)** you can use them to select cmake target.
 
-If you want to generate a make command from cmake, you can use this plugin to set some flags for the make command (for example -jN and etc).
+If you want to generate a make command from cmake, you can use this plugin to set some flags for the make command (for example -jN and etc.).
 
-![cmake4vim screencast](doc/screencast.gif)
+![cmake4vim common](doc/common.gif)
+
+The plugin parses the output of cmake command and supports jump to warnings or errors.
+
+![cmake4vim error](doc/cmake_error.gif)
 
 ## **Installation**
 

@@ -14,6 +14,10 @@ COMMANDS                                                        *cmake-commands*
     Creates a build directory (if it is necessary) and generates cmake
     project.  All arguments are directly passed on to CMake.
 
+:CMakeBuild[{Args}]                                                     *:CMakeBuild*
+    Builds cmake project. You can specify the cmake target using the command
+    line argument.
+
 :CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
     Removes cmake cache and re-generates cmake project.  All arguments are
     directly passed on to CMake.
@@ -25,10 +29,8 @@ COMMANDS                                                        *cmake-commands*
     Cleans the project (it is equal of the execution make clean).
 
 :CMakeSelectTarget[{Args}]                                  *:CMakeSelectTarget*
-    Selects a target for project. You can put target name as a parameter for
-    the command. If you don't put the target name as a parameter, plugin
-    collects targets as a list and you will be able to choose target from this
-    list.
+    Selects a target for project. You should put target name as a parameter for
+    the command.
 
 :CtrlPCMakeTarget                                            *:CtrlPCMakeTarget*
     You can use CtrlP in order to select a target for project.
