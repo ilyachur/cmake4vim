@@ -31,6 +31,7 @@ git clone https://github.com/ilyachur/cmake4vim
 The current version of the plugin supports next commands:
 
  - **`:CMake`** creates a build directory (if it is necessary) and generates cmake project.
+ - **`:CMakeBuild`** builds current cmake project. The command allows to specify cmake target.
  - **`:CMakeResetAndReload`** removes cmake cache and re-generates cmake project.
  - **`:CMakeReset`** removes cmake cache (this command removes the cmake build directory).
  - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
