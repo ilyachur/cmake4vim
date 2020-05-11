@@ -249,39 +249,18 @@ function! cmake4vim#GenerateCMake(...)
     endif
 endfunction
 
-function! cmake4vim#SelectTarget(...)
+function! cmake4vim#SelectTarget(target)
     let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
     if g:cmake_compile_commands && g:cmake_compile_commands_link != ""
         silent call cmake4vim#CreateLink()
     endif
 
-    let s:cmake_target = ''
-    if exists('a:1') && a:1 != ""
-        let s:cmake_target = a:1
-    else
-        let s:targets = ['Select target:']
-        let s:sorted_targets = cmake4vim#GetAllTargets()
-        let s:count = 1
-        let s:sorted_targets = sort(s:sorted_targets)
-        for value in s:sorted_targets
-            let s:targets += [s:count.'. '.value]
-            let s:count += 1
-        endfor
-        let s:target = inputlist(s:targets)
-        if s:target < 1 || s:target >= len(s:targets)
-            echohl WarningMsg |
-                        \ echomsg "Index of target is out of range!" |
-                        \ echohl None
-            return
-        endif
-        let s:cmake_target = split(get(s:targets, s:target))[1]
-    endif
-    let g:cmake_build_target = s:cmake_target
-    let cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target ' . s:cmake_target . ' -- ' . g:make_arguments
+    let g:cmake_build_target = a:target
+    let cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
     if g:cmake_change_build_command
         let &makeprg=cmd
     endif
-    echon 'Cmake target: ' . s:cmake_target . ' selected!'
+    echon 'Cmake target: ' . a:target . ' selected!'
     return cmd
 endfunction
 

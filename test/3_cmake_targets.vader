@@ -66,6 +66,14 @@ Execute (Check all targets):
     let targets = cmake4vim#GetAllTargets()
     Assert len(targets) == 7, "test project should contain 7 targets"
 
+Execute (Get cmake targets):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    silent! CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let result = cmake4vim#CompleteTarget(0,0,0)
+    let refResult = join(['all', 'clean', 'depend', 'edit_cache', 'rebuild_cache', 'test_app', 'test_lib'], "\n")
+    AssertEqual refResult, result
+
 # Execute (Compile cmake targets):
 #     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
 #     silent! CMake
