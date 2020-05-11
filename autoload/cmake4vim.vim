@@ -59,35 +59,21 @@ function! s:makeDir(dir)
     return s:directory
 endfunction
 
-function! s:runDispatch(cmd, ...)
-    let s:old_error = &efm
-    let s:old_make = &makeprg
-    let errFormat = get(a:, 1, "")
+function! s:runDispatch(cmd)
+    let s:old_make = &l:makeprg
 
-    if errFormat != ""
-        let &efm = errFormat
-    endif
-    let &makeprg = a:cmd
-    silent! execute 'Make'
-    if errFormat != ""
-        let &efm = s:old_error
-    endif
-    let &makeprg = s:old_make
+    try
+        let &l:makeprg = a:cmd
+        silent! execute 'Make'
+    finally
+        let &l:makeprg = s:old_make
+    endtry
 endfunction
 
-function! s:runSystem(cmd, ...)
-    let s:old_error = &efm
-    let errFormat = get(a:, 1, "")
-
-    if errFormat != ""
-        let &efm = errFormat
-    endif
+function! s:runSystem(cmd)
     let s:s_out = system(a:cmd)
     silent cgetexpr s:s_out
     silent copen
-    if errFormat != ""
-        let &efm = s:old_error
-    endif
 endfunction
 
 function! s:GetCMakeErrorFormat()
@@ -111,11 +97,22 @@ function! s:GetCMakeErrorFormat()
 endfunction
 
 function! s:executeCommand(cmd, ...)
+    " Close quickfix list in order to don't save custom error format
+    silent cclose
     let errFormat = get(a:, 1, "")
+    let s:old_error = &l:errorformat
+    if errFormat != ""
+        let &l:errorformat = errFormat
+    endif
+
     if exists(':Dispatch')
-        silent call s:runDispatch(a:cmd, errFormat)
+        silent call s:runDispatch(a:cmd)
     else
-        silent call s:runSystem(a:cmd, errFormat)
+        silent call s:runSystem(a:cmd)
+    endif
+
+    if errFormat != ""
+        let &l:errorformat = s:old_error
     endif
 endfunction
 " }}} Private functions "
@@ -289,7 +286,11 @@ function! cmake4vim#SelectTarget(...)
 endfunction
 
 function! cmake4vim#CMakeBuild(...)
-    let result = cmake4vim#SelectTarget(join(a:000))
+    let s:cmake_target = g:cmake_build_target
+    if exists('a:1') && a:1 != ""
+        let s:cmake_target = a:1
+    endif
+    let result = cmake4vim#SelectTarget(s:cmake_target)
     silent call s:executeCommand(result)
 endfunction
 " }}} Public functions "

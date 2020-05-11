@@ -67,3 +67,32 @@ Execute (Generate cmake project in custom build folder):
     CMakeResetAndReload
     Assert filereadable("build_test/CMakeCache.txt"), "CMakeCache.txt should be generated"
     echo system("rm -rf build_test")
+
+Execute (Generate cmake project with custom generator):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    let g:cmake_project_generator='Unix Makefiles'
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-release")
+
+Execute (Generate cmake project with custom options):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    let g:cmake_usr_args='-DCUSTOM_OP=OFF'
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-release")
+
+Execute (Generate cmake project with custom install prefix):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    let g:cmake_install_prefix='.'
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-release")
+
+Execute (Generate cmake project with custom compilers):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    let g:cmake_c_compiler='gcc'
+    let g:cmake_cxx_compiler='g++'
+    CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-release")
