@@ -39,7 +39,7 @@ The current version of the plugin supports next commands:
  - **`:CMakeResetAndReload`** removes cmake cache and re-generates cmake project.
  - **`:CMakeReset`** removes cmake cache (this command removes the cmake build directory).
  - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
- - **`:CMakeSelectTarget`** selects a target for project. You can put target name as a parameter for the command. If you don't put the target name as a parameter, plugin collects targets as a list and you will be able to choose target from this list.
+ - **`:CMakeSelectTarget`** selects a target for project. You should put target name as a command line argument.
  - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
  - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
 
