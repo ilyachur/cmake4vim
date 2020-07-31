@@ -5,10 +5,10 @@ if !exists('g:loaded_ctrlp') || !g:loaded_ctrlp
     finish
 endif
 
-let s:old_cpo = &cpo
-set cpo&vim
+let s:old_cpo = &cpoptions
+set cpoptions&vim
 
 command! CtrlPCMakeTarget call ctrlp#init(ctrlp#cmake4vim#id())
 
-let &cpo = s:old_cpo
+let &cpoptions = s:old_cpo
 unlet s:old_cpo
