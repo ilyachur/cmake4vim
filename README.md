@@ -1,7 +1,7 @@
 # **cmake4vim**
 
 [![Build Status](https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg)](#)
-[![Code style](https://img.shields.io/github/workflow/status/ilyachur/cmake4vim/code-style?style=plastic&logo=github&label=vint)]
+[![Code style](https://img.shields.io/github/workflow/status/ilyachur/cmake4vim/code-style?&logo=github&label=vint)](#)
 [![codecov](https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg)](https://codecov.io/gh/ilyachur/cmake4vim)
 [![License](https://img.shields.io/badge/license-GNU_GPL_3.0-green.svg)](https://github.com/ilyachur/cmake4vim/blob/master/LICENSE)
 
