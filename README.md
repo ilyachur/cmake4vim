@@ -60,6 +60,14 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
+ 
+## **Jump to**
+
+Plugin is closely integrated with quickfix list and allows to use quickfix features to jump between error or warning messages.
+
+ - **:cp[revious]** command jumps to previous error/warning message
+ - **:cn[ext]** command jumps to next error/warning message
+
 
 ## **References**
 
