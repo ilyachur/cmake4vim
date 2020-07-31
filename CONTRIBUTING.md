@@ -33,7 +33,7 @@ Feel free to contact the maintainers if that's a concern.
 
 ## Report bugs using Github's [issues](https://github.com/ilyachur/cmake4vim/issues)
 
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](); it's that easy!
+We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/ilyachur/cmake4vim/issues/new); it's that easy!
 
 ## Use a Consistent Coding Style
 
