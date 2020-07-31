@@ -1,7 +1,7 @@
 " autoload/ctrlp.vim - CtrlP functionality for cmake4vim plugin
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
-if exists("g:loaded_ctrlp_cmake4vim")
+if exists('g:loaded_ctrlp_cmake4vim')
     finish
 endif
 let g:loaded_ctrlp_cmake4vim = 1
@@ -24,7 +24,7 @@ else
     let g:ctrlp_ext_vars = [s:cmake4vim_var]
 endif
 
-function! ctrlp#cmake4vim#init()
+function! ctrlp#cmake4vim#init() abort
     return cmake4vim#GetAllTargets()
 endfunction
 
