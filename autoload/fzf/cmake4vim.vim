@@ -1,12 +1,12 @@
 " autoload/fzf.vim - FZF functionality for cmake4vim plugin
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
-if exists("loaded_fzf_cmake4vim")
-  finish
+if exists('g:loaded_fzf_cmake4vim')
+    finish
 endif
-let loaded_fzf_cmake4vim = 1
+let g:loaded_fzf_cmake4vim = 1
 
-function! fzf#cmake4vim#SelectTarget(...)
+function! fzf#cmake4vim#SelectTarget(...) abort
     if exists(':FZF')
         return fzf#run({
                     \ 'source': cmake4vim#GetAllTargets(),

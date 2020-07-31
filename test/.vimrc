@@ -2,14 +2,15 @@
 profile start /tmp/vim-profile.txt
 profile! file ../*
 
+" vint: next-line -ProhibitSetNoCompatible
 set nocompatible
 filetype off
 filetype plugin indent on
 syntax enable
-set rtp+=${HOME}/.vim/plugged/vader.vim
+set runtimepath +=${HOME}/.vim/plugged/vader.vim
 " set rtp+=${HOME}/.fzf
 " set rtp+=${HOME}/.vim/plugged/fzf.vim
-set rtp+=${PLUGIN_HOME}
+set runtimepath +=${PLUGIN_HOME}
 
-set wmh=0
-set wh=999
+set winminheight=0
+set winheight=999

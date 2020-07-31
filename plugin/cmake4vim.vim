@@ -2,13 +2,15 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 " Initialization {{{ "
-if exists("loaded_cmake4vim_plugin")
-  finish
+if exists('g:loaded_cmake4vim_plugin')
+    finish
 endif
-let loaded_cmake4vim_plugin = 1
+let g:loaded_cmake4vim_plugin = 1
 
-autocmd BufWritePre *.cmake call cmake4vim#CMakeFileSaved()
-autocmd BufWritePre CMakeLists.txt call cmake4vim#CMakeFileSaved()
+augroup cmake
+    autocmd BufWritePre *.cmake call cmake4vim#CMakeFileSaved()
+    autocmd BufWritePre CMakeLists.txt call cmake4vim#CMakeFileSaved()
+augroup END
 " }}} Initialization "
 
 " Commands {{{ "

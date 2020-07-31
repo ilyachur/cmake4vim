@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg)](#)
 [![codecov](https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg)](https://codecov.io/gh/ilyachur/cmake4vim)
-[![License](https://img.shields.io/badge/license-GNU_GPL_3.0-red.svg)](https://github.com/ilyachur/cmake4vim/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-GNU_GPL_3.0-green.svg)](https://github.com/ilyachur/cmake4vim/blob/master/LICENSE)
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 
@@ -18,7 +18,9 @@ The plugin parses the output of cmake command and supports jump to warnings or e
 
 ![cmake4vim error](doc/cmake_error.gif)
 
-## **Installation**
+## **Usage**
+
+### **Installation**
 
 You can use VimPlug for installation:
 ```vim
@@ -30,7 +32,7 @@ cd ~/.vim/bundle
 git clone https://github.com/ilyachur/cmake4vim
 ```
 
-## **Commands**
+### **Commands**
 
 The current version of the plugin supports next commands:
 
@@ -43,7 +45,7 @@ The current version of the plugin supports next commands:
  - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
  - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
 
-## **Variables**
+### **Variables**
 
 Plugin supports special global variables which are allow to change behaviour of commands (you can change them in your **.vimrc**):
 
@@ -60,14 +62,18 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
- 
-## **Jump to**
+
+### **Jump to**
 
 Plugin is closely integrated with quickfix list and allows to use quickfix features to jump between error or warning messages.
 
  - **:cp[revious]** command jumps to previous error/warning message
  - **:cn[ext]** command jumps to next error/warning message
 
+## **Contributing**
+
+Bug reports, feedback, feature and other pull requests are appreciated. Check the [Contributing Guidelines](CONTRIBUTING.md) for how to
+create a feature request, submit a pull request or post an issue.
 
 ## **References**
 
