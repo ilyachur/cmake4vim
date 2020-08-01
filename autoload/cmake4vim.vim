@@ -45,34 +45,34 @@ endif
 
 " Private functions {{{ "
 function! s:makeDir(dir) abort
-    let s:directory = finddir(a:dir, getcwd().';.')
-    if s:directory ==# ''
+    let l:directory = finddir(a:dir, getcwd().';.')
+    if l:directory ==# ''
         silent call mkdir(a:dir, 'p')
-        let s:directory = finddir(a:dir, getcwd().';.')
+        let l:directory = finddir(a:dir, getcwd().';.')
     endif
-    if s:directory ==# ''
+    if l:directory ==# ''
         echohl WarningMsg |
                     \ echomsg 'Cannot create a build directory: '.a:dir |
                     \ echohl None
         return
     endif
-    return s:directory
+    return l:directory
 endfunction
 
 function! s:runDispatch(cmd) abort
-    let s:old_make = &l:makeprg
+    let l:old_make = &l:makeprg
 
     try
         let &l:makeprg = a:cmd
         silent! execute 'Make'
     finally
-        let &l:makeprg = s:old_make
+        let &l:makeprg = l:old_make
     endtry
 endfunction
 
 function! s:runSystem(cmd) abort
-    let s:s_out = system(a:cmd)
-    silent cgetexpr s:s_out
+    let l:s_out = system(a:cmd)
+    silent cgetexpr l:s_out
     silent copen
 endfunction
 
@@ -100,7 +100,7 @@ function! s:executeCommand(cmd, ...) abort
     " Close quickfix list in order to don't save custom error format
     silent cclose
     let l:errFormat = get(a:, 1, '')
-    let s:old_error = &l:errorformat
+    let l:old_error = &l:errorformat
     if l:errFormat !=# ''
         let &l:errorformat = l:errFormat
     endif
@@ -112,28 +112,28 @@ function! s:executeCommand(cmd, ...) abort
     endif
 
     if l:errFormat !=# ''
-        let &l:errorformat = s:old_error
+        let &l:errorformat = l:old_error
     endif
 endfunction
 " }}} Private functions "
 
 " Public functions {{{ "
 function! cmake4vim#ResetCMakeCache() abort
-    let s:build_dir = cmake4vim#DetectBuildDir()
-    let s:directory = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if s:directory !=# ''
-        silent call system("rm -rf '".s:directory."'")
+    let l:build_dir = cmake4vim#DetectBuildDir()
+    let l:directory = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+    if l:directory !=# ''
+        silent call system("rm -rf '".l:directory."'")
     endif
     echon 'Cmake cache was removed!'
 endfunction
 
 function! cmake4vim#CreateLink() abort
-    let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if s:build_dir ==# '' || !g:cmake_compile_commands || g:cmake_compile_commands_link ==# '' || has('win32')
+    let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+    if l:build_dir ==# '' || !g:cmake_compile_commands || g:cmake_compile_commands_link ==# '' || has('win32')
         return
     endif
     silent call system('rm -f ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
-    silent call system('ln -s ' . shellescape(s:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    silent call system('ln -s ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
 endfunction
 
 function! cmake4vim#ResetAndReloadCMake(...) abort
@@ -148,31 +148,31 @@ function! cmake4vim#CMakeFileSaved() abort
 endfunction
 
 function! cmake4vim#CleanCMake() abort
-    let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if s:build_dir ==# ''
+    let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+    if l:build_dir ==# ''
         return
     endif
 
-    let s:cmake_clean_cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target clean -- ' . g:make_arguments
+    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target clean -- ' . g:make_arguments
 
-    silent call s:executeCommand(s:cmake_clean_cmd, s:GetCMakeErrorFormat())
+    silent call s:executeCommand(l:cmake_clean_cmd, s:GetCMakeErrorFormat())
 endfunction
 
 function! cmake4vim#GetAllTargets() abort
-    let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
-    let s:res = split(system('cmake --build ' . shellescape(s:build_dir) . ' --target help'), "\n")[1:]
+    let l:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
+    let l:res = split(system('cmake --build ' . shellescape(l:build_dir) . ' --target help'), "\n")[1:]
 
-    let s:list_targets = []
-    for l:value in s:res
-        let s:list_targets += [split(l:value)[1]]
+    let l:list_targets = []
+    for l:value in l:res
+        let l:list_targets += [split(l:value)[1]]
     endfor
 
-    return s:list_targets
+    return l:list_targets
 endfunction
 
 function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
-    let s:sorted_targets = cmake4vim#GetAllTargets()
-    return join(s:sorted_targets, "\n")
+    let l:sorted_targets = cmake4vim#GetAllTargets()
+    return join(l:sorted_targets, "\n")
 endfunction
 
 function! cmake4vim#DetectBuildType() abort
@@ -180,24 +180,24 @@ function! cmake4vim#DetectBuildType() abort
         return g:cmake_build_type
     endif
     " WA for recursive DetectBuildDir, try to find the first valid cmake directory
-    let s:build_dir = ''
+    let l:build_dir = ''
     if g:cmake_build_dir ==# ''
         for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build']
-            let s:build_dir = finddir(l:value, getcwd().';.')
-            if s:build_dir !=# ''
+            let l:build_dir = finddir(l:value, getcwd().';.')
+            if l:build_dir !=# ''
                 break
             endif
         endfor
     else
-        let s:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+        let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
     endif
 
-    if s:build_dir !=# ''
-        let s:res = split(system('cmake -L -N ' . shellescape(s:build_dir)), '\n')
-        for l:value in s:res
-            let s:split_res = split(l:value, '=')
-            if len(s:split_res) > 1 && s:split_res[0] ==# 'CMAKE_BUILD_TYPE:STRING'
-                return s:split_res[1]
+    if l:build_dir !=# ''
+        let l:res = split(system('cmake -L -N ' . shellescape(l:build_dir)), '\n')
+        for l:value in l:res
+            let l:split_res = split(l:value, '=')
+            if len(l:split_res) > 1 && l:split_res[0] ==# 'CMAKE_BUILD_TYPE:STRING'
+                return l:split_res[1]
             endif
         endfor
     endif
@@ -209,15 +209,15 @@ function! cmake4vim#DetectBuildDir() abort
     if g:cmake_build_dir !=# ''
         return g:cmake_build_dir
     endif
-    let s:build_type = tolower(cmake4vim#DetectBuildType())
-    if s:build_type ==# ''
+    let l:build_type = tolower(cmake4vim#DetectBuildType())
+    if l:build_type ==# ''
         return 'cmake-build'
     endif
-    return 'cmake-build-'.s:build_type
+    return 'cmake-build-'.l:build_type
 endfunction
 
 function! cmake4vim#GenerateCMake(...) abort
-    let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
+    let l:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
     let l:cmake_args = []
 
     let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . cmake4vim#DetectBuildType()]
@@ -240,9 +240,9 @@ function! cmake4vim#GenerateCMake(...) abort
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let s:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.s:build_dir
+    let l:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.l:build_dir
 
-    silent call s:executeCommand(s:cmake_cmd, s:GetCMakeErrorFormat())
+    silent call s:executeCommand(l:cmake_cmd, s:GetCMakeErrorFormat())
 
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
@@ -250,13 +250,13 @@ function! cmake4vim#GenerateCMake(...) abort
 endfunction
 
 function! cmake4vim#SelectTarget(target) abort
-    let s:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
+    let l:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
     if g:cmake_compile_commands && g:cmake_compile_commands_link !=# ''
         silent call cmake4vim#CreateLink()
     endif
 
     let g:cmake_build_target = a:target
-    let l:cmd = 'cmake --build ' . shellescape(s:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
+    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
@@ -265,11 +265,11 @@ function! cmake4vim#SelectTarget(target) abort
 endfunction
 
 function! cmake4vim#CMakeBuild(...) abort
-    let s:cmake_target = g:cmake_build_target
+    let l:cmake_target = g:cmake_build_target
     if exists('a:1') && a:1 !=# ''
-        let s:cmake_target = a:1
+        let l:cmake_target = a:1
     endif
-    let l:result = cmake4vim#SelectTarget(s:cmake_target)
+    let l:result = cmake4vim#SelectTarget(l:cmake_target)
     silent call s:executeCommand(l:result)
 endfunction
 " }}} Public functions "
