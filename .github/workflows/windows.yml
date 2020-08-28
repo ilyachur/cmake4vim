@@ -1,14 +1,15 @@
-name: CI
+name: Windows
 
 on: [push]
 
 jobs:
   run:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v1
+    - uses: rhysd/action-setup-vim@v1
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
@@ -19,13 +20,14 @@ jobs:
           pip3 install coveralls --user
 
     - name: Run tests
+      shell: cmd
       run: |
-        ./test/local_run.sh
+        ./test/local_run.bat
 
     - name: Generate coverage report
       run: |
-          python3 -m covimerage write_coverage /tmp/vim-profile.txt
-          python3 -m coverage xml
+          python -m covimerage write_coverage vim-profile.txt
+          python -m coverage xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
