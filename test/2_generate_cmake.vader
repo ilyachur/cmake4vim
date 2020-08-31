@@ -1,7 +1,24 @@
 Before:
+    function! RemoveFile(file)
+        if has('win32')
+            echo system("del /F /Q \"".a:file."\"")
+        else
+            echo system("rm -rf '".a:file."'")
+        endif
+    endfunction
+
+    function! RemoveCMakeDirs()
+        if has('win32')
+            for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
+                echo system("rd /S /Q \"".l:value."\"")
+            endfor
+        else
+            echo system("rm -rf cmake-build*")
+        endif
+    endfunction
     cd test_proj
-    echo system("rm -rf cmake-build*")
-    echo system("rm -rf compile_commands.json")
+    call RemoveFile("compile_commands.json")
+    call RemoveCMakeDirs()
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0
@@ -18,9 +35,8 @@ Before:
     let g:cmake_reload_after_save=0
 
 After:
-    echo system("rm -rf cmake-build*")
-    echo system("rm -rf compile_commands.json")
-    echo system("rm -rf build_test")
+    call RemoveFile("compile_commands.json")
+    call RemoveCMakeDirs()
     cd ..
 
 Execute (Generate cmake project with default settings):

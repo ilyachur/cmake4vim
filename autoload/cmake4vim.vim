@@ -115,6 +115,22 @@ function! s:executeCommand(cmd, ...) abort
         let &l:errorformat = l:old_error
     endif
 endfunction
+
+function s:removeDirectory(file)
+    if has('win32')
+        silent call system("rd /S /Q \"".a:file."\"")
+    else
+        silent call system("rm -rf '".a:file."'")
+    endif
+endfunction
+
+function s:removeFile(file)
+    if has('win32')
+        silent call system("del /F /Q \"".a:file."\"")
+    else
+        silent call system("rm -rf '".a:file."'")
+    endif
+endfunction
 " }}} Private functions "
 
 " Public functions {{{ "
@@ -122,18 +138,22 @@ function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = cmake4vim#DetectBuildDir()
     let l:directory = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
     if l:directory !=# ''
-        silent call system("rm -rf '".l:directory."'")
+        silent call s:removeDirectory(l:directory)
     endif
     echon 'Cmake cache was removed!'
 endfunction
 
 function! cmake4vim#CreateLink() abort
     let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if l:build_dir ==# '' || !g:cmake_compile_commands || g:cmake_compile_commands_link ==# '' || has('win32')
+    if l:build_dir ==# '' || !g:cmake_compile_commands || g:cmake_compile_commands_link ==# ''
         return
     endif
-    silent call system('rm -f ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
-    silent call system('ln -s ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    silent call s:removeFile(shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    if has('win32')
+        silent call system('copy ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    else
+        silent call system('ln -s ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    endif
 endfunction
 
 function! cmake4vim#ResetAndReloadCMake(...) abort
