@@ -116,7 +116,7 @@ function! s:executeCommand(cmd, ...) abort
     endif
 endfunction
 
-function s:removeDirectory(file)
+function! s:removeDirectory(file) abort
     if has('win32')
         silent call system("rd /S /Q \"".a:file."\"")
     else
@@ -124,7 +124,7 @@ function s:removeDirectory(file)
     endif
 endfunction
 
-function s:removeFile(file)
+function! s:removeFile(file) abort
     if has('win32')
         silent call system("del /F /Q \"".a:file."\"")
     else
