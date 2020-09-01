@@ -1,7 +1,7 @@
 Before:
     function! RemoveFile(file)
         if has('win32')
-            echo system("del /F /Q \"".a:file."\"")
+            echo system("del /F /Q \"".a:file."\" >nul 2>&1")
         else
             echo system("rm -rf '".a:file."'")
         endif
@@ -10,7 +10,7 @@ Before:
     function! RemoveCMakeDirs()
         if has('win32')
             for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
-                echo system("rd /S /Q \"".l:value."\"")
+                echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
             echo system("rm -rf cmake-build*")
@@ -41,10 +41,10 @@ After:
 
 Execute (Generate cmake project with default settings):
     let old_rtp = &rtp
-    set rtp+=${HOME}/.vim/plugged/vim-dispatch
-    set rtp+=${HOME}/.vim/plugged/vim-dispatch/autoload
-    set rtp+=${HOME}/.vim/plugged/vim-dispatch/plugin
-    source ${HOME}/.vim/plugged/vim-dispatch/plugin/dispatch.vim
+    set rtp+=$HOME/.vim/plugged/vim-dispatch
+    set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
+    set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
+    source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
     CMake
     sleep 4
