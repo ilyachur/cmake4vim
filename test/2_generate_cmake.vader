@@ -112,3 +112,10 @@ Execute (Generate cmake project with custom compilers):
     CMake
     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
     echo system("rm -rf cmake-build-release")
+
+Execute (Get cmake info):
+    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    silent! CMake
+    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let result = cmake4vim#GetCMakeInfo()
+    Assert len(result) == 4, "test project should contain 4 fields with cmake info"

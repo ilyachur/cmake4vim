@@ -18,6 +18,9 @@ COMMANDS                                                        *cmake-commands*
     Builds cmake project. You can specify the cmake target using the command
     line argument.
 
+:CMakeInfo                                                        *:CMakeInfo*
+    Prints some CMake parameters [Experimental feature]
+
 :CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
     Removes cmake cache and re-generates cmake project.  All arguments are
     directly passed on to CMake.
