@@ -20,5 +20,6 @@ command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeBuild call cmak
 command! -nargs=1 -complete=custom,cmake4vim#CompleteTarget CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
+command! CMakeInfo echon join(cmake4vim#GetCMakeInfo(), "\n")
 " }}} Commands "
 

@@ -148,6 +148,15 @@ function! s:createLink() abort
     endif
 endfunction
 
+function! s:findCachedVar(data, variable) abort
+    for l:value in a:data
+        let l:split_res = split(l:value, '=')
+        if len(l:split_res) > 1 && stridx(l:split_res[0], a:variable . ':') != -1
+            return l:split_res[1]
+        endif
+    endfor
+endfunction
+
 function! s:detectBuildType() abort
     if g:cmake_build_type !=# ''
         return g:cmake_build_type
@@ -166,13 +175,11 @@ function! s:detectBuildType() abort
     endif
 
     if l:build_dir !=# ''
-        let l:res = split(system('cmake -L -N ' . shellescape(l:build_dir)), '\n')
-        for l:value in l:res
-            let l:split_res = split(l:value, '=')
-            if len(l:split_res) > 1 && l:split_res[0] ==# 'CMAKE_BUILD_TYPE:STRING'
-                return l:split_res[1]
-            endif
-        endfor
+        let l:cmake_vars = split(system('cmake -L -N ' . shellescape(l:build_dir)), '\n')
+        let l:res = s:findCachedVar(l:cmake_vars, 'CMAKE_BUILD_TYPE')
+        if l:res !=# ''
+            return l:res
+        endif
     endif
 
     return 'Release'
@@ -191,6 +198,24 @@ endfunction
 
 function! s:getBuildDir() abort
     return finddir(s:detectBuildDir(), getcwd().';.')
+endfunction
+
+function! s:getCmakeCache() abort
+    let l:cache_file = s:getBuildDir() . '/CMakeCache.txt'
+    if !filereadable(l:cache_file)
+        return []
+    endif
+    if has('win32')
+        return split(system('type ' . shellescape(l:cache_file)), '\n')
+    else
+        return split(system('cat ' . shellescape(l:cache_file)), '\n')
+    endif
+endfunction
+
+function! s:getCmakeGeneratorType() abort
+    let l:cmake_info = s:getCmakeCache()
+
+    return s:findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
 endfunction
 " }}} Private functions "
 
@@ -332,5 +357,19 @@ function! cmake4vim#CMakeBuild(...) abort
     endif
     let l:result = cmake4vim#SelectTarget(l:cmake_target)
     silent call s:executeCommand(l:result)
+endfunction
+
+function! cmake4vim#GetCMakeInfo() abort
+    let l:info = []
+    if executable('cmake')
+        let l:info += ['Cmake was found!']
+        let l:info += ['CMAKE_GENERATOR     : ' . s:getCmakeGeneratorType()]
+        let l:info += ['CMAKE_BUILD_TYPE    : ' . s:detectBuildType()]
+        let l:info += ['BUILD_DIRECTORY     : ' . s:getBuildDir()]
+    else
+        let l:info += ['Cmake was not found!']
+    endif
+    return l:info
+    echon join(l:info, "\n")
 endfunction
 " }}} Public functions "
