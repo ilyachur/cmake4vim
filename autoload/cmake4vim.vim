@@ -44,6 +44,7 @@ endif
 " }}} Options "
 
 " Private functions {{{ "
+" Create directory
 function! s:makeDir(dir) abort
     let l:directory = finddir(a:dir, getcwd().';.')
     if l:directory ==# ''
@@ -57,6 +58,24 @@ function! s:makeDir(dir) abort
         return
     endif
     return l:directory
+endfunction
+
+" Remove directory
+function! s:removeDirectory(file) abort
+    if has('win32')
+        silent call system("rd /S /Q \"".a:file."\"")
+    else
+        silent call system("rm -rf '".a:file."'")
+    endif
+endfunction
+
+" Remove file
+function! s:removeFile(file) abort
+    if has('win32')
+        silent call system("del /F /Q \"".a:file."\"")
+    else
+        silent call system("rm -rf '".a:file."'")
+    endif
 endfunction
 
 function! s:runDispatch(cmd) abort
@@ -76,7 +95,7 @@ function! s:runSystem(cmd) abort
     silent copen
 endfunction
 
-function! s:GetCMakeErrorFormat() abort
+function! s:getCMakeErrorFormat() abort
     return ' %#%f:%l %#(%m),'
                 \ .'See also "%f".,'
                 \ .'%E%>CMake Error at %f:%l:,'
@@ -115,67 +134,21 @@ function! s:executeCommand(cmd, ...) abort
         let &l:errorformat = l:old_error
     endif
 endfunction
-" }}} Private functions "
 
-" Public functions {{{ "
-function! cmake4vim#ResetCMakeCache() abort
-    let l:build_dir = cmake4vim#DetectBuildDir()
-    let l:directory = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if l:directory !=# ''
-        silent call system("rm -rf '".l:directory."'")
-    endif
-    echon 'Cmake cache was removed!'
-endfunction
-
-function! cmake4vim#CreateLink() abort
-    let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if l:build_dir ==# '' || !g:cmake_compile_commands || g:cmake_compile_commands_link ==# '' || has('win32')
+function! s:createLink() abort
+    let l:build_dir = s:getBuildDir()
+    if l:build_dir ==# '' || !g:cmake_compile_commands || g:cmake_compile_commands_link ==# ''
         return
     endif
-    silent call system('rm -f ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
-    silent call system('ln -s ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
-endfunction
-
-function! cmake4vim#ResetAndReloadCMake(...) abort
-    silent call cmake4vim#ResetCMakeCache()
-    silent call cmake4vim#GenerateCMake(join(a:000))
-endfunction
-
-function! cmake4vim#CMakeFileSaved() abort
-    if g:cmake_reload_after_save
-        silent call cmake4vim#ResetAndReloadCMake()
+    silent call s:removeFile(shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    if has('win32')
+        silent call system('copy ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
+    else
+        silent call system('ln -s ' . shellescape(l:build_dir) . '/compile_commands.json ' . shellescape(g:cmake_compile_commands_link) . '/compile_commands.json')
     endif
 endfunction
 
-function! cmake4vim#CleanCMake() abort
-    let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
-    if l:build_dir ==# ''
-        return
-    endif
-
-    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target clean -- ' . g:make_arguments
-
-    silent call s:executeCommand(l:cmake_clean_cmd, s:GetCMakeErrorFormat())
-endfunction
-
-function! cmake4vim#GetAllTargets() abort
-    let l:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
-    let l:res = split(system('cmake --build ' . shellescape(l:build_dir) . ' --target help'), "\n")[1:]
-
-    let l:list_targets = []
-    for l:value in l:res
-        let l:list_targets += [split(l:value)[1]]
-    endfor
-
-    return l:list_targets
-endfunction
-
-function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
-    let l:sorted_targets = cmake4vim#GetAllTargets()
-    return join(l:sorted_targets, "\n")
-endfunction
-
-function! cmake4vim#DetectBuildType() abort
+function! s:detectBuildType() abort
     if g:cmake_build_type !=# ''
         return g:cmake_build_type
     endif
@@ -189,7 +162,7 @@ function! cmake4vim#DetectBuildType() abort
             endif
         endfor
     else
-        let l:build_dir = finddir(cmake4vim#DetectBuildDir(), getcwd().';.')
+        let l:build_dir = s:getBuildDir()
     endif
 
     if l:build_dir !=# ''
@@ -205,22 +178,110 @@ function! cmake4vim#DetectBuildType() abort
     return 'Release'
 endfunction
 
-function! cmake4vim#DetectBuildDir() abort
+function! s:detectBuildDir() abort
     if g:cmake_build_dir !=# ''
         return g:cmake_build_dir
     endif
-    let l:build_type = tolower(cmake4vim#DetectBuildType())
+    let l:build_type = tolower(s:detectBuildType())
     if l:build_type ==# ''
         return 'cmake-build'
     endif
     return 'cmake-build-'.l:build_type
 endfunction
 
+function! s:getBuildDir() abort
+    return finddir(s:detectBuildDir(), getcwd().';.')
+endfunction
+" }}} Private functions "
+
+" Public functions {{{ "
+function! cmake4vim#ResetCMakeCache() abort
+    let l:build_dir = s:getBuildDir()
+    if l:build_dir !=# ''
+        silent call s:removeDirectory(l:build_dir)
+    endif
+    echon 'Cmake cache was removed!'
+endfunction
+
+function! cmake4vim#ResetAndReloadCMake(...) abort
+    silent call cmake4vim#ResetCMakeCache()
+    silent call cmake4vim#GenerateCMake(join(a:000))
+endfunction
+
+function! cmake4vim#CMakeFileSaved() abort
+    if g:cmake_reload_after_save
+        silent call cmake4vim#ResetAndReloadCMake()
+    endif
+endfunction
+
+function! cmake4vim#CleanCMake() abort
+    let l:build_dir = s:getBuildDir()
+    if l:build_dir ==# ''
+        return
+    endif
+
+    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target clean -- ' . g:make_arguments
+
+    silent call s:executeCommand(l:cmake_clean_cmd, s:getCMakeErrorFormat())
+endfunction
+
+function! cmake4vim#GetAllTargets() abort
+    let l:list_targets = []
+    let l:build_dir = s:makeDir(s:detectBuildDir())
+    let l:res = split(system('cmake --build ' . shellescape(l:build_dir) . ' --target help'), "\n")[1:]
+    if v:shell_error != 0
+        let l:error_msg = ''
+        if has('win32')
+            " Parse VS projects
+            let l:res = split(system('dir *.vcxproj /S /B'), "\n")
+            if v:shell_error != 0
+                let l:error_msg = 'Error: cannot detect targets!'
+            else
+                for l:value in l:res
+                    if l:value !=# ''
+                        let l:files = split(l:value, l:build_dir)
+                        if len(l:files) != 2
+                            continue
+                        endif
+                        " Exclude projects from CMakeFiles folder
+                        let l:files = split(l:files[1], 'CMakeFiles')
+                        if len(l:files) != 1
+                            continue
+                        endif
+                        let l:files = split(l:files[0], '\\')
+                        let l:list_targets += [fnamemodify(l:files[-1], ':r')]
+                    endif
+                endfor
+            endif
+        else
+            let l:error_msg = 'Error: cannot detect targets!'
+        endif
+        if l:error_msg !=# ''
+            echohl WarningMsg |
+                        \ echomsg l:error_msg |
+                        \ echohl None
+        endif
+    else
+        for l:value in l:res
+            if l:value !=# ''
+                let l:list_targets += [split(l:value)[1]]
+            endif
+        endfor
+    endif
+
+    return l:list_targets
+endfunction
+
+function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
+    let l:sorted_targets = cmake4vim#GetAllTargets()
+    return join(l:sorted_targets, "\n")
+endfunction
+
 function! cmake4vim#GenerateCMake(...) abort
-    let l:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
+    let l:build_dir = s:makeDir(s:detectBuildDir())
     let l:cmake_args = []
 
-    let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . cmake4vim#DetectBuildType()]
+    let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . s:detectBuildType()]
     if g:cmake_project_generator !=# ''
         let l:cmake_args += ['-G "' . g:cmake_project_generator . '"']
     endif
@@ -242,7 +303,7 @@ function! cmake4vim#GenerateCMake(...) abort
 
     let l:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.l:build_dir
 
-    silent call s:executeCommand(l:cmake_cmd, s:GetCMakeErrorFormat())
+    silent call s:executeCommand(l:cmake_cmd, s:getCMakeErrorFormat())
 
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
@@ -250,9 +311,9 @@ function! cmake4vim#GenerateCMake(...) abort
 endfunction
 
 function! cmake4vim#SelectTarget(target) abort
-    let l:build_dir = s:makeDir(cmake4vim#DetectBuildDir())
+    let l:build_dir = s:makeDir(s:detectBuildDir())
     if g:cmake_compile_commands && g:cmake_compile_commands_link !=# ''
-        silent call cmake4vim#CreateLink()
+        silent call s:createLink()
     endif
 
     let g:cmake_build_target = a:target

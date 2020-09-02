@@ -1,0 +1,20 @@
+name: Windows
+
+on: [push]
+
+jobs:
+  run:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: rhysd/action-setup-vim@v1
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Run tests
+      shell: cmd
+      run: |
+        ./test/local_run.bat
