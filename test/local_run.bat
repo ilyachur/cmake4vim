@@ -11,8 +11,7 @@ git clone --depth 1 https://github.com/junegunn/vader.vim.git %HOME%\.vim\plugge
 git clone --depth 1 https://github.com/tpope/vim-dispatch.git %HOME%\.vim\plugged\vim-dispatch
 del %HOME%\vim-profile.txt
 
-REM  vim -Nu .vimrc +Vader!*
-vim -Nu .vimrc +Vader! 1_plugin_initialization.vader 4_change_cmake_file.vader
+vim -Nu .vimrc +Vader!*
 set code=%ERRORLEVEL%
 
 type vader_output

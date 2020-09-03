@@ -40,6 +40,7 @@ After:
     cd ..
 
 Execute (Generate cmake project with default settings):
+    if !has('win32') " Skip for Windows
     let old_rtp = &rtp
     set rtp+=$HOME/.vim/plugged/vim-dispatch
     set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
@@ -51,3 +52,4 @@ Execute (Generate cmake project with default settings):
     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     echo system("rm -rf cmake-build-release")
     let &rtp = old_rtp
+    endif
