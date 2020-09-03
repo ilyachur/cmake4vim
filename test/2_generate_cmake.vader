@@ -60,22 +60,26 @@ Execute (Generate Debug cmake project):
     echo system("rm -rf cmake-build-debug")
 
 Execute (Generate cmake project with compilation database generation):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
-    let g:cmake_compile_commands=1
-    CMakeResetAndReload
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
-    echo system("rm -rf cmake-build-release")
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        let g:cmake_compile_commands=1
+        CMakeResetAndReload
+        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
+        echo system("rm -rf cmake-build-release")
+    endif
 
 Execute (Generate cmake project with link to compilation database):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
-    let g:cmake_compile_commands=1
-    let g:cmake_compile_commands_link='./'
-    CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
-    Assert filereadable("compile_commands.json"), "Link to compile_commands.json should be generated"
-    echo system("rm -rf cmake-build-release")
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        let g:cmake_compile_commands=1
+        let g:cmake_compile_commands_link='./'
+        CMake
+        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
+        Assert filereadable("compile_commands.json"), "Link to compile_commands.json should be generated"
+        echo system("rm -rf cmake-build-release")
+    endif
 
 Execute (Generate cmake project in custom build folder):
     Assert !isdirectory("build_test"), "Build directory shouldn't exist"
