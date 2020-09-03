@@ -370,6 +370,5 @@ function! cmake4vim#GetCMakeInfo() abort
         let l:info += ['Cmake was not found!']
     endif
     return l:info
-    echon join(l:info, "\n")
 endfunction
 " }}} Public functions "
