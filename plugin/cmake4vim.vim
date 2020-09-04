@@ -13,6 +13,48 @@ augroup cmake
 augroup END
 " }}} Initialization "
 
+" Options {{{ "
+if !exists('g:make_arguments')
+    let g:make_arguments = ''
+endif
+if !exists('g:cmake_build_target')
+    let g:cmake_build_target = 'all'
+endif
+if !exists('g:cmake_change_build_command')
+    let g:cmake_change_build_command = 1
+endif
+if !exists('g:cmake_reload_after_save')
+    let g:cmake_reload_after_save = 0
+endif
+if !exists('g:cmake_compile_commands')
+    let g:cmake_compile_commands = 0
+endif
+if !exists('g:cmake_compile_commands_link')
+    let g:cmake_compile_commands_link = ''
+endif
+if !exists('g:cmake_build_type')
+    let g:cmake_build_type = ''
+endif
+if !exists('g:cmake_build_dir')
+    let g:cmake_build_dir = ''
+endif
+if !exists('g:cmake_project_generator')
+    let g:cmake_project_generator = ''
+endif
+if !exists('g:cmake_install_prefix')
+    let g:cmake_install_prefix = ''
+endif
+if !exists('g:cmake_c_compiler')
+    let g:cmake_c_compiler = ''
+endif
+if !exists('g:cmake_cxx_compiler')
+    let g:cmake_cxx_compiler = ''
+endif
+if !exists('g:cmake_usr_args')
+    let g:cmake_usr_args = ''
+endif
+" }}} Options "
+
 " Commands {{{ "
 command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMake call cmake4vim#GenerateCMake(<f-args>)
 command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args>)
