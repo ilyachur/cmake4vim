@@ -10,6 +10,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: rhysd/action-setup-vim@v1
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+          # ninja version to download. Default: 1.10.0
+          version: 1.10.0
     - name: Setup python modules
       uses: actions/setup-python@master
       with:

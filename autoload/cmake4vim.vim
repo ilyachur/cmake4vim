@@ -126,7 +126,11 @@ function! cmake4vim#SelectTarget(target) abort
     endif
 
     let g:cmake_build_target = a:target
-    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
+    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- '
+    if utils#cmake#getCmakeGeneratorType() ==# 'Ninja'
+        let l:cmd .= '-C ' . fnamemodify(l:build_dir, ':p:h') . ' '
+    endif
+    let l:cmd .= g:make_arguments
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
