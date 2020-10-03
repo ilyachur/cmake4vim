@@ -46,6 +46,7 @@ The current version of the plugin supports next commands:
  - **`:CMakeSelectTarget`** selects a target for project. You should put target name as a command line argument.
  - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
  - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
+ - **`:CMakeLinkCompileCommands`** link compile_commands.json to `g:cmake_compile_commands_link`.
 
 ### **Variables**
 
