@@ -117,13 +117,18 @@ function! cmake4vim#GenerateCMake(...) abort
     endif
 endfunction
 
-function! cmake4vim#SelectTarget(target) abort
+function! cmake4vim#LinkCompileCommands()
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    if g:cmake_compile_commands && g:cmake_compile_commands_link !=# ''
+    if g:cmake_compile_commands_link !=# ''
         let l:src = shellescape(l:build_dir) . '/compile_commands.json'
         let l:dst = shellescape(g:cmake_compile_commands_link) . '/compile_commands.json'
         silent call utils#fs#createLink(l:src, l:dst)
     endif
+endfunction
+
+function! cmake4vim#SelectTarget(target) abort
+    let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
+    silent call cmake4vim#LinkCompileCommands()
 
     let g:cmake_build_target = a:target
     let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
