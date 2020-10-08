@@ -63,5 +63,4 @@ command! -nargs=1 -complete=custom,cmake4vim#CompleteTarget CMakeSelectTarget ca
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo echon join(cmake4vim#GetCMakeInfo(), "\n")
-command! CMakeLinkCompileCommands call cmake4vim#LinkCompileCommands()
 " }}} Commands "
