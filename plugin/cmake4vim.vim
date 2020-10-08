@@ -38,6 +38,9 @@ endif
 if !exists('g:cmake_build_dir')
     let g:cmake_build_dir = ''
 endif
+if !exists('g:cmake_build_dir_prefix')
+    let g:cmake_build_dir_prefix = 'cmake-build-'
+endif
 if !exists('g:cmake_project_generator')
     let g:cmake_project_generator = ''
 endif
