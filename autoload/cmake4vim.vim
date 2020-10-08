@@ -155,4 +155,10 @@ function! cmake4vim#GetCMakeInfo() abort
     endif
     return l:info
 endfunction
+
+function! cmake4vim#SelectBuildType(buildType) abort
+    let g:cmake_build_type = a:buildType
+
+    silent call cmake4vim#GenerateCMake()
+endfunction
 " }}} Public functions "
