@@ -131,3 +131,15 @@ Execute (Generate cmake project in prefix build folder):
     CMakeResetAndReload
     Assert filereadable("cmake-vador-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     echo system("rm -rf cmake-vador-Release")
+
+Execute (Generate cmake project and change BuildType):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    let g:cmake_build_dir_prefix='cmake-vador-'
+    CMakeResetAndReload
+    Assert filereadable("cmake-vador-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    CMakeSelectBuildType Debug
+    Assert filereadable("cmake-vador-Debug/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    echo system("rm -rf cmake-vador-Release")
+    echo system("rm -rf cmake-vador-Debug")
