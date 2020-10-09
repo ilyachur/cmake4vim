@@ -143,3 +143,17 @@ Execute (Generate cmake project and change BuildType):
     Assert filereadable("cmake-vador-Debug/CMakeCache.txt"), "CMakeCache.txt should be generated"
     echo system("rm -rf cmake-vador-Release")
     echo system("rm -rf cmake-vador-Debug")
+
+Execute (Generate RelWithDebInfo cmake project):
+    Assert !isdirectory("cmake-build-RelWithDebInfo"), "Build directory shouldn't exist"
+    let g:cmake_build_type='RelWithDebInfo'
+    CMake
+    Assert filereadable("cmake-build-RelWithDebInfo/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-RelWithDebInfo")
+
+Execute (Generate MinSizeRel cmake project):
+    Assert !isdirectory("cmake-build-MinSizeRel"), "Build directory shouldn't exist"
+    let g:cmake_build_type='MinSizeRel'
+    CMake
+    Assert filereadable("cmake-build-MinSizeRel/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-MinSizeRel")
