@@ -9,7 +9,7 @@ Before:
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
@@ -40,14 +40,14 @@ After:
     cd ..
 
 Execute (Change in cmake file shouldn't call project generation):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     :e CMakeLists.txt
     :w
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
 Execute (Change in cmake file should call project generation):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_reload_after_save=1
     :e CMakeLists.txt
     :silent! w
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
