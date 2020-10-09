@@ -41,6 +41,10 @@ COMMANDS                                                        *cmake-commands*
 :FZFCMakeSelectTarget                                    *:FZFCMakeSelectTarget*
     You can use FZF in order to select a target for project.
 
+:CMakeSelectBuildType[{Args}]                            *:CMakeSelectBuildType*
+    Change to the CMakeBuildType with the argument passed,
+    and will call :CMake after.
+
 VARIABLES                                                      *cmake-variables*
 
 *g:cmake_reload_after_save*           if this variable is not equal 0, plugin
@@ -50,10 +54,13 @@ VARIABLES                                                      *cmake-variables*
 *g:cmake_change_build_command*        if this variable is not equal 0, plugin
                                     will change the make command. Default is 1.
 
-*g:cmake_build_dir*                   allows to set cmake build directory.
-                                    Default is 'cmake-build-${g:cmake_build_type}'.
+*g:cmake_build_dir*                   allows to set cmake build directory for
+                                    all build. Default is ''.
                                     If variable is empty plugin uses build
-                                    directory in the current folder.
+                                    directory prefix plus the build type.
+
+*g:cmake_build_dir_prefix*            allows to set cmake build directory prefix.
+                                    Default is 'cmake-build-'.
 
 *g:cmake_build_target*                set the target name for build.
                                     Default is 'all'.
