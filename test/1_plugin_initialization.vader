@@ -9,7 +9,7 @@ Before:
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
@@ -38,5 +38,6 @@ Execute (Check default initialization):
     Assert g:make_arguments == "", "g:make_arguments != \"\""
     Assert g:cmake_build_target == "all", "g:cmake_build_target != \"all\""
     Assert g:cmake_build_dir == "", "g:cmake_build_dir != \"\""
+    Assert g:cmake_build_dir_prefix == "cmake-build-", "g:cmake_build_dir != \"cmake-build-\""
     Assert g:cmake_change_build_command == 1, "g:cmake_change_build_command != 1"
     Assert g:cmake_reload_after_save == 0, "g:cmake_reload_after_save != 0"

@@ -9,7 +9,7 @@ Before:
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
@@ -33,6 +33,7 @@ Before:
     let g:cmake_build_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
 
 After:
     call RemoveFile("compile_commands.json")
@@ -40,45 +41,45 @@ After:
     cd ..
 
 Execute (Generate cmake project with default settings):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    echo system("rm -rf cmake-build-release")
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    echo system("rm -rf cmake-build-Release")
 
 Execute (Remove cmake build forder):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
-    Assert isdirectory("cmake-build-release"), "Build directory should be created"
+    Assert isdirectory("cmake-build-Release"), "Build directory should be created"
     CMakeReset
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
 Execute (Generate Debug cmake project):
-    Assert !isdirectory("cmake-build-debug"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
     let g:cmake_build_type='Debug'
     CMake
-    Assert filereadable("cmake-build-debug/CMakeCache.txt"), "CMakeCache.txt should be exist"
-    echo system("rm -rf cmake-build-debug")
+    Assert filereadable("cmake-build-Debug/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-Debug")
 
 Execute (Generate cmake project with compilation database generation):
     if !has('win32') " Skip for Windows
-        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         let g:cmake_compile_commands=1
         CMakeResetAndReload
-        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
-        echo system("rm -rf cmake-build-release")
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/compile_commands.json"), "compile_commands.json should be generated"
+        echo system("rm -rf cmake-build-Release")
     endif
 
 Execute (Generate cmake project with link to compilation database):
     if !has('win32') " Skip for Windows
-        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         let g:cmake_compile_commands=1
         let g:cmake_compile_commands_link='./'
         CMake
-        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        Assert filereadable("cmake-build-release/compile_commands.json"), "compile_commands.json should be generated"
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/compile_commands.json"), "compile_commands.json should be generated"
         Assert filereadable("compile_commands.json"), "Link to compile_commands.json should be generated"
-        echo system("rm -rf cmake-build-release")
+        echo system("rm -rf cmake-build-Release")
     endif
 
 Execute (Generate cmake project in custom build folder):
@@ -89,37 +90,70 @@ Execute (Generate cmake project in custom build folder):
     echo system("rm -rf build_test")
 
 Execute (Generate cmake project with custom generator):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_project_generator='Unix Makefiles'
     CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
-    echo system("rm -rf cmake-build-release")
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-Release")
 
 Execute (Generate cmake project with custom options):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_usr_args='-DCUSTOM_OP=OFF'
     CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
-    echo system("rm -rf cmake-build-release")
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-Release")
 
 Execute (Generate cmake project with custom install prefix):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_install_prefix='.'
     CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
-    echo system("rm -rf cmake-build-release")
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-Release")
 
 Execute (Generate cmake project with custom compilers):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_c_compiler='gcc'
     let g:cmake_cxx_compiler='g++'
     CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be exist"
-    echo system("rm -rf cmake-build-release")
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-Release")
 
 Execute (Get cmake info):
-    Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent! CMake
-    Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = cmake4vim#GetCMakeInfo()
     Assert len(result) == 4, "test project should contain 4 fields with cmake info"
+
+Execute (Generate cmake project in prefix build folder):
+    Assert !isdirectory("cmake-vador-Release"), "Build directory shouldn't exist"
+    let g:cmake_build_dir_prefix='cmake-vador-'
+    CMakeResetAndReload
+    Assert filereadable("cmake-vador-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    echo system("rm -rf cmake-vador-Release")
+
+Execute (Generate cmake project and change BuildType):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    let g:cmake_build_dir_prefix='cmake-vador-'
+    CMakeResetAndReload
+    Assert filereadable("cmake-vador-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    CMakeSelectBuildType Debug
+    Assert filereadable("cmake-vador-Debug/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    echo system("rm -rf cmake-vador-Release")
+    echo system("rm -rf cmake-vador-Debug")
+
+Execute (Generate RelWithDebInfo cmake project):
+    Assert !isdirectory("cmake-build-RelWithDebInfo"), "Build directory shouldn't exist"
+    let g:cmake_build_type='RelWithDebInfo'
+    CMake
+    Assert filereadable("cmake-build-RelWithDebInfo/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-RelWithDebInfo")
+
+Execute (Generate MinSizeRel cmake project):
+    Assert !isdirectory("cmake-build-MinSizeRel"), "Build directory shouldn't exist"
+    let g:cmake_build_type='MinSizeRel'
+    CMake
+    Assert filereadable("cmake-build-MinSizeRel/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    echo system("rm -rf cmake-build-MinSizeRel")
