@@ -9,7 +9,7 @@ Before:
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
@@ -33,6 +33,7 @@ Before:
     let g:cmake_build_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
 
 After:
     call RemoveFile("compile_commands.json")
@@ -102,18 +103,18 @@ Execute (Get cmake targets):
     endif
 
 # Execute (Compile cmake targets):
-#     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+#     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 #     silent! CMake
-#     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+#     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
 #     execute "normal! :CMakeSelectTarget test_l\<C-I>\<CR>"
 #     silent! make
-#     Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
-#     Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
+#     Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't exist"
+#     Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
 #
 # Execute (FZF cmake targets):
 #     unlet! g:fzf_layout g:fzf_action g:fzf_history_dir
-#     Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+#     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 #     silent! CMake
-#     Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+#     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
 #     let result = fzf#cmake4vim#SelectTarget()
 #     AssertEqual ['all'], result

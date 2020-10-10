@@ -119,7 +119,7 @@ endfunction
 
 function! cmake4vim#SelectTarget(target) abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    if g:cmake_compile_commands && g:cmake_compile_commands_link !=# ''
+    if g:cmake_compile_commands_link !=# ''
         let l:src = shellescape(l:build_dir) . '/compile_commands.json'
         let l:dst = shellescape(g:cmake_compile_commands_link) . '/compile_commands.json'
         silent call utils#fs#createLink(l:src, l:dst)
@@ -158,5 +158,11 @@ function! cmake4vim#GetCMakeInfo() abort
         let l:info += ['Cmake was not found!']
     endif
     return l:info
+endfunction
+
+function! cmake4vim#SelectBuildType(buildType) abort
+    let g:cmake_build_type = a:buildType
+
+    silent call cmake4vim#GenerateCMake()
 endfunction
 " }}} Public functions "
