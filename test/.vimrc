@@ -13,4 +13,4 @@ set runtimepath +=$HOME/.vim/plugged/vader.vim
 set runtimepath +=$PLUGIN_HOME
 
 set winminheight=0
-set winheight=999
+set winheight=999999
