@@ -26,7 +26,7 @@ After:
     cd ..
 
 Execute (Check default initialization):
-    CMake
+    silent! CMake
     Assert g:cmake_compile_commands_link == "", "g:cmake_compile_commands_link != \"\""
     Assert g:cmake_compile_commands == 0, "g:cmake_compile_commands != 0"
     Assert g:cmake_usr_args == "", "g:cmake_usr_args != \"\""

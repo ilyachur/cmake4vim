@@ -48,7 +48,7 @@ Execute (Generate cmake project with default settings):
     set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
     source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
+    silent! CMake
     sleep 4
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     echo system("rm -rf cmake-build-Release")
