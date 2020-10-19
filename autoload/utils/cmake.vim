@@ -28,6 +28,7 @@ function! utils#cmake#findCachedVar(data, variable) abort
             return l:split_res[1]
         endif
     endfor
+    return ''
 endfunction
 
 function! utils#cmake#detectBuildType() abort
@@ -89,4 +90,16 @@ function! utils#cmake#getCmakeGeneratorType() abort
     let l:cmake_info = utils#cmake#getCmakeCache()
 
     return utils#cmake#findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
+endfunction
+
+function! utils#cmake#getBinaryPath() abort
+    let l:exec_filename = ''
+    if has('win32')
+        let l:exec_filename = g:cmake_build_target . '.exe'
+    else
+        let l:exec_filename = g:cmake_build_target
+    endif
+
+    let l:exec_path = findfile(exec_filename, utils#cmake#getBuildDir() . '**')
+    return l:exec_path
 endfunction

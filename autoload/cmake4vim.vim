@@ -161,4 +161,18 @@ function! cmake4vim#SelectBuildType(buildType) abort
 
     silent call cmake4vim#GenerateCMake()
 endfunction
+
+function! cmake4vim#RunTarget() abort
+    if !exists('g:cmake_build_target')
+        echom 'Please select target first!'
+        return
+    endif
+
+    let l:exec_path = utils#cmake#getBinaryPath()
+    if strlen(l:exec_path)
+        call utils#common#executeCommand(l:exec_path)
+    else
+        echom 'Executable "' . g:cmake_build_target . '" was not found'
+    endif
+endfunction
 " }}} Public functions "

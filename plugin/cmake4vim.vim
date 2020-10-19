@@ -67,4 +67,5 @@ command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo echon join(cmake4vim#GetCMakeInfo(), "\n")
 command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
+command! CMakeRun call cmake4vim#RunTarget()
 " }}} Commands "
