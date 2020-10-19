@@ -45,6 +45,10 @@ COMMANDS                                                        *cmake-commands*
     Change to the CMakeBuildType with the argument passed,
     and will call :CMake after.
 
+:CMakeRun                                                           *:CMakeRun*
+    Run the current target if it is runnable and compiled. Currently,
+    doesn't support binary locations out of build directory.
+
 VARIABLES                                                      *cmake-variables*
 
 *g:cmake_reload_after_save*           if this variable is not equal 0, plugin
