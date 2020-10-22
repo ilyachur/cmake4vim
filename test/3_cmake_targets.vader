@@ -27,7 +27,7 @@ Before:
     let g:cmake_c_compiler=""
     let g:cmake_build_type=""
     let g:cmake_install_prefix=""
-    let g:cmake_project_generator=""
+    let g:cmake_project_generator="Unix Makefiles"
     let g:make_arguments=""
     let g:cmake_build_target="all"
     let g:cmake_build_dir=""
