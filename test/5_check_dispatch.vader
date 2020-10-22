@@ -34,6 +34,7 @@ Before:
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
+    on
 
 After:
     call RemoveFile("compile_commands.json")
@@ -41,18 +42,16 @@ After:
     cd ..
 
 Execute (Generate cmake project with default settings):
-    if 0                " Disabled test due to Vim(copen):E36: Not enough room
     if !has('win32')    " Skip for Windows
-    let old_rtp = &rtp
-    set rtp+=$HOME/.vim/plugged/vim-dispatch
-    set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
-    set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
-    source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent! CMake
-    sleep 4
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    echo system("rm -rf cmake-build-Release")
-    let &rtp = old_rtp
-    endif
+        let old_rtp = &rtp
+        set rtp+=$HOME/.vim/plugged/vim-dispatch
+        set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
+        set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
+        source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        sleep 4
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        echo system("rm -rf cmake-build-Release")
+        let &rtp = old_rtp
     endif

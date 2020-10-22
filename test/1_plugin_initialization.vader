@@ -19,6 +19,7 @@ Before:
     cd test_proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
+    on
 
 After:
     call RemoveFile("compile_commands.json")
@@ -26,7 +27,7 @@ After:
     cd ..
 
 Execute (Check default initialization):
-    silent! CMake
+    CMake
     Assert g:cmake_compile_commands_link == "", "g:cmake_compile_commands_link != \"\""
     Assert g:cmake_compile_commands == 0, "g:cmake_compile_commands != 0"
     Assert g:cmake_usr_args == "", "g:cmake_usr_args != \"\""

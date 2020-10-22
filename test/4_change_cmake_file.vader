@@ -34,6 +34,7 @@ Before:
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
+    on
 
 After:
     call RemoveFile("compile_commands.json")
@@ -50,5 +51,5 @@ Execute (Change in cmake file should call project generation):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_reload_after_save=1
     :e CMakeLists.txt
-    :silent! w
+    :w
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"

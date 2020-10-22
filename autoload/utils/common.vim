@@ -14,13 +14,13 @@ endfunction
 
 function! utils#common#runSystem(cmd) abort
     let l:s_out = system(a:cmd)
-    silent cgetexpr l:s_out
-    silent copen
+    cgetexpr l:s_out
+    copen
 endfunction
 
 function! utils#common#executeCommand(cmd, ...) abort
     " Close quickfix list in order to don't save custom error format
-    silent cclose
+    silent! cclose
     let l:errFormat = get(a:, 1, '')
     let l:old_error = &l:errorformat
     if l:errFormat !=# ''
