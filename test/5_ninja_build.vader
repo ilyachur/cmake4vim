@@ -9,7 +9,7 @@ Before:
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-release', 'cmake-build-debug', 'cmake-build-relwithdebinfo', 'cmake-build-minsizerel', 'cmake-build', 'build_test']
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
@@ -41,34 +41,34 @@ After:
 
 Execute (Generate cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
-        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         CMake
-        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        Assert filereadable("cmake-build-release/build.ninja"), "build.ninja should be generated"
-        echo system("rm -rf cmake-build-release")
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        echo system("rm -rf cmake-build-Release")
     endif
 
 Execute (Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
-        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         CMake
-        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        Assert filereadable("cmake-build-release/build.ninja"), "build.ninja should be generated"
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         CMakeBuild
-        Assert filereadable("cmake-build-release/app/test_app"), "app should be built"
-        Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
-        echo system("rm -rf cmake-build-release")
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        echo system("rm -rf cmake-build-Release")
     endif
 
 Execute (Build cmake project with -C param):
     if !has('win32') " Skip for Windows
         let g:make_arguments="-C ."
-        Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         CMake
-        Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        Assert filereadable("cmake-build-release/build.ninja"), "build.ninja should be generated"
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         CMakeBuild
-        Assert filereadable("cmake-build-release/app/test_app"), "app should be built"
-        Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
-        echo system("rm -rf cmake-build-release")
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        echo system("rm -rf cmake-build-Release")
     endif
