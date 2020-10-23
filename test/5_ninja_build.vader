@@ -22,7 +22,7 @@ Before:
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0
-    let g:cmake_usr_args=""
+    let g:cmake_usr_args="-GNinja"
     let g:cmake_cxx_compiler=""
     let g:cmake_c_compiler=""
     let g:cmake_build_type=""
