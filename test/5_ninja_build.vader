@@ -48,6 +48,11 @@ Execute (Generate cmake project with Ninja generator):
         echo system("rm -rf cmake-build-Release")
     endif
 
+Execute (Find Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert executable('ninja'), "Ninja is not found!"
+    endif
+
 Execute (Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
