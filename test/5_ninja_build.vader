@@ -39,6 +39,11 @@ After:
     call RemoveCMakeDirs()
     cd ..
 
+Execute (Find Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert executable('ninja'), "Ninja is not found!"
+    endif
+
 Execute (Generate cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -46,11 +51,6 @@ Execute (Generate cmake project with Ninja generator):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         echo system("rm -rf cmake-build-Release")
-    endif
-
-Execute (Find Ninja generator):
-    if !has('win32') " Skip for Windows
-        Assert executable('ninja'), "Ninja is not found!"
     endif
 
 Execute (Build cmake project with Ninja generator):

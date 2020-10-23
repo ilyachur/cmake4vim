@@ -25,6 +25,11 @@ jobs:
       uses: ashutoshvarma/setup-ninja@master
       with:
           version: 1.10.1
+    - name: Check Ninja
+      run: |
+          which ninja
+          ninja --version
+
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
