@@ -4,6 +4,7 @@ profile! file ../*
 
 execute 'set encoding=utf-8'
 " vint: next-line -ProhibitSetNoCompatible
+set nocompatible
 filetype off
 filetype plugin indent on
 syntax enable
@@ -12,4 +13,5 @@ set runtimepath +=$HOME/.vim/plugged/vader.vim
 " set rtp+=$HOME/.vim/plugged/fzf.vim
 set runtimepath +=$PLUGIN_HOME
 
-set tabpagemax=1000
+set winminheight=0
+set winheight=999
