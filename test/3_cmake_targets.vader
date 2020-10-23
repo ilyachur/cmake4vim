@@ -34,6 +34,8 @@ Before:
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
+    " Use on in order to close all windows and avoid E36 error
+    on
 
 After:
     call RemoveFile("compile_commands.json")
@@ -43,7 +45,7 @@ After:
 Execute (Generate cmake project with default settings):
     if !has('win32') " Skip for Windows
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent! CMake
+    CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     silent! make
     Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
@@ -53,12 +55,12 @@ Execute (Generate cmake project with default settings):
 Execute (Generate cmake project with default settings):
     if !has('win32') " Skip for Windows
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent! CMake
+    CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     silent! make
     Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
     Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    silent! CMakeClean
+    CMakeClean
     Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't exist"
     Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib shouldn't exist"
     endif
@@ -66,9 +68,9 @@ Execute (Generate cmake project with default settings):
 Execute (Build only library with arguments):
     if !has('win32') " Skip for Windows
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent! CMake
+    CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    silent! CMakeSelectTarget test_lib
+    CMakeSelectTarget test_lib
     silent! make
     Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't exist"
     Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -77,9 +79,9 @@ Execute (Build only library with arguments):
 Execute (CMakeBuild for test library):
     if !has('win32') " Skip for Windows
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent! CMake
+    CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    silent! CMakeBuild test_lib
+    CMakeBuild test_lib
     silent! make
     Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't exist"
     Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -87,7 +89,7 @@ Execute (CMakeBuild for test library):
 
 Execute (Check all targets):
     if !has('win32') " Skip for Windows
-    silent! CMake
+    CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let targets = cmake4vim#GetAllTargets()
     Assert len(targets) == 7, "test project should contain 7 targets"
@@ -96,7 +98,7 @@ Execute (Check all targets):
 Execute (Get cmake targets):
     if !has('win32') " Skip for Windows
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent! CMake
+    CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
     Assert len(result) == 7, "test project should contain 7 targets"
@@ -104,7 +106,7 @@ Execute (Get cmake targets):
 
 # Execute (Compile cmake targets):
 #     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-#     silent! CMake
+#     CMake
 #     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
 #     execute "normal! :CMakeSelectTarget test_l\<C-I>\<CR>"
 #     silent! make
@@ -114,7 +116,7 @@ Execute (Get cmake targets):
 # Execute (FZF cmake targets):
 #     unlet! g:fzf_layout g:fzf_action g:fzf_history_dir
 #     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-#     silent! CMake
+#     CMake
 #     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
 #     let result = fzf#cmake4vim#SelectTarget()
 #     AssertEqual ['all'], result
