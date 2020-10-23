@@ -12,38 +12,70 @@ on:
 
 jobs:
   run:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: rhysd/action-setup-vim@v1
-      # with:
-      #     version: nightly
-      #     neovim: true
+    - name: Checkout repository
+      uses: actions/checkout@v1
+
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
-          python-version: 3.7
+        python-version: 3.7
+
     - name: Install covimerage
       run: |
-          pip3 install covimerage --user
-          pip3 install coveralls --user
+        pip3 install covimerage --user
+        pip3 install coveralls --user
 
-    - name: Run tests
+    - name: Install vim
+      uses: rhysd/action-setup-vim@v1
+
+    - name: Install nvim
+      uses: rhysd/action-setup-vim@v1
+      with:
+        neovim: true
+
+    - name: Remove profile
       run: |
-        ./test/local_run.sh
+        rm -rf ${HOME}/vim-profile.txt
+      env:
+          TEST_HOME: ./test
+          PLUGIN_HOME: ./
+
+    - name: Run tests for vim
+      run: |
+        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
+        git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
+        cd ${TEST_HOME}
+        vim -Nu ./vimrc -c 'Vader! *'
+      env:
+          TEST_HOME: ./test
+          PLUGIN_HOME: ./
+
+    - name: Run tests fir nVim
+      run: |
+        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
+        git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
+        cd ${TEST_HOME}
+        nvim -Nu ./vimrc -c 'Vader! *'
+      env:
+          TEST_HOME: ./test
+          PLUGIN_HOME: ./
 
     - name: Generate coverage report
       run: |
-          python3 -m covimerage write_coverage ./test/tmp/vim-profile.txt
-          python3 -m coverage xml
+        python3 -m covimerage write_coverage ${HOME}/vim-profile.txt
+        python3 -m coverage xml
+      env:
+          TEST_HOME: ./test
+          PLUGIN_HOME: ./
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-          token: ${{ secrets.CODECOV_TOKEN  }}
-          file: ./coverage.xml
-          flags: tests
-          name: codecov-umbrella
-          fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN  }}
+        file: ./coverage.xml
+        flags: tests
+        name: codecov-umbrella
+        fail_ci_if_error: true

@@ -11,8 +11,7 @@ on:
       - master
 
 jobs:
-  run:
-
+  cmake4vim:
     runs-on: ubuntu-latest
 
     steps:
