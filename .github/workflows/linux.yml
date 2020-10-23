@@ -18,9 +18,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: rhysd/action-setup-vim@v1
-      with:
-          version: nightly
-          # neovim: true
+      # with:
+      #     version: nightly
+      #     neovim: true
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
