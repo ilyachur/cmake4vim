@@ -19,6 +19,8 @@ Before:
     cd test_proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
+    " Use on in order to close all windows and avoid E36 error
+    on
 
 After:
     call RemoveFile("compile_commands.json")

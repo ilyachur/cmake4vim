@@ -2,6 +2,7 @@
 profile start $HOME/vim-profile.txt
 profile! file ../*
 
+execute 'set encoding=utf-8'
 " vint: next-line -ProhibitSetNoCompatible
 filetype off
 filetype plugin indent on

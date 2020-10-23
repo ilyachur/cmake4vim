@@ -34,6 +34,8 @@ Before:
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
+    " Use on in order to close all windows and avoid E36 error
+    on
 
 After:
     call RemoveFile("compile_commands.json")
@@ -45,7 +47,7 @@ Execute (Generate cmake project with default settings):
         Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
         CMake
         Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        make
+        silent! make
         Assert filereadable("cmake-build-release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
     endif
@@ -55,7 +57,7 @@ Execute (Generate cmake project with default settings):
         Assert !isdirectory("cmake-build-release"), "Build directory shouldn't exist"
         CMake
         Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        make
+        silent! make
         Assert filereadable("cmake-build-release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
         CMakeClean
@@ -69,7 +71,7 @@ Execute (Build only library with arguments):
         CMake
         Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         CMakeSelectTarget test_lib
-        make
+        silent! make
         Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
         Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
     endif
@@ -80,7 +82,7 @@ Execute (CMakeBuild for test library):
         CMake
         Assert filereadable("cmake-build-release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         CMakeBuild test_lib
-        make
+        silent! make
         Assert !filereadable("cmake-build-release/app/test_app"), "app shouldn't exist"
         Assert filereadable("cmake-build-release/lib/libtest_lib.a"), "test_lib should be built"
     endif
