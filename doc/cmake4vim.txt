@@ -63,9 +63,8 @@ VARIABLES                                                      *cmake-variables*
                                     Default is 'cmake-build-'.
 
 *g:cmake_build_target*                set the target name for build.
-                                    Default is 'all'.
-                                    If variable is empty, plugin uses the all
-                                    target for build.
+                                    Default is empty and default value depends
+                                    on CMake Generator
 
 *g:make_arguments*                    allows to set custom parameters for make
                                     command. Default is empty.
