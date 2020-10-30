@@ -34,7 +34,7 @@ endfunction
 function! utils#cmake#getCMakeCache(dir) abort
     let l:cache_file = a:dir . '/CMakeCache.txt'
     if !filereadable(l:cache_file)
-        return ['CMAKE_BUILD_TYPE:ddsa=Dsads']
+        return []
     endif
     if has('win32')
         let l:cache_file = substitute(l:cache_file, '\/', '\\', 'g')
