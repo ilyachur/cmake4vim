@@ -100,6 +100,9 @@ Execute (CMakeBuild for test library):
     if !has('win32')
         Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    else
+        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
 Execute (Check all targets):
