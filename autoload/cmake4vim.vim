@@ -118,6 +118,16 @@ function! cmake4vim#GenerateCMake(...) abort
 endfunction
 
 function! cmake4vim#SelectTarget(target) abort
+    " Use all target if a:target and g:cmake_target are empty
+    let l:cmake_target = a:target
+    if a:target ==# ''
+        let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+        if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, 'Visual Studio') != -1
+            let l:cmake_target = 'ALL_BUILD'
+        else
+            let l:cmake_target = 'all'
+        endif
+    endif
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     if g:cmake_compile_commands_link !=# ''
         let l:src = shellescape(l:build_dir) . '/compile_commands.json'
@@ -126,11 +136,11 @@ function! cmake4vim#SelectTarget(target) abort
     endif
 
     let g:cmake_build_target = a:target
-    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
+    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . l:cmake_target . ' -- ' . g:make_arguments
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
-    echon 'Cmake target: ' . a:target . ' selected!'
+    echon 'Cmake target: ' . l:cmake_target . ' selected!'
     return l:cmd
 endfunction
 
@@ -162,3 +172,4 @@ function! cmake4vim#SelectBuildType(buildType) abort
     silent call cmake4vim#GenerateCMake()
 endfunction
 " }}} Public functions "
+

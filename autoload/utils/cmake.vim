@@ -89,7 +89,8 @@ function! utils#cmake#getBuildDir() abort
 endfunction
 
 function! utils#cmake#getCmakeGeneratorType() abort
-    let l:cmake_info = utils#cmake#getCMakeCache(utils#cmake#getBuildDir())
+    let l:build_dir = utils#cmake#getBuildDir()
+    let l:cmake_info = utils#cmake#getCMakeCache(l:build_dir)
 
     return utils#cmake#findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
 endfunction

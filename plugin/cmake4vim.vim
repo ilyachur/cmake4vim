@@ -18,7 +18,7 @@ if !exists('g:make_arguments')
     let g:make_arguments = ''
 endif
 if !exists('g:cmake_build_target')
-    let g:cmake_build_target = 'all'
+    let g:cmake_build_target = ''
 endif
 if !exists('g:cmake_change_build_command')
     let g:cmake_change_build_command = 1
