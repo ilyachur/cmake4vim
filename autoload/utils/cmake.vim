@@ -44,7 +44,7 @@ function! utils#cmake#getCMakeCache(dir) abort
     endif
 endfunction
 
-function! utils#cmake#getBuildCommand(target)
+function! utils#cmake#setBuildTarget(target) abort
     " Use all target if a:target and g:cmake_target are empty
     let l:cmake_target = a:target
     if a:target ==# ''
@@ -55,6 +55,12 @@ function! utils#cmake#getBuildCommand(target)
             let l:cmake_target = 'all'
         endif
     endif
+    let g:cmake_build_target = l:cmake_target
+
+    return l:cmake_target
+endfunction
+
+function! utils#cmake#getBuildCommand(target) abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     if g:cmake_compile_commands_link !=# ''
         let l:src = shellescape(l:build_dir) . '/compile_commands.json'
@@ -62,8 +68,7 @@ function! utils#cmake#getBuildCommand(target)
         silent call utils#fs#createLink(l:src, l:dst)
     endif
 
-    let g:cmake_build_target = a:target
-    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . l:cmake_target . ' -- ' . g:make_arguments
+    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
     return l:cmd
 endfunction
 

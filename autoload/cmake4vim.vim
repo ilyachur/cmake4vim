@@ -94,7 +94,8 @@ function! cmake4vim#GenerateCMake(...) abort
 endfunction
 
 function! cmake4vim#SelectTarget(target) abort
-    let l:cmd = utils#cmake#getBuildCommand(target)
+    let l:cmake_target = utils#cmake#setBuildTarget(a:target)
+    let l:cmd = utils#cmake#getBuildCommand(l:cmake_target)
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
