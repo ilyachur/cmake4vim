@@ -29,7 +29,7 @@ Before:
     let g:cmake_install_prefix=""
     let g:cmake_project_generator=""
     let g:make_arguments=""
-    let g:cmake_build_target="all"
+    let g:cmake_build_target=""
     let g:cmake_build_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
@@ -46,7 +46,7 @@ Execute (Generate cmake project with default settings):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    silent! make
+    CMakeBuild
     if !has('win32')
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -59,7 +59,7 @@ Execute (Generate cmake project with default settings):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    silent! make
+    CMakeBuild
     if !has('win32')
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -81,7 +81,7 @@ Execute (Build only library with arguments):
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     CMakeSelectTarget test_lib
-    silent! make
+    CMakeBuild
     if !has('win32')
         Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -91,6 +91,7 @@ Execute (Build only library with arguments):
     endif
 
 Execute (CMakeBuild for test library):
+    " Check that make command works with changed build command
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -99,9 +100,6 @@ Execute (CMakeBuild for test library):
     if !has('win32')
         Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/libtest_lib.lib"), "test_lib should be built"
     endif
 
 Execute (Check all targets):

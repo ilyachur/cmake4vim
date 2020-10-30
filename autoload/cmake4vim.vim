@@ -85,31 +85,7 @@ function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
 endfunction
 
 function! cmake4vim#GenerateCMake(...) abort
-    let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    let l:cmake_args = []
-
-    let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . utils#cmake#detectBuildType()]
-    if g:cmake_project_generator !=# ''
-        let l:cmake_args += ['-G "' . g:cmake_project_generator . '"']
-    endif
-    if g:cmake_install_prefix !=# ''
-        let l:cmake_args += ['-DCMAKE_INSTALL_PREFIX=' . g:cmake_install_prefix]
-    endif
-    if g:cmake_c_compiler !=# ''
-        let l:cmake_args += ['-DCMAKE_C_COMPILER=' . g:cmake_c_compiler]
-    endif
-    if g:cmake_cxx_compiler !=# ''
-        let l:cmake_args += ['-DCMAKE_CXX_COMPILER=' . g:cmake_cxx_compiler]
-    endif
-    if g:cmake_compile_commands
-        let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
-    endif
-    if g:cmake_usr_args !=# ''
-        let l:cmake_args += [g:cmake_usr_args]
-    endif
-
-    let l:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.l:build_dir
-
+    let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand()
     silent call utils#common#executeCommand(l:cmake_cmd, utils#cmake#getCMakeErrorFormat())
 
     if g:cmake_change_build_command
@@ -118,25 +94,7 @@ function! cmake4vim#GenerateCMake(...) abort
 endfunction
 
 function! cmake4vim#SelectTarget(target) abort
-    " Use all target if a:target and g:cmake_target are empty
-    let l:cmake_target = a:target
-    if a:target ==# ''
-        let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
-        if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, 'Visual Studio') != -1
-            let l:cmake_target = 'ALL_BUILD'
-        else
-            let l:cmake_target = 'all'
-        endif
-    endif
-    let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    if g:cmake_compile_commands_link !=# ''
-        let l:src = shellescape(l:build_dir) . '/compile_commands.json'
-        let l:dst = shellescape(g:cmake_compile_commands_link) . '/compile_commands.json'
-        silent call utils#fs#createLink(l:src, l:dst)
-    endif
-
-    let g:cmake_build_target = a:target
-    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . l:cmake_target . ' -- ' . g:make_arguments
+    let l:cmd = utils#cmake#getBuildCommand(target)
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
@@ -160,6 +118,8 @@ function! cmake4vim#GetCMakeInfo() abort
         let l:info += ['CMAKE_GENERATOR     : ' . utils#cmake#getCmakeGeneratorType()]
         let l:info += ['CMAKE_BUILD_TYPE    : ' . utils#cmake#detectBuildType()]
         let l:info += ['BUILD_DIRECTORY     : ' . utils#cmake#getBuildDir()]
+        let l:info += ['CMAKE_GEN_COMMAND   : ' . utils#cmake#getCMakeGenerationCommand()]
+        let l:info += ['CMAKE_BUILD_COMMAND : ' . utils#cmake#getBuildCommand(g:cmake_build_target)]
     else
         let l:info += ['Cmake was not found!']
     endif
