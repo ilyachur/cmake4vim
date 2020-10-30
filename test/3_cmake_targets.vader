@@ -52,7 +52,7 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     else
         Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/libtest_lib.lib"), "test_lib should be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
 Execute (Generate cmake project with default settings):
@@ -65,7 +65,7 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     else
         Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/libtest_lib.lib"), "test_lib should be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
     CMakeClean
     if !has('win32')
@@ -73,7 +73,7 @@ Execute (Generate cmake project with default settings):
         Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     else
         Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert !filereadable("cmake-build-Release/lib/Debug/libtest_lib.lib"), "test_lib should be built"
+        Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
 Execute (Build only library with arguments):
@@ -87,7 +87,7 @@ Execute (Build only library with arguments):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     else
         Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/libtest_lib.lib"), "test_lib should be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
 Execute (CMakeBuild for test library):
