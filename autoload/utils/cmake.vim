@@ -28,7 +28,22 @@ function! utils#cmake#findCachedVar(data, variable) abort
             return l:split_res[1]
         endif
     endfor
+    return ''
 endfunction
+
+function! utils#cmake#getCMakeCache(dir) abort
+    let l:cache_file = a:dir . '/CMakeCache.txt'
+    if !filereadable(l:cache_file)
+        return ['CMAKE_BUILD_TYPE:ddsa=Dsads']
+    endif
+    if has('win32')
+        let l:cache_file = substitute(l:cache_file, '\/', '\\', 'g')
+        return split(system('type ' . shellescape(l:cache_file)), '\n')
+    else
+        return split(system('cat ' . shellescape(l:cache_file)), '\n')
+    endif
+endfunction
+
 
 function! utils#cmake#detectBuildType() abort
     if g:cmake_build_type !=# ''
@@ -48,7 +63,7 @@ function! utils#cmake#detectBuildType() abort
     endif
 
     if l:build_dir !=# ''
-        let l:cmake_vars = split(system('cmake -L -N ' . shellescape(l:build_dir)), '\n')
+        let l:cmake_vars = utils#cmake#getCMakeCache(l:build_dir)
         let l:res = utils#cmake#findCachedVar(l:cmake_vars, 'CMAKE_BUILD_TYPE')
         if l:res !=# ''
             return l:res
@@ -73,20 +88,8 @@ function! utils#cmake#getBuildDir() abort
     return finddir(utils#cmake#detectBuildDir(), getcwd().';.')
 endfunction
 
-function! utils#cmake#getCmakeCache() abort
-    let l:cache_file = utils#cmake#getBuildDir() . '/CMakeCache.txt'
-    if !filereadable(l:cache_file)
-        return []
-    endif
-    if has('win32')
-        return split(system('type ' . shellescape(l:cache_file)), '\n')
-    else
-        return split(system('cat ' . shellescape(l:cache_file)), '\n')
-    endif
-endfunction
-
 function! utils#cmake#getCmakeGeneratorType() abort
-    let l:cmake_info = utils#cmake#getCmakeCache()
+    let l:cmake_info = utils#cmake#getCMakeCache(utils#cmake#getBuildDir())
 
     return utils#cmake#findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
 endfunction
