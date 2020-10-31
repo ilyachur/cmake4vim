@@ -97,6 +97,15 @@ jobs:
     needs: [Linux, Windows]
 
     steps:
+    - uses: actions/checkout@v1
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Install covimerage
+      run: |
+          pip3 install covimerage --user
+          pip3 install coveralls --user
     - name: Download Linux profile
       uses: actions/download-artifact@v2
       with:
