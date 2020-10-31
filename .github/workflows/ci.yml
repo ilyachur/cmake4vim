@@ -11,6 +11,24 @@ on:
       - master
 
 jobs:
+  code_style:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Install Vint
+      run: |
+          pip3 install vim-vint
+
+    - name: Run code style check
+      run: |
+        vint .
+
   Linux:
     runs-on: ubuntu-latest
 
@@ -28,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
           name: lin_profile
-          path: ./lin-profile.txt
+          path: ./lin_profile.txt
 
   Windows:
     runs-on: windows-latest
@@ -48,22 +66,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
           name: win_profile
-          path: ./win-profile.txt
-
-  # MacOS:
-  #   runs-on: macos-latest
-  #
-  #   steps:
-  #   - uses: actions/checkout@v1
-  #   - uses: rhysd/action-setup-vim@v1
-  #   - name: Run tests
-  #     run: |
-  #       ./test/local_run.sh
-  #   - name: Upload MacOS profile
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #         name: mac_profile.txt
-  #         path: ./test/tmp/vim-profile.txt
+          path: ./win_profile.txt
 
   Report:
     runs-on: ubuntu-latest
@@ -92,7 +95,7 @@ jobs:
 
     - name: Generate coverage report
       run: |
-          python3 -m covimerage write_coverage ./lin-profile.txt
+          python3 -m covimerage write_coverage ./lin_profile.txt
           python3 -m coverage xml
 
     - name: Upload coverage to Codecov
