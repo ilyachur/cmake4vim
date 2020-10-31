@@ -43,6 +43,8 @@ jobs:
           pip3 install covimerage --user
           pip3 install coveralls --user
     - uses: rhysd/action-setup-vim@v1
+      with:
+          neovim: true
     - name: Run tests
       run: |
         ./test/local_run.sh
@@ -73,6 +75,8 @@ jobs:
           pip3 install covimerage --user
           pip3 install coveralls --user
     - uses: rhysd/action-setup-vim@v1
+      with:
+          neovim: true
     - name: Run tests
       shell: cmd
       run: |
