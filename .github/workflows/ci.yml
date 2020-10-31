@@ -58,15 +58,12 @@ jobs:
       shell: cmd
       run: |
         ./test/local_run.bat
-    - name: Rename profile
-      run: |
-        rename ./test/tmp/vim-profile.txt win_profile.txt
 
     - name: Upload Winux profile
       uses: actions/upload-artifact@v2
       with:
           name: win_profile
-          path: ./win_profile.txt
+          path: ./test/tmp/vim-profile.txt
 
   Report:
     runs-on: ubuntu-latest
@@ -92,6 +89,9 @@ jobs:
       uses: actions/download-artifact@v2
       with:
           name: win_profile
+    - name: tree
+      run: |
+          ls -Rla .
 
     - name: Generate coverage report
       run: |
