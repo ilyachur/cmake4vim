@@ -1,0 +1,102 @@
+name: Validation
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: rhysd/action-setup-vim@v1
+      # with:
+      #     version: nightly
+      #     neovim: true
+
+    - name: Run tests
+      run: |
+        ./test/local_run.sh
+
+    - name: Upload Linux profile
+      uses: actions/upload-artifact@v2
+      with:
+          name: lin_profile.txt
+          path: ./test/tmp/vim-profile.txt
+
+  Windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: rhysd/action-setup-vim@v1
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Run tests
+      shell: cmd
+      run: |
+        ./test/local_run.bat
+
+    - name: Upload Windows profile
+      uses: actions/upload-artifact@v2
+      with:
+          name: win_profile.txt
+          path: ./test/tmp/vim-profile.txt
+
+  MacOS:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: rhysd/action-setup-vim@v1
+      # with:
+      #     version: nightly
+      #     neovim: true
+
+    - name: Run tests
+      run: |
+        ./test/local_run.sh
+
+    - name: Upload MacOS profile
+      uses: actions/upload-artifact@v2
+      with:
+          name: mac_profile.txt
+          path: ./test/tmp/vim-profile.txt
+
+  Report:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+
+    - name: Install covimerage
+      run: |
+          pip3 install covimerage --user
+          pip3 install coveralls --user
+
+    - name: Generate coverage report
+      run: |
+          python3 -m covimerage write_coverage ./test/tmp/vim-profile.txt
+          python3 -m coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+          token: ${{ secrets.CODECOV_TOKEN  }}
+          file: ./coverage.xml
+          flags: tests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+
