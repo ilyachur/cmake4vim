@@ -44,20 +44,20 @@ jobs:
           name: win_profile.txt
           path: ./test/tmp/vim-profile.txt
 
-  MacOS:
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v1
-    - uses: rhysd/action-setup-vim@v1
-    - name: Run tests
-      run: |
-        ./test/local_run.sh
-    - name: Upload MacOS profile
-      uses: actions/upload-artifact@v2
-      with:
-          name: mac_profile.txt
-          path: ./test/tmp/vim-profile.txt
+  # MacOS:
+  #   runs-on: macos-latest
+  #
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #   - uses: rhysd/action-setup-vim@v1
+  #   - name: Run tests
+  #     run: |
+  #       ./test/local_run.sh
+  #   - name: Upload MacOS profile
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #         name: mac_profile.txt
+  #         path: ./test/tmp/vim-profile.txt
 
   Report:
     runs-on: ubuntu-latest
