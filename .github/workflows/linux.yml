@@ -40,6 +40,11 @@ jobs:
     - name: Run tests for nVim
       run: |
         ./test/local_run.sh nvim
+    - name: Save profile
+      uses: actions/upload-artifact@v2
+      with:
+          name: vim-profile.txt
+          path: ./test/tmp/vim-profile.txt
     - name: Generate coverage report
       run: |
           python3 -m covimerage write_coverage ./test/tmp/vim-profile.txt
