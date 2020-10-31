@@ -53,7 +53,7 @@ jobs:
           TEST_HOME: ./test
           PLUGIN_HOME: ./
 
-    - name: Run tests fir nVim
+    - name: Run tests for nVim
       run: |
         git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
         git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
@@ -68,7 +68,6 @@ jobs:
         python3 -m covimerage write_coverage ${HOME}/vim-profile.txt
         python3 -m coverage xml
       env:
-          TEST_HOME: ./test
           PLUGIN_HOME: ./
 
     - name: Upload coverage to Codecov
