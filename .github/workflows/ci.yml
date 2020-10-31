@@ -89,11 +89,6 @@ jobs:
     - name: Upload Windows coverage
       uses: actions/upload-artifact@v2
       with:
-          name: win_coverage
-          path: coverage.xml
-    - name: Upload Windows coverage
-      uses: actions/upload-artifact@v2
-      with:
           name: win_cov
           path: win_cov.xml
 
@@ -111,16 +106,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
           name: win_cov
-    - name: tree
-      run: |
-          ls -Rla .
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
           token: ${{ secrets.CODECOV_TOKEN  }}
-          files: ./win_cov.xml,./lin_cov.xml
+          file: ./lin_cov.xml
           flags: tests
           name: cmake4vim_coverage
           fail_ci_if_error: true
-          verbose: true
-
