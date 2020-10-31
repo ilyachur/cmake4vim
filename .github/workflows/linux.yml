@@ -45,30 +45,16 @@ jobs:
 
     - name: Run tests for vim
       run: |
-        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
-        git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
-        cd ${TEST_HOME}
-        vim -Nu ./vimrc -c 'Vader! *'
-      env:
-          TEST_HOME: ./test
-          PLUGIN_HOME: ./
+          ./test/local_run.sh
 
     - name: Run tests for nVim
       run: |
-        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
-        git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
-        cd ${TEST_HOME}
-        nvim -Nu ./vimrc -c 'Vader! *'
-      env:
-          TEST_HOME: ./test
-          PLUGIN_HOME: ./
+          ./test/local_run.sh nvim
 
     - name: Generate coverage report
       run: |
-        python3 -m covimerage write_coverage ${HOME}/vim-profile.txt
+        python3 -m covimerage write_coverage ./vim-profile.txt
         python3 -m coverage xml
-      env:
-          PLUGIN_HOME: ./
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
