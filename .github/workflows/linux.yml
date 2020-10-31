@@ -12,55 +12,43 @@ on:
 
 jobs:
   run:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v1
-
+    - uses: actions/checkout@v1
+    - name: Install Vim
+      uses: rhysd/action-setup-vim@v1
+    - name: Install nVim
+      uses: rhysd/action-setup-vim@v1
+      with:
+          neovim: true
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
-        python-version: 3.7
-
+          python-version: 3.7
     - name: Install covimerage
       run: |
-        pip3 install covimerage --user
-        pip3 install coveralls --user
-
-    - name: Install vim
-      uses: rhysd/action-setup-vim@v1
-
-    - name: Install nvim
-      uses: rhysd/action-setup-vim@v1
-      with:
-        neovim: true
-
-    - name: Remove profile
+          pip3 install covimerage --user
+          pip3 install coveralls --user
+    - name: Remove provile
       run: |
-        rm -rf ${HOME}/vim-profile.txt
-      env:
-          TEST_HOME: ./test
-          PLUGIN_HOME: ./
-
-    - name: Run tests for vim
+        rm -rf ./test/tmp/vim-profile.txt
+    - name: Run tests for Vim
       run: |
-          ./test/local_run.sh
-
+        ./test/local_run.sh
     - name: Run tests for nVim
       run: |
-          ./test/local_run.sh nvim
-
+        ./test/local_run.sh nvim
     - name: Generate coverage report
       run: |
-        python3 -m covimerage write_coverage ./vim-profile.txt
-        python3 -m coverage xml
-
+          python3 -m covimerage write_coverage ./test/tmp/vim-profile.txt
+          python3 -m coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        token: ${{ secrets.CODECOV_TOKEN  }}
-        file: ./coverage.xml
-        flags: tests
-        name: codecov-umbrella
-        fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN  }}
+          file: ./coverage.xml
+          flags: tests
+          name: codecov-umbrella
+          fail_ci_if_error: true

@@ -7,7 +7,7 @@ execute 'set encoding=utf-8'
 set nocompatible
 filetype off
 filetype plugin indent on
-syntax enable
+" syntax enable
 set runtimepath +=$HOME/.vim/plugged/vader.vim
 " set rtp+=$HOME/.fzf
 " set rtp+=$HOME/.vim/plugged/fzf.vim
