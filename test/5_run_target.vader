@@ -47,12 +47,10 @@ Execute (Should not find non-binary target):
     AssertEqual '', result
 
 Execute (Should find binary target):
-    silent! CMake
-    silent! CMakeBuild
-    silent! CMakeSelectTarget test_app
+    CMake
+    CMakeBuild
+    CMakeSelectTarget test_app
     let result = utils#cmake#getBinaryPath()
-    if has('win32')
-    AssertEqual 'cmake-build-Release/app/test_app.exe', result
-    else
+    if !has('win32')
     AssertEqual 'cmake-build-Release/app/test_app', result
     endif
