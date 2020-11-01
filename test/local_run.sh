@@ -12,4 +12,4 @@ rm -f ${HOME}/vim-profile.txt
 # ${HOME}/.fzf/install --all
 
 cd ${TEST_HOME}
-vim -Nu .vimrc +Vader!*
+eval "vim -Nu vimrc -c 'Vader! *'"

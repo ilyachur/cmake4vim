@@ -19,6 +19,8 @@ Before:
     cd test_proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
+    " Use on in order to close all windows and avoid E36 error
+    on
 
 After:
     call RemoveFile("compile_commands.json")
@@ -26,7 +28,7 @@ After:
     cd ..
 
 Execute (Check default initialization):
-    silent! CMake
+    CMake
     Assert g:cmake_compile_commands_link == "", "g:cmake_compile_commands_link != \"\""
     Assert g:cmake_compile_commands == 0, "g:cmake_compile_commands != 0"
     Assert g:cmake_usr_args == "", "g:cmake_usr_args != \"\""
@@ -36,7 +38,11 @@ Execute (Check default initialization):
     Assert g:cmake_install_prefix == "", "g:cmake_install_prefix != \"\""
     Assert g:cmake_project_generator == "", "g:cmake_project_generator != \"\""
     Assert g:make_arguments == "", "g:make_arguments != \"\""
-    Assert g:cmake_build_target == "all", "g:cmake_build_target != \"all\""
+    if !has('win32')
+        Assert g:cmake_build_target == "all", "g:cmake_build_target != \"\""
+    else
+        Assert g:cmake_build_target == "ALL_BUILD", "g:cmake_build_target != \"\""
+    endif
     Assert g:cmake_build_dir == "", "g:cmake_build_dir != \"\""
     Assert g:cmake_build_dir_prefix == "cmake-build-", "g:cmake_build_dir != \"cmake-build-\""
     Assert g:cmake_change_build_command == 1, "g:cmake_change_build_command != 1"
