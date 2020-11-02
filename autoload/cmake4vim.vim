@@ -27,7 +27,7 @@ function! cmake4vim#CleanCMake() abort
         return
     endif
 
-    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target clean -- ' . g:make_arguments
+    let l:cmake_clean_cmd = 'cmake --build ' . l:build_dir . ' --target clean -- ' . g:make_arguments
 
     silent call utils#common#executeCommand(l:cmake_clean_cmd, utils#cmake#getCMakeErrorFormat())
 endfunction
@@ -35,7 +35,7 @@ endfunction
 function! cmake4vim#GetAllTargets() abort
     let l:list_targets = []
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    let l:res = split(system('cmake --build ' . shellescape(l:build_dir) . ' --target help'), "\n")[1:]
+    let l:res = split(system('cmake --build ' . l:build_dir . ' --target help'), "\n")[1:]
     if v:shell_error != 0
         let l:error_msg = ''
         if has('win32')

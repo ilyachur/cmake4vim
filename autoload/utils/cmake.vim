@@ -38,9 +38,9 @@ function! utils#cmake#getCMakeCache(dir) abort
     endif
     if has('win32')
         let l:cache_file = substitute(l:cache_file, '\/', '\\', 'g')
-        return split(system('type ' . shellescape(l:cache_file)), '\n')
+        return split(system('type ' . l:cache_file), '\n')
     else
-        return split(system('cat ' . shellescape(l:cache_file)), '\n')
+        return split(system('cat ' . l:cache_file), '\n')
     endif
 endfunction
 
@@ -63,12 +63,12 @@ endfunction
 function! utils#cmake#getBuildCommand(target) abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     if g:cmake_compile_commands_link !=# ''
-        let l:src = shellescape(l:build_dir) . '/compile_commands.json'
-        let l:dst = shellescape(g:cmake_compile_commands_link) . '/compile_commands.json'
+        let l:src = l:build_dir . '/compile_commands.json'
+        let l:dst = g:cmake_compile_commands_link . '/compile_commands.json'
         silent call utils#fs#createLink(l:src, l:dst)
     endif
 
-    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
+    let l:cmd = 'cmake --build ' . l:build_dir . ' --target ' . a:target . ' -- ' . g:make_arguments
     return l:cmd
 endfunction
 
