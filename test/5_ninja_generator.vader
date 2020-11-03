@@ -1,0 +1,79 @@
+Before:
+    function! RemoveFile(file)
+        if has('win32')
+            echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+        else
+            echo system("rm -rf '".a:file."'")
+        endif
+    endfunction
+
+    function! RemoveCMakeDirs()
+        if has('win32')
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
+                echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
+            endfor
+        else
+            echo system("rm -rf cmake-build*")
+        endif
+    endfunction
+    cd test_proj
+    call RemoveFile("compile_commands.json")
+    call RemoveCMakeDirs()
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args="-GNinja"
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator="Ninja"
+    let g:make_arguments=""
+    let g:cmake_build_target=""
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+
+After:
+    call RemoveFile("compile_commands.json")
+    call RemoveCMakeDirs()
+    cd ..
+
+Execute (Find Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert executable('ninja'), "Ninja is not found!"
+    endif
+
+Execute (Generate cmake project with Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        echo system("rm -rf cmake-build-Release")
+    endif
+
+Execute (Build cmake project with Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        echo system("rm -rf cmake-build-Release")
+    endif
+
+Execute (Build cmake project with -C param):
+    if !has('win32') " Skip for Windows
+        let g:make_arguments="-C ."
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        echo system("rm -rf cmake-build-Release")
+    endif
