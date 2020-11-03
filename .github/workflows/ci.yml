@@ -43,6 +43,12 @@ jobs:
           pip3 install covimerage --user
           pip3 install coveralls --user
     - uses: rhysd/action-setup-vim@v1
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Check Ninja
+      run: |
+          which ninja
+          ninja --version
     - name: Run tests
       run: |
         ./test/local_run.sh

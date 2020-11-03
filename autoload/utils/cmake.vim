@@ -44,15 +44,24 @@ function! utils#cmake#getCMakeCache(dir) abort
     endif
 endfunction
 
+function! utils#cmake#getCmakeGeneratorType() abort
+    let l:build_dir = utils#cmake#getBuildDir()
+    let l:cmake_info = utils#cmake#getCMakeCache(l:build_dir)
+
+    return utils#cmake#findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
+endfunction
+
 function! utils#cmake#setBuildTarget(target) abort
     " Use all target if a:target and g:cmake_target are empty
     let l:cmake_target = a:target
     if a:target ==# ''
         let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
-        if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, 'Visual Studio') != -1
-            let l:cmake_target = 'ALL_BUILD'
+        if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
+            let l:cmake_target = utils#gen#vs#getDefaultTarget()
+        elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
+            let l:cmake_target = utils#gen#ninja#getDefaultTarget()
         else
-            let l:cmake_target = 'all'
+            let l:cmake_target = utils#gen#make#getDefaultTarget()
         endif
     endif
     let g:cmake_build_target = l:cmake_target
@@ -68,8 +77,14 @@ function! utils#cmake#getBuildCommand(target) abort
         silent call utils#fs#createLink(l:src, l:dst)
     endif
 
-    let l:cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . a:target . ' -- ' . g:make_arguments
-    return l:cmd
+    let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+    if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
+        return utils#gen#vs#getBuildCommand(l:build_dir, a:target, g:make_arguments)
+    elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
+        return utils#gen#ninja#getBuildCommand(l:build_dir, a:target, g:make_arguments)
+    else
+        return utils#gen#make#getBuildCommand(l:build_dir, a:target, g:make_arguments)
+    endif
 endfunction
 
 function! utils#cmake#getCMakeGenerationCommand() abort
@@ -143,9 +158,3 @@ function! utils#cmake#getBuildDir() abort
     return finddir(utils#cmake#detectBuildDir(), getcwd().';.')
 endfunction
 
-function! utils#cmake#getCmakeGeneratorType() abort
-    let l:build_dir = utils#cmake#getBuildDir()
-    let l:cmake_info = utils#cmake#getCMakeCache(l:build_dir)
-
-    return utils#cmake#findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
-endfunction

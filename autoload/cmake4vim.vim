@@ -26,40 +26,27 @@ function! cmake4vim#CleanCMake() abort
     if l:build_dir ==# ''
         return
     endif
+    let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+    let l:clean_target = utils#gen#make#getCleanTarget()
+    if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
+        let l:clean_target = utils#gen#vs#getCleanTarget()
+    elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
+        let l:clean_target = utils#gen#ninja#getCleanTarget()
+    endif
 
-    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target clean -- ' . g:make_arguments
+    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . l:clean_target . ' -- ' . g:make_arguments
 
     silent call utils#common#executeCommand(l:cmake_clean_cmd, utils#cmake#getCMakeErrorFormat())
 endfunction
 
 function! cmake4vim#GetAllTargets() abort
-    let l:list_targets = []
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    let l:res = split(system('cmake --build ' . shellescape(l:build_dir) . ' --target help'), "\n")[1:]
+    let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+    let l:res = split(system('cmake --build ' . shellescape(l:build_dir) . ' --target help'), "\n")
+    " VS doesn't have cmake target with the name help
     if v:shell_error != 0
-        let l:error_msg = ''
-        if has('win32')
-            " Parse VS projects
-            let l:res = split(system('dir *.vcxproj /S /B'), "\n")
-            if v:shell_error != 0
-                let l:error_msg = 'Error: cannot detect targets!'
-            else
-                for l:value in l:res
-                    if l:value !=# ''
-                        let l:files = split(l:value, l:build_dir)
-                        if len(l:files) != 2
-                            continue
-                        endif
-                        " Exclude projects from CMakeFiles folder
-                        let l:files = split(l:files[1], 'CMakeFiles')
-                        if len(l:files) != 1
-                            continue
-                        endif
-                        let l:files = split(l:files[0], '\\')
-                        let l:list_targets += [fnamemodify(l:files[-1], ':r')]
-                    endif
-                endfor
-            endif
+        if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
+            return utils#gen#vs#getTargets(l:res)
         else
             let l:error_msg = 'Error: cannot detect targets!'
         endif
@@ -69,14 +56,12 @@ function! cmake4vim#GetAllTargets() abort
                         \ echohl None
         endif
     else
-        for l:value in l:res
-            if l:value !=# ''
-                let l:list_targets += [split(l:value)[1]]
-            endif
-        endfor
+        if stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
+            return utils#gen#ninja#getTargets(l:res)
+        endif
     endif
 
-    return l:list_targets
+    return utils#gen#make#getTargets(l:res)
 endfunction
 
 function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
