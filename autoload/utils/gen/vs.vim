@@ -1,18 +1,22 @@
 " autoload/gen/vs.vim - contains helpers for Visual Studio generator
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
+" Returns the name of CMake generator
 function! utils#gen#vs#getGeneratorName() abort
     return 'Visual Studio'
 endfunction
 
+" Returns the default target for current CMake generator
 function! utils#gen#vs#getDefaultTarget() abort
     return 'ALL_BUILD'
 endfunction
 
+" Returns the clean target for CMake generator
 function! utils#gen#vs#getCleanTarget() abort
     return 'clean'
 endfunction
 
+" Returns the list of targets for CMake generator
 function! utils#gen#vs#getTargets(targets_list) abort
     " Parse VS projects
     let l:build_dir = utils#cmake#detectBuildDir()
@@ -40,6 +44,7 @@ function! utils#gen#vs#getTargets(targets_list) abort
     return l:list_targets
 endfunction
 
+" Returns the cmake build command for CMake generator
 function! utils#gen#vs#getBuildCommand(build_dir, target, make_arguments) abort
     let l:cmd = 'cmake --build ' . shellescape(a:build_dir) . ' --target ' . a:target . ' -- ' . a:make_arguments
     return l:cmd
