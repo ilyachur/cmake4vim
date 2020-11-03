@@ -15,6 +15,7 @@ endfunction
 
 function! utils#gen#vs#getTargets(targets_list) abort
     " Parse VS projects
+    let l:build_dir = utils#cmake#detectBuildDir()
     let l:list_targets = []
     let l:res = split(system('dir *.vcxproj /S /B'), "\n")
     if v:shell_error != 0
