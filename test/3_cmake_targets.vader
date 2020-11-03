@@ -106,20 +106,24 @@ Execute (CMakeBuild for test library):
     endif
 
 Execute (Check all targets):
-    if !has('win32') " Skip for Windows
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let targets = cmake4vim#GetAllTargets()
-    Assert len(targets) == 8, "test project should contain 8 targets"
+    if has('win32')
+        AssertEqual len(targets), 5
+    else
+        AssertEqual len(targets), 8
     endif
 
 Execute (Get cmake targets):
-    if !has('win32') " Skip for Windows
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
-    Assert len(result) == 8, "test project should contain 8 targets"
+    if has('win32')
+        AssertEqual len(targets), 5
+    else
+        AssertEqual len(targets), 8
     endif
 
 # Execute (Compile cmake targets):

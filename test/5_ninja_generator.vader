@@ -22,7 +22,7 @@ Before:
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0
-    let g:cmake_usr_args="-GNinja"
+    let g:cmake_usr_args=""
     let g:cmake_cxx_compiler=""
     let g:cmake_c_compiler=""
     let g:cmake_build_type=""
@@ -76,4 +76,12 @@ Execute (Build cmake project with -C param):
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
         echo system("rm -rf cmake-build-Release")
+    endif
+
+Execute (Get all Ninja targets):
+    if !has('win32') " Skip for Windows
+    CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let targets = cmake4vim#GetAllTargets()
+    AssertEqual len(targets), 17
     endif
