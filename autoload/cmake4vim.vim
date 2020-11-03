@@ -29,12 +29,12 @@ function! cmake4vim#CleanCMake() abort
     let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
     let l:clean_target = utils#gen#make#getCleanTarget()
     if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-        l:clean_target = utils#gen#vs#getCleanTarget()
+        let l:clean_target = utils#gen#vs#getCleanTarget()
     elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
-        l:clean_target = utils#gen#ninja#getCleanTarget()
+        let l:clean_target = utils#gen#ninja#getCleanTarget()
     endif
 
-    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . l:clean_target . '-- ' . g:make_arguments
+    let l:cmake_clean_cmd = 'cmake --build ' . shellescape(l:build_dir) . ' --target ' . l:clean_target . ' -- ' . g:make_arguments
 
     silent call utils#common#executeCommand(l:cmake_clean_cmd, utils#cmake#getCMakeErrorFormat())
 endfunction

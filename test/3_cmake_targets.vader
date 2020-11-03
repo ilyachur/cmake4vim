@@ -55,7 +55,7 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
-Execute (Generate cmake project with default settings):
+Execute (Check CMakeClean):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -110,7 +110,7 @@ Execute (Check all targets):
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let targets = cmake4vim#GetAllTargets()
-    Assert len(targets) == 7, "test project should contain 7 targets"
+    Assert len(targets) == 8, "test project should contain 8 targets"
     endif
 
 Execute (Get cmake targets):
@@ -119,7 +119,7 @@ Execute (Get cmake targets):
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
-    Assert len(result) == 7, "test project should contain 7 targets"
+    Assert len(result) == 8, "test project should contain 8 targets"
     endif
 
 # Execute (Compile cmake targets):
