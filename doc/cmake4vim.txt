@@ -2,11 +2,15 @@
 
 Authors:    Ilya Churaev <https://github.com/ilyachur>
 Licence:    GPLv3
-Version:    0.3.2
 
 INTRODUCTION                                                             *cmake*
 
-Plugin add CMake integration to Vim.
+Plugin adds CMake integration to Vim.
+At the current moment plugins supports next CMake generators:
+
+  * Unix Makefiles
+  * Visual Studio
+  * Ninja
 
 COMMANDS                                                        *cmake-commands*
 

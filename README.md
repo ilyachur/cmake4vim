@@ -7,17 +7,23 @@
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 
-This plugin shows cmake results using quickfix list. If you installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, it will be use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window.
-
-This plugin allow to specify cmake targets in order to avoid building of all project. If you use **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)** or **[FZF](https://github.com/junegunn/fzf.vim)** you can use them to select cmake target.
-
-If you want to generate a make command from cmake, you can use this plugin to set some flags for the make command (for example -jN and etc.).
-
 ![cmake4vim common](doc/common.gif)
 
-The plugin parses the output of cmake command and supports jump to warnings or errors.
+## Key features
 
-![cmake4vim error](doc/cmake_error.gif)
+* Written in pure Vimscript
+* The plugin supports next CMake Generators:
+  * Unix Makefiles
+  * Visual Studio
+  * Ninja
+* The plugin shows cmake results using quickfix list. If you have installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, plugin will use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window.
+* The plugin allow to specify cmake targets in order to avoid building of all project.
+* The plugin has an integration with next fuzzy finder plugins:
+   * **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)**
+   * **[FZF](https://github.com/junegunn/fzf.vim)** you can use them to select cmake target.
+* The plugin allows to specify make arguments for native build system (for example -jN and something else for Unix Make).
+* The plugin parses the output of cmake command and supports jump to warnings or errors.
+  ![cmake4vim error](doc/cmake_error.gif)
 
 ## **Usage**
 
