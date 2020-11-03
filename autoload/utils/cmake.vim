@@ -57,7 +57,7 @@ function! utils#cmake#setBuildTarget(target) abort
     if a:target ==# ''
         let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
         if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-            let l:cmake_target = utils#gen#vs#getGeneratorName()
+            let l:cmake_target = utils#gen#vs#getDefaultTarget()
         elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
             let l:cmake_target = utils#gen#ninja#getDefaultTarget()
         else

@@ -44,9 +44,7 @@ jobs:
           pip3 install coveralls --user
     - uses: rhysd/action-setup-vim@v1
     - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@master
-      with:
-          version: 1.10.1
+      uses: seanmiddleditch/gha-setup-ninja@master
     - name: Check Ninja
       run: |
           which ninja
