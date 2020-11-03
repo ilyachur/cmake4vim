@@ -9,6 +9,10 @@ function! utils#gen#make#getDefaultTarget() abort
     return 'all'
 endfunction
 
+function! utils#gen#make#getCleanTarget() abort
+    return 'clean'
+endfunction
+
 function! utils#gen#make#getTargets(targets_list) abort
     let l:res = a:targets_list
     let l:list_targets = []
@@ -20,4 +24,9 @@ function! utils#gen#make#getTargets(targets_list) abort
         endif
     endfor
     return l:list_targets
+endfunction
+
+function! utils#gen#make#getBuildCommand(build_dir, target, make_arguments) abort
+    let l:cmd = 'cmake --build ' . shellescape(a:build_dir) . ' --target ' . a:target . ' -- ' . a:make_arguments
+    return l:cmd
 endfunction

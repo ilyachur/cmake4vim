@@ -9,6 +9,10 @@ function! utils#gen#vs#getDefaultTarget() abort
     return 'ALL_BUILD'
 endfunction
 
+function! utils#gen#vs#getCleanTarget() abort
+    return 'clean'
+endfunction
+
 function! utils#gen#vs#getTargets(targets_list) abort
     " Parse VS projects
     let l:list_targets = []
@@ -33,4 +37,9 @@ function! utils#gen#vs#getTargets(targets_list) abort
         endfor
     endif
     return l:list_targets
+endfunction
+
+function! utils#gen#vs#getBuildCommand(build_dir, target, make_arguments) abort
+    let l:cmd = 'cmake --build ' . shellescape(a:build_dir) . ' --target ' . a:target . ' -- ' . a:make_arguments
+    return l:cmd
 endfunction
