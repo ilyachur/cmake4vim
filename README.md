@@ -20,8 +20,8 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 * The plugin allow to specify cmake targets in order to avoid building of all project.
 * The plugin has an integration with next fuzzy finder plugins:
    * **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)**
-   * **[FZF](https://github.com/junegunn/fzf.vim)** you can use them to select cmake target.
-* The plugin allows to specify make arguments for native build system (for example -jN and something else for Unix Make).
+   * **[FZF](https://github.com/junegunn/fzf.vim)**
+* The plugin allows to specify make arguments for native build system (for example *-jN* and something else for Unix Make).
 * The plugin parses the output of cmake command and supports jump to warnings or errors.
   ![cmake4vim error](doc/cmake_error.gif)
 
