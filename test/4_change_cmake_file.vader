@@ -16,7 +16,7 @@ Before:
             echo system("rm -rf cmake-build*")
         endif
     endfunction
-    cd test_proj
+    cd test\ proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
 

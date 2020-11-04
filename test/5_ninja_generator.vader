@@ -16,7 +16,7 @@ Before:
             echo system("rm -rf cmake-build*")
         endif
     endfunction
-    cd test_proj
+    cd test\ proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
 
@@ -44,13 +44,20 @@ Execute (Find Ninja generator):
         Assert executable('ninja'), "Ninja is not found!"
     endif
 
+Execute (Check CMake generator name):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        let gen_name = utils#cmake#getCmakeGeneratorType()
+        AssertEqual 'Ninja', gen_name
+    endif
+
 Execute (Generate cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
-        echo system("rm -rf cmake-build-Release")
     endif
 
 Execute (Build cmake project with Ninja generator):
@@ -62,7 +69,20 @@ Execute (Build cmake project with Ninja generator):
         CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-        echo system("rm -rf cmake-build-Release")
+    endif
+
+Execute (Build cmake project with Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        CMakeClean
+        Assert !filereadable("cmake-build-Release/app/test_app"), "app should not be built"
+        Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should not be built"
     endif
 
 Execute (Build cmake project with -C param):
@@ -75,7 +95,6 @@ Execute (Build cmake project with -C param):
         CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-        echo system("rm -rf cmake-build-Release")
     endif
 
 Execute (Get all Ninja targets):

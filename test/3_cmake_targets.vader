@@ -16,7 +16,7 @@ Before:
             echo system("rm -rf cmake-build*")
         endif
     endfunction
-    cd test_proj
+    cd test\ proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
 
@@ -53,6 +53,17 @@ Execute (Generate cmake project with default settings):
     else
         Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    endif
+
+Execute (Check CMake generator):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let cmake_gen = utils#cmake#getCmakeGeneratorType()
+    if has('win32')
+        AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'fdfsfsdfs '. utils#cmake#getCMakeCache(utils#cmake#getBuildDir())[0]
+    else
+        AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1
     endif
 
 Execute (Check CMakeClean):

@@ -37,10 +37,9 @@ function! utils#cmake#getCMakeCache(dir) abort
         return []
     endif
     if has('win32')
-        let l:cache_file = substitute(l:cache_file, '\/', '\\', 'g')
-        return split(system('type ' . shellescape(l:cache_file)), '\n')
+        return split(system('type ' . utils#fs#fnameescape(l:cache_file)), '\n')
     else
-        return split(system('cat ' . shellescape(l:cache_file)), '\n')
+        return split(system('cat ' . utils#fs#fnameescape(l:cache_file)), '\n')
     endif
 endfunction
 
@@ -72,8 +71,8 @@ endfunction
 function! utils#cmake#getBuildCommand(target) abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     if g:cmake_compile_commands_link !=# ''
-        let l:src = shellescape(l:build_dir) . '/compile_commands.json'
-        let l:dst = shellescape(g:cmake_compile_commands_link) . '/compile_commands.json'
+        let l:src = l:build_dir . '/compile_commands.json'
+        let l:dst = g:cmake_compile_commands_link . '/compile_commands.json'
         silent call utils#fs#createLink(l:src, l:dst)
     endif
 
@@ -111,7 +110,7 @@ function! utils#cmake#getCMakeGenerationCommand() abort
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let l:cmake_cmd = 'cmake '.join(l:cmake_args).' '.join(a:000).' -H'.getcwd().' -B'.l:build_dir
+    let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' -B ' . utils#fs#fnameescape(l:build_dir)
     return l:cmake_cmd
 endfunction
 
@@ -155,6 +154,9 @@ function! utils#cmake#detectBuildDir() abort
 endfunction
 
 function! utils#cmake#getBuildDir() abort
-    return finddir(utils#cmake#detectBuildDir(), getcwd().';.')
+    let l:build_dir = finddir(utils#cmake#detectBuildDir(), getcwd().';.')
+    if l:build_dir !=# ''
+        let l:build_dir = fnamemodify(l:build_dir, ':p:h')
+    endif
+    return l:build_dir
 endfunction
-
