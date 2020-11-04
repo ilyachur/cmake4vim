@@ -34,7 +34,8 @@ jobs:
     strategy:
       matrix:
         vim_type: ['Vim', 'Neovim']
-        vim_version: ['nightly', 'stable']
+        vim_version: ['stable']
+        # vim_version: ['nightly', 'stable']
         platform: ['Linux', 'MacOS', 'Windows']
 
         include:
@@ -53,7 +54,8 @@ jobs:
     timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v1
+    - name: Clone CMake4Vim
+      uses: actions/checkout@v1
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
@@ -78,6 +80,10 @@ jobs:
     - name: Clone Dispatch
       run: |
         git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
+    - name: Run tests
+      run: |
+        pushd test
+        vim -Nu vimrc '+Vader!*'
   # Report:
   #   runs-on: ubuntu-latest
   #   needs: [Linux, Windows, MacOS]
