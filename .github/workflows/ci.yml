@@ -40,8 +40,8 @@ jobs:
           python-version: 3.7
     - name: Install covimerage
       run: |
-          pip3 install covimerage --user
-          pip3 install coveralls --user
+          pip3 install covimerage
+          pip3 install coveralls
     - uses: rhysd/action-setup-vim@v1
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
@@ -76,8 +76,8 @@ jobs:
           python-version: 3.7
     - name: Install covimerage
       run: |
-          pip3 install covimerage --user
-          pip3 install coveralls --user
+          pip3 install covimerage
+          pip3 install coveralls
     - name: Install coreutils
       run: |
           brew install coreutils
@@ -91,10 +91,12 @@ jobs:
     - name: Run tests
       run: |
         ./test/local_run.sh
+    - name: Prepare coverage report
+      run: |
+        ./test/get_cov.sh
     - name: Generate coverage report
       run: |
-          python -m covimerage write_coverage ./test/tmp/vim-profile.txt
-          python -m coverage xml
+        python -m coverage xml
     - name: Rename profile
       run: |
         mv ./coverage.xml mac_cov.xml
