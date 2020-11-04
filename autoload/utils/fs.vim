@@ -14,24 +14,24 @@ function! utils#fs#makeDir(dir) abort
                     \ echohl None
         return
     endif
-    return '"' . fnamemodify(l:directory, ':p:h') . '"'
+    return fnamemodify(l:directory, ':p:h')
 endfunction
 
 " Remove directory
 function! utils#fs#removeDirectory(file) abort
     if has('win32')
-        silent call system('rd /S /Q ' . a:file)
+        silent call system('rd /S /Q ' . fnameescape(a:file))
     else
-        silent call system('rm -rf ' . a:file)
+        silent call system('rm -rf ' . fnameescape(a:file))
     endif
 endfunction
 
 " Remove file
 function! utils#fs#removeFile(file) abort
     if has('win32')
-        silent call system('del /F /Q ' . a:file)
+        silent call system('del /F /Q ' . fnameescape(a:file))
     else
-        silent call system('rm -rf ' . a:file)
+        silent call system('rm -rf ' . fnameescape(a:file))
     endif
 endfunction
 
@@ -43,8 +43,8 @@ function! utils#fs#createLink(src, dst) abort
     " endif
     silent call utils#fs#removeFile(a:dst)
     if has('win32')
-        silent call system('copy ' . a:src . ' ' . a:dst)
+        silent call system('copy ' . fnameescape(a:src) . ' ' . fnameescape(a:dst))
     else
-        silent call system('ln -s ' . a:src . ' ' . a:dst)
+        silent call system('ln -s ' . fnameescape(a:src) . ' ' . fnameescape(a:dst))
     endif
 endfunction
