@@ -40,8 +40,8 @@ jobs:
           python-version: 3.7
     - name: Install covimerage
       run: |
-          pip3 install covimerage --user
-          pip3 install coveralls --user
+          pip3 install covimerage
+          pip3 install coveralls
     - uses: rhysd/action-setup-vim@v1
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
@@ -52,10 +52,12 @@ jobs:
     - name: Run tests
       run: |
         ./test/local_run.sh
+    - name: Prepare coverage report
+      run: |
+        ./test/get_cov.sh
     - name: Generate coverage report
       run: |
-          python -m covimerage write_coverage ./test/tmp/vim-profile.txt
-          python -m coverage xml
+        python -m coverage xml
     - name: Rename profile
       run: |
         mv ./coverage.xml lin_cov.xml
@@ -64,6 +66,47 @@ jobs:
       with:
           name: lin_cov
           path: ./lin_cov.xml
+
+  MacOS:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Install covimerage
+      run: |
+          pip3 install covimerage
+          pip3 install coveralls
+    - name: Install coreutils
+      run: |
+          brew install coreutils
+    - uses: rhysd/action-setup-vim@v1
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Check Ninja
+      run: |
+          which ninja
+          ninja --version
+    - name: Run tests
+      run: |
+        ./test/local_run.sh
+    - name: Prepare coverage report
+      run: |
+        ./test/get_cov.sh
+    - name: Generate coverage report
+      run: |
+        python -m coverage xml
+    - name: Rename profile
+      run: |
+        mv ./coverage.xml mac_cov.xml
+    - name: Upload MacOS coverage
+      uses: actions/upload-artifact@v2
+      with:
+          name: mac_cov
+          path: ./mac_cov.xml
 
   Windows:
     runs-on: windows-latest
@@ -100,7 +143,7 @@ jobs:
 
   Report:
     runs-on: ubuntu-latest
-    needs: [Linux, Windows]
+    needs: [Linux, Windows, MacOS]
 
     steps:
     - uses: actions/checkout@v1
@@ -108,7 +151,10 @@ jobs:
       uses: actions/download-artifact@v2
       with:
           name: lin_cov
-
+    - name: Download MacOS profile
+      uses: actions/download-artifact@v2
+      with:
+          name: mac_cov
     - name: Download Windows profile
       uses: actions/download-artifact@v2
       with:
@@ -117,7 +163,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
           token: ${{ secrets.CODECOV_TOKEN  }}
-          files: ./win_cov.xml,./lin_cov.xml
+          files: ./win_cov.xml,./lin_cov.xml,./mac_cov.xml
           flags: tests
           name: cmake4vim_coverage
           fail_ci_if_error: true
