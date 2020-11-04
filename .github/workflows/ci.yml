@@ -115,10 +115,7 @@ jobs:
           name: coverage
           path: ./cov_report
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-          token: ${{ secrets.CODECOV_TOKEN  }}
-          directory: ./cov_report/
-          flags: tests
-          name: cmake4vim_coverage
-          fail_ci_if_error: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
+      run: |
+        bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
