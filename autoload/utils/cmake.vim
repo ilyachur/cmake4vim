@@ -32,15 +32,16 @@ function! utils#cmake#findCachedVar(data, variable) abort
 endfunction
 
 function! utils#cmake#getCMakeCache(dir) abort
-    let l:cache_file = a:dir . '/CMakeCache.txt'
+    let l:cache_file = substitute(a:dir, '"', '', 'g')
+    let l:cache_file = l:cache_file . '/CMakeCache.txt'
     if !filereadable(l:cache_file)
         return []
     endif
     if has('win32')
         let l:cache_file = substitute(l:cache_file, '\/', '\\', 'g')
-        return split(system('type ' . l:cache_file), '\n')
+        return split(system('type "' . l:cache_file . '"'), '\n')
     else
-        return split(system('cat ' . l:cache_file), '\n')
+        return split(system('cat "' . l:cache_file. '"'), '\n')
     endif
 endfunction
 
