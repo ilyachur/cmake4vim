@@ -52,7 +52,7 @@ endfunction
 " Extends default fnameescape, adds double quotes for Windows
 function! utils#fs#fnameescape(file) abort
     if has('win32')
-        return subtitute(fnameescape(a:file), '\ ', '^ ', 'g')
+        return '"' . a:file . '"'
     else
         return fnameescape(a:file)
     endif
