@@ -34,7 +34,7 @@ function! cmake4vim#CleanCMake() abort
         let l:clean_target = utils#gen#ninja#getCleanTarget()
     endif
 
-    let l:cmake_clean_cmd = 'cmake --build ' . fnameescape(l:build_dir) . ' --target ' . l:clean_target . ' -- ' . g:make_arguments
+    let l:cmake_clean_cmd = 'cmake --build ' . utils#fs#fnameescape(l:build_dir) . ' --target ' . l:clean_target . ' -- ' . g:make_arguments
 
     silent call utils#common#executeCommand(l:cmake_clean_cmd, utils#cmake#getCMakeErrorFormat())
 endfunction
@@ -42,7 +42,7 @@ endfunction
 function! cmake4vim#GetAllTargets() abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
-    let l:res = split(system('cmake --build ' . fnameescape(l:build_dir) . ' --target help'), "\n")
+    let l:res = split(system('cmake --build ' . utils#fs#fnameescape(l:build_dir) . ' --target help'), "\n")
     " VS doesn't have cmake target with the name help
     if v:shell_error != 0
         if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1

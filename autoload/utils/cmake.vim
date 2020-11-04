@@ -37,9 +37,9 @@ function! utils#cmake#getCMakeCache(dir) abort
         return []
     endif
     if has('win32')
-        return split(system('type ' . fnameescape(l:cache_file)), '\n')
+        return split(system('type ' . utils#fs#fnameescape(l:cache_file)), '\n')
     else
-        return split(system('cat ' . fnameescape(l:cache_file)), '\n')
+        return split(system('cat ' . utils#fs#fnameescape(l:cache_file)), '\n')
     endif
 endfunction
 
@@ -110,7 +110,7 @@ function! utils#cmake#getCMakeGenerationCommand() abort
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' -B ' . fnameescape(l:build_dir)
+    let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' -B ' . utils#fs#fnameescape(l:build_dir)
     return l:cmake_cmd
 endfunction
 

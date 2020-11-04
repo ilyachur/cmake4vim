@@ -20,18 +20,18 @@ endfunction
 " Remove directory
 function! utils#fs#removeDirectory(file) abort
     if has('win32')
-        silent call system('rd /S /Q ' . fnameescape(a:file))
+        silent call system('rd /S /Q ' . utils#fs#fnameescape(a:file))
     else
-        silent call system('rm -rf ' . fnameescape(a:file))
+        silent call system('rm -rf ' . utils#fs#fnameescape(a:file))
     endif
 endfunction
 
 " Remove file
 function! utils#fs#removeFile(file) abort
     if has('win32')
-        silent call system('del /F /Q ' . fnameescape(a:file))
+        silent call system('del /F /Q ' . utils#fs#fnameescape(a:file))
     else
-        silent call system('rm -rf ' . fnameescape(a:file))
+        silent call system('rm -rf ' . utils#fs#fnameescape(a:file))
     endif
 endfunction
 
@@ -43,8 +43,17 @@ function! utils#fs#createLink(src, dst) abort
     " endif
     silent call utils#fs#removeFile(a:dst)
     if has('win32')
-        silent call system('copy ' . fnameescape(a:src) . ' ' . fnameescape(a:dst))
+        silent call system('copy ' . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
     else
-        silent call system('ln -s ' . fnameescape(a:src) . ' ' . fnameescape(a:dst))
+        silent call system('ln -s ' . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
+    endif
+endfunction
+
+" Extends default fnameescape, adds double quotes for Windows
+function! utils#fs#fnameescape(file) abort
+    if has('win32')
+        return subtitute(fnameescape(a:file), '\ ', '^ ', 'g')
+    else
+        return fnameescape(a:file)
     endif
 endfunction

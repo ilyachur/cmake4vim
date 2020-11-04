@@ -45,7 +45,7 @@ After:
 Execute (Generate cmake project with default settings):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated!! " . utils#cmake#getBuildCommand(g:cmake_build_target)
     echo system("rm -rf cmake-build-Release")
 
 Execute (Remove cmake build forder):
