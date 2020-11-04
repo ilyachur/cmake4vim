@@ -2,7 +2,6 @@
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEST_HOME=$(realpath ${CURRENT_DIR}/)
-export PLUGIN_HOME=$(realpath ${CURRENT_DIR}/../)
 export HOME="${TEST_HOME}/tmp"
 git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
 git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
