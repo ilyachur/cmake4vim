@@ -32,7 +32,7 @@ endfunction
 
 " Returns the cmake build command for CMake generator
 function! utils#gen#ninja#getBuildCommand(build_dir, target, make_arguments) abort
-    let l:cmd = 'cmake --build ' . shellescape(a:build_dir) . ' --target ' . a:target . ' -- '
+    let l:cmd = 'cmake --build ' . a:build_dir . ' --target ' . a:target . ' -- '
     if stridx(a:make_arguments, '-C ') == -1
         let l:cmd .= '-C ' . fnamemodify(a:build_dir, ':p:h') . ' '
     endif

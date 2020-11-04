@@ -14,24 +14,24 @@ function! utils#fs#makeDir(dir) abort
                     \ echohl None
         return
     endif
-    return l:directory
+    return '"' . fnamemodify(l:directory, ':p:h') . '"'
 endfunction
 
 " Remove directory
 function! utils#fs#removeDirectory(file) abort
     if has('win32')
-        silent call system("rd /S /Q \"".a:file."\"")
+        silent call system('rd /S /Q ' . a:file)
     else
-        silent call system("rm -rf '".a:file."'")
+        silent call system('rm -rf ' . a:file)
     endif
 endfunction
 
 " Remove file
 function! utils#fs#removeFile(file) abort
     if has('win32')
-        silent call system("del /F /Q \"".a:file."\"")
+        silent call system('del /F /Q ' . a:file)
     else
-        silent call system("rm -rf '".a:file."'")
+        silent call system('rm -rf ' . a:file)
     endif
 endfunction
 
