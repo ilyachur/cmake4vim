@@ -55,6 +55,17 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
+Execute (Check CMake generator):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let cmake_gen = utils#cmake#getCmakeGeneratorType()
+    if has('win32')
+        AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'fdfsfsdfs '. utils#cmake#getCMakeCache(utils#cmake#getBuildDir())[0]
+    else
+        AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1
+    endif
+
 Execute (Check CMakeClean):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
