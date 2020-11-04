@@ -86,29 +86,39 @@ jobs:
         pushd test
         vim -Nu vimrc '+Vader!*'
         popd
-  # Report:
-  #   runs-on: ubuntu-latest
-  #   needs: [Linux, Windows, MacOS]
-  #
-  #   steps:
-  #   - uses: actions/checkout@v1
-  #   - name: Download Linux profile
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #         name: lin_cov
-  #   - name: Download MacOS profile
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #         name: mac_cov
-  #   - name: Download Windows profile
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #         name: win_cov
-  #   - name: Upload coverage to Codecov
-  #     uses: codecov/codecov-action@v1
-  #     with:
-  #         token: ${{ secrets.CODECOV_TOKEN  }}
-  #         files: ./win_cov.xml,./lin_cov.xml,./mac_cov.xml
-  #         flags: tests
-  #         name: cmake4vim_coverage
-  #         fail_ci_if_error: true
+    - name: Generate report
+      run: |
+        python -m covimerage write_coverage ${HOME}/vim-profile.txt
+        python -m coverage xml
+    - if: matrix.os == 'windows-latest'
+      run: |
+        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+    - if: matrix.os != 'windows-latest'
+      run: |
+        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        if-no-files-found: error
+
+  Report:
+    runs-on: ubuntu-latest
+    needs: [tests]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+          name: coverage
+          path: ./cov_report
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+          token: ${{ secrets.CODECOV_TOKEN  }}
+          directory: ./cov_report/
+          flags: tests
+          name: cmake4vim_coverage
+          fail_ci_if_error: true
