@@ -33,8 +33,7 @@ jobs:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }}'
     strategy:
       matrix:
-        # vim_type: ['Vim', 'Neovim']
-        vim_type: ['Vim']
+        vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
         # vim_version: ['nightly', 'stable']
         platform: ['Linux', 'MacOS', 'Windows']
@@ -48,8 +47,10 @@ jobs:
             os: 'windows-latest'
           - vim_type: 'Vim'
             nvim: false
-          # - vim_type: 'Neovim'
-          #   nvim: true
+            vim_executable: vim
+          - vim_type: 'Neovim'
+            nvim: true
+            vim_executable: nvim
 
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 10
@@ -84,7 +85,7 @@ jobs:
     - name: Run tests
       run: |
         pushd test
-        vim -Nu vimrc '+Vader!*'
+        ${{ matrix.vim_executable }} -Nu vimrc '+Vader!*'
         popd
     - name: Generate report
       run: |
