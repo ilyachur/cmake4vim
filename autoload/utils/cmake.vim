@@ -43,6 +43,11 @@ function! utils#cmake#getCMakeCache(dir) abort
     endif
 endfunction
 
+function! utils#cmake#projectExists() abort
+    let l:build_dir = utils#cmake#getBuildDir()
+    return (len(utils#cmake#getCMakeCache(l:build_dir)) != 0)
+endfunction
+
 function! utils#cmake#getCmakeGeneratorType() abort
     let l:build_dir = utils#cmake#getBuildDir()
     let l:cmake_info = utils#cmake#getCMakeCache(l:build_dir)

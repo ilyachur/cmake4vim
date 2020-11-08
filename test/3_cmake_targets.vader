@@ -87,6 +87,11 @@ Execute (Check CMakeClean):
         Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
+Execute (Check CMakeClean for empty project):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMakeClean
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+
 Execute (Build only library with arguments):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
