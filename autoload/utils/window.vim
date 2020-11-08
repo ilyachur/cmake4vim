@@ -1,7 +1,7 @@
 " autoload/utils/window.vim - contains function for work with windows
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
-let s:cmake_info_win_name = "CMake4Vim info"
+let s:cmake_info_win_name = 'CMake4Vim info'
 let s:cmake_info_prev_win_id = -1
 
 " Private functions {{{ "
@@ -13,7 +13,7 @@ endfunction
 function! utils#window#CloseCMakeInfoWindow() abort
     q
     if s:cmake_info_prev_win_id > -1
-        exec s:cmake_info_prev_win_id."wincmd w"
+        exec s:cmake_info_prev_win_id . 'wincmd w'
     endif
 endfunction
 
@@ -31,7 +31,7 @@ function! utils#window#OpenCMakeInfoWindow() abort
 endfunction
 
 function! utils#window#GotoCMakeInfoWindow() abort
-    if bufname("%") == s:cmake_info_win_name
+    if bufname('%') == s:cmake_info_win_name
         return
     endif
 
@@ -40,7 +40,7 @@ function! utils#window#GotoCMakeInfoWindow() abort
         call utils#window#OpenCMakeInfoWindow()
         let l:cmake_info_winnr = bufwinnr(s:cmake_info_win_name)
     endif
-    exec l:cmake_info_winnr . "wincmd w"
+    exec l:cmake_info_winnr . 'wincmd w'
 endfunction
 
 function! utils#window#OpenCMakeInfo() abort
@@ -59,6 +59,6 @@ function! utils#window#OpenCMakeInfo() abort
 
     %delete
     silent! put = l:info
-    normal gg
+    " normal gg
     setlocal nomodifiable
 endfunction
