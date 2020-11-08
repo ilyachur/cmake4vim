@@ -99,15 +99,16 @@ endfunction
 
 function! cmake4vim#GetCMakeInfo() abort
     let l:info = []
-    if executable('cmake')
-        let l:info += ['Cmake was found!']
+    if executable('cmake') && utils#cmake#projectExists()
+        let l:info = ['CMake project was found!']
+        let l:info += []
         let l:info += ['CMAKE_GENERATOR     : ' . utils#cmake#getCmakeGeneratorType()]
         let l:info += ['CMAKE_BUILD_TYPE    : ' . utils#cmake#detectBuildType()]
         let l:info += ['BUILD_DIRECTORY     : ' . utils#cmake#getBuildDir()]
         let l:info += ['CMAKE_GEN_COMMAND   : ' . utils#cmake#getCMakeGenerationCommand()]
         let l:info += ['CMAKE_BUILD_COMMAND : ' . utils#cmake#getBuildCommand(g:cmake_build_target)]
     else
-        let l:info += ['Cmake was not found!']
+        let l:info = ['CMake project was not found!']
     endif
     return l:info
 endfunction
