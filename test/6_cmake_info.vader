@@ -68,3 +68,8 @@ Execute (Close CMakeInfo Window):
     let window_counter = 0
     windo let window_counter = window_counter + 1
     AssertEqual window_counter, 1
+
+Execute (Get cmake info 2 times):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMakeInfo
+    CMakeInfo
