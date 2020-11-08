@@ -51,7 +51,20 @@ Execute (Get cmake info):
 
 Execute (Get cmake info for empty project):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    call utils#window#OpenCMakeInfo()
+    CMakeInfo
 
 Expect text:
   CMake project was not found!
+
+Execute (Close CMakeInfo Window):
+    let window_counter = 0
+    windo let window_counter = window_counter + 1
+    AssertEqual window_counter, 1
+    CMakeInfo
+    let window_counter = 0
+    windo let window_counter = window_counter + 1
+    AssertEqual window_counter, 2
+    call utils#window#CloseCMakeInfoWindow()
+    let window_counter = 0
+    windo let window_counter = window_counter + 1
+    AssertEqual window_counter, 1
