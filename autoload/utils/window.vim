@@ -58,7 +58,7 @@ function! utils#window#OpenCMakeInfo() abort
     let l:info = cmake4vim#GetCMakeInfo()
 
     %delete
-    silent! put = l:info
-    " normal gg
+    silent! call append('$', l:info)
+    delete
     setlocal nomodifiable
 endfunction

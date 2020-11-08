@@ -119,13 +119,6 @@ Execute (Generate cmake project with custom compilers):
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
 
-Execute (Get cmake info):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let result = cmake4vim#GetCMakeInfo()
-    Assert len(result) == 6, "test project should contain 4 fields with cmake info"
-
 Execute (Generate cmake project in prefix build folder):
     Assert !isdirectory("cmake-vador-Release"), "Build directory shouldn't exist"
     let g:cmake_build_dir_prefix='cmake-vador-'
