@@ -17,8 +17,9 @@ function! utils#gen#ninja#getCleanTarget() abort
 endfunction
 
 " Returns the list of targets for CMake generator
-function! utils#gen#ninja#getTargets(targets_list) abort
-    let l:res = a:targets_list
+function! utils#gen#ninja#getTargets() abort
+    let l:build_dir = utils#cmake#detectBuildDir()
+    let l:res = split(system('cmake --build ' . utils#fs#fnameescape(l:build_dir) . ' --target help'), "\n")
     let l:list_targets = []
     " Remove the first line which is not a target
     call remove(l:res, 0)

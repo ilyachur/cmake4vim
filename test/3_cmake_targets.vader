@@ -130,7 +130,6 @@ Execute (Check all targets):
     else
         AssertEqual len(targets), 8
     endif
-
 Execute (Get cmake targets):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
@@ -142,19 +141,7 @@ Execute (Get cmake targets):
         AssertEqual len(targets), 8
     endif
 
-# Execute (Compile cmake targets):
-#     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-#     CMake
-#     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-#     execute "normal! :CMakeSelectTarget test_l\<C-I>\<CR>"
-#     silent! make
-#     Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't exist"
-#     Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-#
-# Execute (FZF cmake targets):
-#     unlet! g:fzf_layout g:fzf_action g:fzf_history_dir
-#     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-#     CMake
-#     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-#     let result = fzf#cmake4vim#SelectTarget()
-#     AssertEqual ['all'], result
+Execute (Check all targets for empty project):
+    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    let targets = cmake4vim#GetAllTargets()
+    AssertEqual len(targets), 0
