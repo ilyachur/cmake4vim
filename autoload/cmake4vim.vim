@@ -42,26 +42,15 @@ endfunction
 function! cmake4vim#GetAllTargets() abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
-    let l:res = split(system('cmake --build ' . utils#fs#fnameescape(l:build_dir) . ' --target help'), "\n")
-    " VS doesn't have cmake target with the name help
-    if v:shell_error != 0
-        if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-            return utils#gen#vs#getTargets(l:res)
-        else
-            let l:error_msg = 'Error: cannot detect targets!'
-        endif
-        if l:error_msg !=# ''
-            echohl WarningMsg |
-                        \ echomsg l:error_msg |
-                        \ echohl None
-        endif
-    else
-        if stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
-            return utils#gen#ninja#getTargets(l:res)
-        endif
+    if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
+        return utils#gen#vs#getTargets()
+    elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
+        return utils#gen#ninja#getTargets()
+    elseif stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
+        return utils#gen#make#getTargets()
     endif
-
-    return utils#gen#make#getTargets(l:res)
+    call utils#common#Warning('Cmake targets were not found!')
+    return []
 endfunction
 
 function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort

@@ -9,9 +9,7 @@ function! utils#fs#makeDir(dir) abort
         let l:directory = finddir(a:dir, getcwd().';.')
     endif
     if l:directory ==# ''
-        echohl WarningMsg |
-                    \ echomsg 'Cannot create a build directory: '.a:dir |
-                    \ echohl None
+        call utils#common#Warning('Cannot create a build directory: '.a:dir)
         return
     endif
     return fnamemodify(l:directory, ':p:h')

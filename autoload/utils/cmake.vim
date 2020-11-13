@@ -152,9 +152,6 @@ function! utils#cmake#detectBuildDir() abort
         return g:cmake_build_dir
     endif
     let l:build_type = utils#cmake#detectBuildType()
-    if l:build_type ==# ''
-        return 'cmake-build'
-    endif
     return g:cmake_build_dir_prefix . l:build_type
 endfunction
 

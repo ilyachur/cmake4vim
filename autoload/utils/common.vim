@@ -37,3 +37,9 @@ function! utils#common#executeCommand(cmd, ...) abort
         let &l:errorformat = l:old_error
     endif
 endfunction
+
+function! utils#common#Warning(msg) abort
+    echohl WarningMsg |
+                \ echomsg a:msg |
+                \ echohl None
+endfunction
