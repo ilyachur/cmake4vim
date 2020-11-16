@@ -1,6 +1,15 @@
 " autoload/utils/cmake.vim - contains cmake helpers
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
+function! utils#cmake#getVersion() abort
+    if !executable('cmake')
+        return []
+    endif
+    let l:version_out = system('cmake --version')
+    let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
+    return split(l:version_str, '\.')
+endfunction
+
 function! utils#cmake#getCMakeErrorFormat() abort
     return ' %#%f:%l %#(%m),'
                 \ .'See also "%f".,'
@@ -115,7 +124,13 @@ function! utils#cmake#getCMakeGenerationCommand() abort
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000) . ' -B ' . utils#fs#fnameescape(l:build_dir)
+    let l:cmake_ver = utils#cmake#getVersion()
+    let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)
+    if l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13
+        let l:cmake_cmd .= ' -B ' . utils#fs#fnameescape(l:build_dir)
+    else
+        let l:cmake_cmd .= ' ' . utils#fs#fnameescape(getcwd())
+    endif
     return l:cmake_cmd
 endfunction
 

@@ -102,5 +102,5 @@ Execute (Get all Ninja targets):
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let targets = cmake4vim#GetAllTargets()
-    AssertEqual len(targets), 17
+    Assert len(targets) > 10
     endif

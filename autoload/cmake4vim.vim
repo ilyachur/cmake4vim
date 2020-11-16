@@ -60,7 +60,16 @@ endfunction
 
 function! cmake4vim#GenerateCMake(...) abort
     let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand()
+    let l:cmake_ver = utils#cmake#getVersion()
+    let l:src_dir = getcwd()
+    let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
+    if !(l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13)
+        silent exec 'cd' l:build_dir
+    endif
     silent call utils#common#executeCommand(l:cmake_cmd, utils#cmake#getCMakeErrorFormat())
+    if !(l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13)
+        silent exec 'cd' l:src_dir
+    endif
 
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
