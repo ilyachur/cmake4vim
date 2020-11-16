@@ -102,15 +102,15 @@ jobs:
         python -m coverage xml
     - if: matrix.os == 'windows-latest'
       run: |
-        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
     - if: matrix.os != 'windows-latest'
       run: |
-        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
         name: coverage
-        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
         if-no-files-found: error
 
   Report:

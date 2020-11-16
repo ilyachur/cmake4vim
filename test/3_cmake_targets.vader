@@ -61,9 +61,9 @@ Execute (Check CMake generator):
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let cmake_gen = utils#cmake#getCmakeGeneratorType()
     if has('win32')
-        AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'fdfsfsdfs '. utils#cmake#getCMakeCache(utils#cmake#getBuildDir())[0]
+        AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
     else
-        AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1
+        AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
     endif
 
 Execute (Check CMakeClean):
