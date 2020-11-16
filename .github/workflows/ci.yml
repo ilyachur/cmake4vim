@@ -30,12 +30,12 @@ jobs:
         vint .
 
   tests:
-    name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }}'
+    name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     strategy:
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
-        # vim_version: ['nightly', 'stable']
+        cmake_version: ['2.8', ''] # empty means the latest version
         platform: ['Linux', 'MacOS', 'Windows']
 
         include:
@@ -66,10 +66,19 @@ jobs:
       run: |
           pip3 install covimerage
           pip3 install coveralls
-    - uses: rhysd/action-setup-vim@v1
+    - name: Install vim
+      uses: rhysd/action-setup-vim@v1
       with:
         neovim: ${{ matrix.nvim }}
         version: ${{ matrix.vim_version  }}
+    - name: Install cmake
+      uses: jwlawson/actions-setup-cmake@v1.4
+      with:
+          cmake-version: ${{ matrix.cmake_version }}
+    - name: Check cmake
+      run: |
+          which cmake
+          cmake --version
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
     - name: Check Ninja
