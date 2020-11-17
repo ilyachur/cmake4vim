@@ -2,9 +2,6 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 function! utils#cmake#getVersion() abort
-    if !executable('cmake')
-        return []
-    endif
     let l:version_out = system('cmake --version')
     let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
     return split(l:version_str, '\.')
