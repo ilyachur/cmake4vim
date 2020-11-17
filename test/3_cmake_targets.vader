@@ -67,6 +67,7 @@ Execute (Check CMake generator):
     else
         AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
     endif
+    echo cmake_gen
 
 Execute (Check CMakeClean):
     let cmake_gen = utils#cmake#getCmakeGeneratorType()
