@@ -54,6 +54,8 @@ jobs:
         exclude:
             - platform: 'Windows'
               cmake_version: '2.8' # Exclude because NMake is not supported
+            - platform: 'Windows'
+              cmake_version: '3.13' # Exclude because VS 15 is not supported
 
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 10
