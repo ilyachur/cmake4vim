@@ -63,6 +63,7 @@ function! cmake4vim#GenerateCMake(...) abort
     let l:cmake_ver = utils#cmake#getVersion()
     let l:src_dir = getcwd()
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
+    call utils#cmake#fileapi#prepare(l:build_dir)
     if !(l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13)
         silent exec 'cd' l:build_dir
     endif
