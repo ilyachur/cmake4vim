@@ -30,12 +30,12 @@ jobs:
         vint .
 
   tests:
-    name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }}'
+    name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     strategy:
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
-        # vim_version: ['nightly', 'stable']
+        cmake_version: ['2.8', '3.13', ''] # empty means the latest version
         platform: ['Linux', 'MacOS', 'Windows']
 
         include:
@@ -51,6 +51,11 @@ jobs:
           - vim_type: 'Neovim'
             nvim: true
             vim_executable: nvim
+        exclude:
+            - platform: 'Windows'
+              cmake_version: '2.8' # Exclude because NMake is not supported
+            - platform: 'Windows'
+              cmake_version: '3.13' # Exclude because VS 15 is not supported
 
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 10
@@ -66,10 +71,19 @@ jobs:
       run: |
           pip3 install covimerage
           pip3 install coveralls
-    - uses: rhysd/action-setup-vim@v1
+    - name: Install vim
+      uses: rhysd/action-setup-vim@v1
       with:
         neovim: ${{ matrix.nvim }}
         version: ${{ matrix.vim_version  }}
+    - name: Install cmake
+      uses: jwlawson/actions-setup-cmake@v1.4
+      with:
+          cmake-version: ${{ matrix.cmake_version }}
+    - name: Check cmake
+      run: |
+          which cmake
+          cmake --version
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
     - name: Check Ninja
@@ -93,15 +107,15 @@ jobs:
         python -m coverage xml
     - if: matrix.os == 'windows-latest'
       run: |
-        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
     - if: matrix.os != 'windows-latest'
       run: |
-        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
         name: coverage
-        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_cov.xml
+        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
         if-no-files-found: error
 
   Report:
