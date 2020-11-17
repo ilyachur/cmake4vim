@@ -6,8 +6,23 @@ function! s:getClientFolder(build_dir) abort
     return utils#fs#makeDir(l:client_folder)
 endfunction
 
-function! s:createFile(filename) abort
-    silent call system('echo >' . utils#fs#fnameescape(a:filename))
+function! s:createFile(filename, content) abort
+    new
+    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+    put=a:content
+    execute 'w! ' a:filename
+    q
+endfunction
+
+function! s:createQuery() abort
+    let l:query = {}
+    let l:requests = []
+    let l:requests += [ { 'kind': 'codemodel', 'version': 2 } ]
+    let l:requests += [ { 'kind': 'cache', 'version': 2 } ]
+    let l:requests += [ { 'kind': 'cmakeFiles', 'version': 1 } ]
+    let l:query['requests'] = l:requests
+    let l:query['client'] = {}
+    return l:query
 endfunction
 
 function! utils#cmake#fileapi#prepare(build_dir) abort
@@ -16,7 +31,5 @@ function! utils#cmake#fileapi#prepare(build_dir) abort
         return l:cmake_ver
     endif
     let l:client_folder = s:getClientFolder(a:build_dir)
-    call s:createFile(l:client_folder . '/cache-v2')
-    call s:createFile(l:client_folder . '/codemodel-v2')
-    call s:createFile(l:client_folder . '/cmakeFiles-v1')
+    call s:createFile(l:client_folder . '/query.json', json_encode(s:createQuery()))
 endfunction
