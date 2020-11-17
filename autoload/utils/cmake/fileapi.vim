@@ -6,6 +6,14 @@ function! s:getClientFolder(build_dir) abort
     return utils#fs#makeDir(l:client_folder)
 endfunction
 
+function! s:getReplyFolder(build_dir) abort
+    let l:reply_folder = a:build_dir . '/.cmake/api/v1/reply'
+    if !isdirectory(l:reply_folder)
+        return ''
+    endif
+    return utils#fs#fnameescape(l:reply_folder)
+endfunction
+
 function! s:createFile(filename, content) abort
     new
     setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
@@ -25,6 +33,11 @@ function! s:createQuery() abort
     return l:query
 endfunction
 
+function! s:parseAll(index) abort
+    let l:index = json_decode(join(readfile(a:index), ''))
+    return l:index
+endfunction
+
 function! utils#cmake#fileapi#prepare(build_dir) abort
     let l:cmake_ver = utils#cmake#getVersion()
     if !(l:cmake_ver[0] > 3 || (l:cmake_ver[0] == 3 && l:cmake_ver[1] >= 14))
@@ -32,4 +45,13 @@ function! utils#cmake#fileapi#prepare(build_dir) abort
     endif
     let l:client_folder = s:getClientFolder(a:build_dir)
     call s:createFile(l:client_folder . '/query.json', json_encode(s:createQuery()))
+endfunction
+
+function! utils#cmake#fileapi#parceReply(build_dir) abort
+    let l:reply_folder = s:getReplyFolder(a:build_dir)
+    if l:reply_folder ==# ''
+        return {}
+    endif
+    let l:index_file = globpath(l:reply_folder, 'index*')
+    return s:parseAll(l:index_file)
 endfunction
