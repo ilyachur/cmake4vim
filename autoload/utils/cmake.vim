@@ -97,7 +97,7 @@ function! utils#cmake#getBuildCommand(target) abort
     endif
 endfunction
 
-function! utils#cmake#getCMakeGenerationCommand() abort
+function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     let l:cmake_args = []
 
