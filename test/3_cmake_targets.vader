@@ -43,7 +43,6 @@ After:
     cd ..
 
 Execute (Generate cmake project with default settings):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -56,8 +55,34 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
     endif
 
+Execute (Generate cmake project with custom options):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    let g:cmake_usr_args='-DCUSTOM_OP=OFF'
+    CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    CMakeBuild
+    if !has('win32')
+        Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    else
+        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    endif
+
+Execute (Generate cmake project with custom options as argument):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMake -DCUSTOM_OP=OFF
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    CMakeBuild
+    if !has('win32')
+        Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    else
+        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    endif
+
 Execute (Check CMake generator):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -70,7 +95,6 @@ Execute (Check CMake generator):
     echo cmake_gen
 
 Execute (Check CMakeClean):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -97,7 +121,6 @@ Execute (Check CMakeClean for empty project):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
 Execute (Build only library with arguments):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -112,7 +135,6 @@ Execute (Build only library with arguments):
     endif
 
 Execute (CMakeBuild for test library):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     " Check that make command works with changed build command
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
@@ -128,7 +150,6 @@ Execute (CMakeBuild for test library):
     endif
 
 Execute (Check all targets):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let targets = cmake4vim#GetAllTargets()
@@ -139,7 +160,6 @@ Execute (Check all targets):
     endif
 
 Execute (Get cmake targets):
-    let cmake_gen = utils#cmake#getCmakeGeneratorType()
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
