@@ -7,6 +7,18 @@ function! utils#cmake#getVersion() abort
     return split(l:version_str, '\.')
 endfunction
 
+function! utils#cmake#versionGreater(cmake_version) abort
+    let l:i = 0
+    let l:cmake_ver = utils#cmake#getVersion()
+    while l:i < len(a:cmake_version) && l:i < len(l:cmake_ver)
+        if a:cmake_version[l:i] > l:cmake_ver[l:i]
+            return 0
+        endif
+        let i += 1
+    endwhile
+    return 1
+endfunction
+
 function! utils#cmake#getCMakeErrorFormat() abort
     return ' %#%f:%l %#(%m),'
                 \ .'See also "%f".,'
@@ -27,45 +39,15 @@ function! utils#cmake#getCMakeErrorFormat() abort
                 \ .'%Z  %m,'
 endfunction
 
-function! utils#cmake#findCachedVar(data, variable) abort
-    for l:value in a:data
-        let l:split_res = split(l:value, '=')
-        if len(l:split_res) > 1 && stridx(l:split_res[0], a:variable . ':') != -1
-            return l:split_res[1]
-        endif
-    endfor
-    return ''
-endfunction
-
-function! utils#cmake#getCMakeCache(dir) abort
-    let l:cache_file = a:dir . '/CMakeCache.txt'
-    if !filereadable(l:cache_file)
-        return []
-    endif
-    if has('win32')
-        return split(system('type ' . utils#fs#fnameescape(l:cache_file)), '\n')
-    else
-        return split(system('cat ' . utils#fs#fnameescape(l:cache_file)), '\n')
-    endif
-endfunction
-
-function! utils#cmake#projectExists() abort
-    let l:build_dir = utils#cmake#getBuildDir()
-    return (len(utils#cmake#getCMakeCache(l:build_dir)) != 0)
-endfunction
-
-function! utils#cmake#getCmakeGeneratorType() abort
-    let l:build_dir = utils#cmake#getBuildDir()
-    let l:cmake_info = utils#cmake#getCMakeCache(l:build_dir)
-
-    return utils#cmake#findCachedVar(l:cmake_info, 'CMAKE_GENERATOR')
-endfunction
-
 function! utils#cmake#setBuildTarget(target) abort
     " Use all target if a:target and g:cmake_target are empty
     let l:cmake_target = a:target
     if a:target ==# ''
-        let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+        let l:cmake_gen = ''
+        let cmake_info = utils#cmake#common#getInfo()
+        if !empty(cmake_info)
+            let l:cmake_gen = cmake_info['cmake']['generator']
+        endif
         if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
             let l:cmake_target = utils#gen#vs#getDefaultTarget()
         elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
@@ -87,7 +69,11 @@ function! utils#cmake#getBuildCommand(target) abort
         silent call utils#fs#createLink(l:src, l:dst)
     endif
 
-    let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+    let l:cmake_gen = ''
+    let cmake_info = utils#cmake#common#getInfo()
+    if !empty(cmake_info)
+        let l:cmake_gen = cmake_info['cmake']['generator']
+    endif
     if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
         return utils#gen#vs#getBuildCommand(l:build_dir, a:target, g:make_arguments)
     elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
@@ -121,9 +107,8 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
         let l:cmake_args += [g:cmake_usr_args]
     endif
 
-    let l:cmake_ver = utils#cmake#getVersion()
     let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)
-    if l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13
+    if utils#cmake#versionGreater([3, 13])
         let l:cmake_cmd .= ' -B ' . utils#fs#fnameescape(l:build_dir)
     else
         let l:cmake_cmd .= ' ' . utils#fs#fnameescape(getcwd())
@@ -149,10 +134,9 @@ function! utils#cmake#detectBuildType() abort
     endif
 
     if l:build_dir !=# ''
-        let l:cmake_vars = utils#cmake#getCMakeCache(l:build_dir)
-        let l:res = utils#cmake#findCachedVar(l:cmake_vars, 'CMAKE_BUILD_TYPE')
-        if l:res !=# ''
-            return l:res
+        let l:cmake_info = utils#cmake#common#getInfo()
+        if !empty(l:cmake_info) && l:cmake_info['cmake']['build_type'] !=# ''
+            return l:cmake_info['cmake']['build_type']
         endif
     endif
 

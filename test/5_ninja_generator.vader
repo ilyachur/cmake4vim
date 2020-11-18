@@ -48,7 +48,9 @@ Execute (Check CMake generator name):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         CMake
-        let gen_name = utils#cmake#getCmakeGeneratorType()
+        let cmake_info = utils#cmake#common#getInfo()
+        Asser !empty(cmake_info)
+        let gen_name = cmake_info['cmake']['generator']
         AssertEqual 'Ninja', gen_name
     endif
 

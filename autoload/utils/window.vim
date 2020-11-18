@@ -55,7 +55,7 @@ function! utils#window#OpenCMakeInfo() abort
     setlocal norelativenumber
     setlocal modifiable
 
-    let l:info = cmake4vim#GetCMakeInfo()
+    let l:info = utils#cmake#common#getInfo()
 
     %delete
     silent! call append('$', l:info)

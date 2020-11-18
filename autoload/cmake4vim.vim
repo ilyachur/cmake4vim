@@ -2,6 +2,8 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 " Public functions {{{ "
+
+" Reset cmake cache
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#getBuildDir()
     if l:build_dir !=# ''
@@ -23,10 +25,11 @@ endfunction
 
 function! cmake4vim#CleanCMake() abort
     let l:build_dir = utils#cmake#getBuildDir()
-    if l:build_dir ==# ''
+    let l:cmake_info = utils#cmake#common#getInfo()
+    if l:build_dir ==# '' || empty(l:cmake_info)
         return
     endif
-    let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+    let l:cmake_gen = l:cmake_info['cmake']['generator']
     let l:clean_target = utils#gen#make#getCleanTarget()
     if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
         let l:clean_target = utils#gen#vs#getCleanTarget()
@@ -41,7 +44,11 @@ endfunction
 
 function! cmake4vim#GetAllTargets() abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    let l:cmake_gen = utils#cmake#getCmakeGeneratorType()
+    let l:cmake_info = utils#cmake#common#getInfo()
+    let l:cmake_gen = ''
+    if !empty(cmake_info)
+        let l:cmake_gen = l:cmake_info['cmake']['generator']
+    endif
     if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
         return utils#gen#vs#getTargets()
     elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
@@ -50,7 +57,7 @@ function! cmake4vim#GetAllTargets() abort
         return utils#gen#make#getTargets()
     endif
     call utils#common#Warning('Cmake targets were not found!')
-    return []
+    return [json_encode(l:cmake_info)]
 endfunction
 
 function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
@@ -60,17 +67,18 @@ endfunction
 
 function! cmake4vim#GenerateCMake(...) abort
     let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand(join(a:000))
-    let l:cmake_ver = utils#cmake#getVersion()
     let l:src_dir = getcwd()
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    call utils#cmake#fileapi#prepare(l:build_dir)
-    if !(l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13)
+    call utils#cmake#common#makeRequests(l:build_dir)
+
+    if !utils#cmake#versionGreater([3, 13])
         silent exec 'cd' l:build_dir
     endif
     silent call utils#common#executeCommand(l:cmake_cmd, utils#cmake#getCMakeErrorFormat())
-    if !(l:cmake_ver[0] >= 3 && l:cmake_ver[1] >= 13)
+    if !utils#cmake#versionGreater([3, 13])
         silent exec 'cd' l:src_dir
     endif
+    call utils#cmake#common#collectResults(l:build_dir)
 
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
@@ -96,26 +104,9 @@ function! cmake4vim#CMakeBuild(...) abort
     silent call utils#common#executeCommand(l:result)
 endfunction
 
-function! cmake4vim#GetCMakeInfo() abort
-    let l:info = []
-    if executable('cmake') && utils#cmake#projectExists()
-        let l:info = ['CMake project was found!']
-        let l:info += []
-        let l:info += ['CMAKE_GENERATOR     : ' . utils#cmake#getCmakeGeneratorType()]
-        let l:info += ['CMAKE_BUILD_TYPE    : ' . utils#cmake#detectBuildType()]
-        let l:info += ['BUILD_DIRECTORY     : ' . utils#cmake#getBuildDir()]
-        let l:info += ['CMAKE_GEN_COMMAND   : ' . utils#cmake#getCMakeGenerationCommand()]
-        let l:info += ['CMAKE_BUILD_COMMAND : ' . utils#cmake#getBuildCommand(g:cmake_build_target)]
-    else
-        let l:info = ['CMake project was not found!']
-    endif
-    return l:info
-endfunction
-
 function! cmake4vim#SelectBuildType(buildType) abort
     let g:cmake_build_type = a:buildType
 
     silent call cmake4vim#GenerateCMake()
 endfunction
 " }}} Public functions "
-
