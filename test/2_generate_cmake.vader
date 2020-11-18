@@ -100,12 +100,6 @@ Execute (Generate cmake project with custom generator):
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
 
-Execute (Generate cmake project with custom options):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    let g:cmake_usr_args='-DCUSTOM_OP=OFF'
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
-
 Execute (Generate cmake project with custom install prefix):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_install_prefix='.'
