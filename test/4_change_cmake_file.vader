@@ -19,6 +19,7 @@ Before:
     cd test\ proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
+    CMakeReset
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0

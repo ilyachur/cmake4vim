@@ -19,6 +19,7 @@ Before:
     cd test\ proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
+    CMakeReset
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0
@@ -175,3 +176,14 @@ Execute (Check all targets for empty project):
     Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
     let targets = cmake4vim#GetAllTargets()
     AssertEqual len(targets), 0
+
+Execute (Select all targets for empty project):
+    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    let cmd = cmake4vim#SelectTarget('all')
+    AssertEqual cmd, ''
+    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+
+Execute (Select all targets for empty project):
+    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    let cmd = cmake4vim#CMakeBuild()
+    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"

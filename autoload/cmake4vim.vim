@@ -96,7 +96,7 @@ function! cmake4vim#SelectTarget(target) abort
     let l:build_dir = utils#cmake#getBuildDir()
     if l:build_dir ==# ''
         call utils#common#Warning('CMake project was not found!')
-        return
+        return ''
     endif
     let l:cmake_target = utils#cmake#setBuildTarget(l:build_dir, a:target)
     let l:cmd = utils#cmake#getBuildCommand(l:cmake_target)
