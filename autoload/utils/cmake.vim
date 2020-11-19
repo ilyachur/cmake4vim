@@ -39,12 +39,12 @@ function! utils#cmake#getCMakeErrorFormat() abort
                 \ .'%Z  %m,'
 endfunction
 
-function! utils#cmake#setBuildTarget(target) abort
+function! utils#cmake#setBuildTarget(build_dir, target) abort
     " Use all target if a:target and g:cmake_target are empty
     let l:cmake_target = a:target
     if a:target ==# ''
         let l:cmake_gen = ''
-        let cmake_info = utils#cmake#common#getInfo()
+        let cmake_info = utils#cmake#common#getInfo(a:build_dir)
         if !empty(cmake_info)
             let l:cmake_gen = cmake_info['cmake']['generator']
         endif
@@ -70,7 +70,7 @@ function! utils#cmake#getBuildCommand(target) abort
     endif
 
     let l:cmake_gen = ''
-    let cmake_info = utils#cmake#common#getInfo()
+    let cmake_info = utils#cmake#common#getInfo(l:build_dir)
     if !empty(cmake_info)
         let l:cmake_gen = cmake_info['cmake']['generator']
     endif
@@ -134,7 +134,7 @@ function! utils#cmake#detectBuildType() abort
     endif
 
     if l:build_dir !=# ''
-        let l:cmake_info = utils#cmake#common#getInfo()
+        let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
         if !empty(l:cmake_info) && l:cmake_info['cmake']['build_type'] !=# ''
             return l:cmake_info['cmake']['build_type']
         endif

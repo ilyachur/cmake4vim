@@ -43,6 +43,25 @@ function! utils#window#GotoCMakeInfoWindow() abort
     exec l:cmake_info_winnr . 'wincmd w'
 endfunction
 
+function! utils#window#PrepareInfo(cache) abort
+    let l:info = []
+    if empty(a:cache)
+        let l:info = 'CMake project was not found!'
+    else
+        let l:info += ['CMake:']
+        let l:info += ['    version:            ' . a:cache['cmake']['version']]
+        let l:info += ['']
+        let l:info += ['Project:']
+        let l:info += ['    name:               ' . a:cache['cmake']['project_name']]
+        let l:info += ['    build type:         ' . a:cache['cmake']['build_type']]
+        let l:info += ['    build directory:    ' . a:cache['cmake']['build_dir']]
+        let l:info += ['    generator:          ' . a:cache['cmake']['generator']]
+        let l:info += ['    generation command: ' . utils#cmake#getCMakeGenerationCommand()]
+        let l:info += ['    build command:      ' . utils#cmake#getBuildCommand(g:cmake_build_target)]
+    endif
+    return l:info
+endfunction
+
 function! utils#window#OpenCMakeInfo() abort
     call utils#window#GotoCMakeInfoWindow()
 
@@ -55,7 +74,8 @@ function! utils#window#OpenCMakeInfo() abort
     setlocal norelativenumber
     setlocal modifiable
 
-    let l:info = utils#cmake#common#getInfo()
+    let l:build_dir = utils#cmake#getBuildDir()
+    let l:info = utils#window#PrepareInfo(utils#cmake#common#getInfo(l:build_dir))
 
     %delete
     silent! call append('$', l:info)

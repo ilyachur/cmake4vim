@@ -103,6 +103,5 @@ function! utils#cmake#fileapi#parceReply(build_dir) abort
     let l:index_file = globpath(l:reply_folder, 'index*')
     let l:common =  s:parseAll(l:reply_folder, l:index_file)
 
-    let l:common['cmake']['gen_command'] = utils#cmake#getCMakeGenerationCommand()
     return l:common
 endfunction

@@ -46,8 +46,8 @@ Execute (Get cmake info):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let result = utils#cmake#common#getInfo()
-    Assert len(result) == 6, "test project should contain 4 fields with cmake info"
+    let result = utils#window#PrepareInfo(utils#cmake#common#getInfo())
+    Assert len(result) == 10, "test project should contain 10 lines with cmake info"
 
 Execute (Get cmake info for empty project):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"

@@ -39,7 +39,6 @@ function! utils#cmake#cache#collectInfo(build_dir) abort
                 \ 'build_type': s:findCacheVar(l:cmake_cache, 'CMAKE_BUILD_TYPE'),
                 \ 'project_name': s:findCacheVar(l:cmake_cache, 'CMAKE_PROJECT_NAME'),
                 \ 'build_dir': a:build_dir,
-                \ 'gen_command': utils#cmake#getCMakeGenerationCommand()
                 \ }
     return l:common
 endfunction

@@ -39,7 +39,6 @@ Execute (Check default initialization):
     AssertEqual g:cmake_project_generator, ""
     AssertEqual g:make_arguments, ""
     let cmake_info = utils#cmake#common#getInfo()
-    Asser !empty(cmake_info)
     let cmake_gen = cmake_info['cmake']['generator']
     if stridx(cmake_gen, utils#gen#vs#getGeneratorName()) != -1
         AssertEqual g:cmake_build_target, "ALL_BUILD"

@@ -13,7 +13,7 @@ Before:
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
-            echo system("rm -rf cmake-build*")
+            echo system("rm -rf build_test cmake-build*")
         endif
     endfunction
     cd test\ proj

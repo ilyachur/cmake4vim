@@ -17,11 +17,17 @@ function! utils#cmake#common#collectResults(build_dir) abort
 endfunction
 
 " Returns the dictionary with CMake Cache
-function! utils#cmake#common#getInfo() abort
+function! utils#cmake#common#getInfo(...) abort
+    let l:build_dir = ''
+    if exists('a:1') && a:1 !=# ''
+        let l:build_dir = a:1
+    endif
+    if l:build_dir !=# '' && empty(s:cmake_cache_info)
+        call utils#cmake#common#collectResults(l:build_dir)
+    endif
     if !executable('cmake') || empty(s:cmake_cache_info)
         return {}
     endif
 
-    let s:cmake_cache_info['cmake']['build_command'] = utils#cmake#getBuildCommand(g:cmake_build_target)
     return s:cmake_cache_info
 endfunction
