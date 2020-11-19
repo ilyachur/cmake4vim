@@ -5,6 +5,7 @@
 
 " Reset cmake cache
 function! cmake4vim#ResetCMakeCache() abort
+    call utils#cmake#common#cleanCache()
     let l:build_dir = utils#cmake#getBuildDir()
     if l:build_dir !=# ''
         silent call utils#fs#removeDirectory(l:build_dir)
@@ -71,6 +72,7 @@ function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
 endfunction
 
 function! cmake4vim#GenerateCMake(...) abort
+    call utils#cmake#common#cleanCache()
     let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand(join(a:000))
     let l:src_dir = getcwd()
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())

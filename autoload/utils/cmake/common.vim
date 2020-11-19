@@ -5,6 +5,10 @@ if !exists('s:cmake_cache_info')
     let s:cmake_cache_info = {}
 endif
 
+function! utils#cmake#common#cleanCache() abort
+    let s:cmake_cache_info = {}
+endfunction
+
 function! utils#cmake#common#makeRequests(build_dir) abort
     call utils#cmake#fileapi#prepare(a:build_dir)
 endfunction

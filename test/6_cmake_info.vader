@@ -9,7 +9,7 @@ Before:
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
                 echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
@@ -19,6 +19,7 @@ Before:
     cd test\ proj
     call RemoveFile("compile_commands.json")
     call RemoveCMakeDirs()
+    CMakeReset
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0
