@@ -84,7 +84,7 @@ endfunction
 " }}} Private functions "
 
 function! utils#cmake#fileapi#prepare(build_dir) abort
-    if !(utils#cmake#versionGreater([3, 13]))
+    if !(utils#cmake#verNewerOrEq([3, 14]))
         return
     endif
     let l:reply_folder = s:getReplyFolder(a:build_dir)

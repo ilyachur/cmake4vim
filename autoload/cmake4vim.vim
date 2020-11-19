@@ -78,11 +78,11 @@ function! cmake4vim#GenerateCMake(...) abort
     let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
     call utils#cmake#common#makeRequests(l:build_dir)
 
-    if !utils#cmake#versionGreater([3, 13])
+    if !utils#cmake#verNewerOrEq([3, 13])
         silent exec 'cd' l:build_dir
     endif
     silent call utils#common#executeCommand(l:cmake_cmd, utils#cmake#getCMakeErrorFormat())
-    if !utils#cmake#versionGreater([3, 13])
+    if !utils#cmake#verNewerOrEq([3, 13])
         silent exec 'cd' l:src_dir
     endif
     call utils#cmake#common#collectResults(l:build_dir)

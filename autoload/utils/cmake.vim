@@ -12,18 +12,19 @@ function! utils#cmake#getVersion() abort
     return l:version
 endfunction
 
-function! utils#cmake#versionGreater(cmake_version) abort
+" Return 1 if cmake version is newer or equal to passed value
+function! utils#cmake#verNewerOrEq(cmake_version) abort
     let l:i = 0
     let l:cmake_ver = utils#cmake#getVersion()
     while l:i < len(a:cmake_version) && l:i < len(l:cmake_ver)
         if a:cmake_version[l:i] > l:cmake_ver[l:i]
-            return 1
-        elseif a:cmake_version[l:i] < l:cmake_ver[l:i]
             return 0
+        elseif a:cmake_version[l:i] < l:cmake_ver[l:i]
+            return 1
         endif
         let l:i += 1
     endwhile
-    return 0
+    return 1
 endfunction
 
 function! utils#cmake#getCMakeErrorFormat() abort
@@ -115,7 +116,7 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     endif
 
     let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)
-    if utils#cmake#versionGreater([3, 13])
+    if utils#cmake#verNewerOrEq([3, 13])
         let l:cmake_cmd .= ' -B ' . utils#fs#fnameescape(l:build_dir)
     else
         let l:cmake_cmd .= ' ' . utils#fs#fnameescape(getcwd())
