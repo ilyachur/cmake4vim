@@ -44,77 +44,87 @@ After:
     cd ..
 
 Execute (Generate cmake project with default settings):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    CMakeBuild
-    if !has('win32')
-        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
 
 Execute (Generate cmake project with custom options):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    let g:cmake_usr_args='-DCUSTOM_OP=OFF'
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    CMakeBuild
-    if !has('win32')
-        Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
-        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_usr_args='-DCUSTOM_OP=OFF'
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeBuild
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
 
 Execute (Generate cmake project with custom options as argument):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake -DCUSTOM_OP=OFF
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    CMakeBuild
-    if !has('win32')
-        Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
-        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake -DCUSTOM_OP=OFF
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeBuild
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
 
 Execute (Check CMake generator):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let cmake_info = utils#cmake#common#getInfo()
-    let cmake_gen = cmake_info['cmake']['generator']
-    if has('win32')
-        AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
-    else
-        AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let cmake_info = utils#cmake#common#getInfo()
+        let cmake_gen = cmake_info['cmake']['generator']
+        if has('win32')
+            AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
+        else
+            AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
+        endif
+        echo cmake_gen
     endif
-    echo cmake_gen
 
 Execute (Check CMakeClean):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    CMakeBuild
-    if !has('win32')
-        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
-    endif
-    CMakeClean
-    if !has('win32')
-        Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
-        Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+        CMakeClean
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
 
 Execute (Check CMakeClean for empty project):
@@ -123,53 +133,61 @@ Execute (Check CMakeClean for empty project):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
 Execute (Build only library with arguments):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    CMakeSelectTarget test_lib
-    CMakeBuild
-    if !has('win32')
-        Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeSelectTarget test_lib
+        CMakeBuild
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
 
 Execute (CMakeBuild for test library):
-    " Check that make command works with changed build command
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    CMakeBuild test_lib
-    silent! make
-    if !has('win32')
-        Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-    else
-        Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        " Check that make command works with changed build command
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeBuild test_lib
+        silent! make
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
 
 Execute (Check all targets):
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let targets = cmake4vim#GetAllTargets()
-    if has('win32')
-        AssertEqual len(targets), 5
-    else
-        AssertEqual len(targets), 8
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let targets = cmake4vim#GetAllTargets()
+        if has('win32')
+            AssertEqual len(targets), 5
+        else
+            AssertEqual len(targets), 8
+        endif
     endif
 
 Execute (Get cmake targets):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
-    if has('win32')
-        AssertEqual len(targets), 5
-    else
-        AssertEqual len(targets), 8
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14]) # enable tests for windows with last cmake
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
+        if has('win32')
+            AssertEqual len(targets), 5
+        else
+            AssertEqual len(targets), 8
+        endif
     endif
 
 Execute (Check all targets for empty project):

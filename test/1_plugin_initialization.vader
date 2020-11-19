@@ -41,10 +41,12 @@ Execute (Check default initialization):
     AssertEqual g:make_arguments, ""
     let cmake_info = utils#cmake#common#getInfo()
     let cmake_gen = cmake_info['cmake']['generator']
-    if stridx(cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-        AssertEqual g:cmake_build_target, "ALL_BUILD"
-    else
-        AssertEqual g:cmake_build_target, "all"
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 0]) # Disable this check for windows with cmake 2.8
+        if stridx(cmake_gen, utils#gen#vs#getGeneratorName()) != -1
+            AssertEqual g:cmake_build_target, "ALL_BUILD"
+        else
+            AssertEqual g:cmake_build_target, "all"
+        endif
     endif
     AssertEqual g:cmake_build_dir, ""
     AssertEqual g:cmake_build_dir_prefix, "cmake-build-"

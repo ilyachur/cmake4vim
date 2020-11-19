@@ -9,7 +9,6 @@ function! s:findCacheVar(data, variable) abort
             return l:split_res[1]
         endif
     endfor
-    return ''
 endfunction
 
 function! s:getCache(dir) abort
