@@ -132,11 +132,6 @@ Execute (Check CMakeClean):
         endif
     endif
 
-Execute (Check CMakeClean for empty project):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMakeClean
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-
 Execute (Build only library with arguments):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
@@ -214,3 +209,8 @@ Execute (Select all targets for empty project):
     Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
     let cmd = cmake4vim#CMakeBuild()
     Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+
+Execute (Check CMakeClean for empty project):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMakeClean
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
