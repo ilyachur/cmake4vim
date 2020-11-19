@@ -4,7 +4,12 @@
 function! utils#cmake#getVersion() abort
     let l:version_out = system('cmake --version')
     let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
-    return split(l:version_str, '\.')
+    let l:version_str = split(l:version_str, '\.')
+    let l:version = []
+    for l:val in l:version_str
+        let l:version += [str2nr(l:val)]
+    endfor
+    return l:version
 endfunction
 
 function! utils#cmake#versionGreater(cmake_version) abort
@@ -12,11 +17,13 @@ function! utils#cmake#versionGreater(cmake_version) abort
     let l:cmake_ver = utils#cmake#getVersion()
     while l:i < len(a:cmake_version) && l:i < len(l:cmake_ver)
         if a:cmake_version[l:i] > l:cmake_ver[l:i]
+            return 1
+        elseif a:cmake_version[l:i] < l:cmake_ver[l:i]
             return 0
         endif
-        let i += 1
+        let l:i += 1
     endwhile
-    return 1
+    return 0
 endfunction
 
 function! utils#cmake#getCMakeErrorFormat() abort

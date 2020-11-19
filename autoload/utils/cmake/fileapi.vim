@@ -34,19 +34,19 @@ function! s:createQuery() abort
     return l:query
 endfunction
 
-function s:parseCodemodel(path, hash)
+function! s:parseCodemodel(path, hash) abort
     let l:codemodel = json_decode(join(readfile(a:path), ''))
     let l:common = a:hash
     let l:common['cmake']['build_dir'] = l:codemodel['paths']['build']
     return l:common
 endfunction
 
-function s:parseCMakeFiles(path, hash)
+function! s:parseCMakeFiles(path, hash) abort
     let l:cmakeFiles = json_decode(join(readfile(a:path), ''))
     return a:hash
 endfunction
 
-function s:parseCache(path, hash)
+function! s:parseCache(path, hash) abort
     let l:cache = json_decode(join(readfile(a:path), ''))['entries']
     let l:common = a:hash
     for l:val in l:cache

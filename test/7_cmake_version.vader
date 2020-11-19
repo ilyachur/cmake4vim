@@ -1,0 +1,104 @@
+Execute (Check older cmake version):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1] - 1, cur_version[2] - 1]), 0
+
+Execute (Check older major, minor cmake version 1):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1] - 1]), 0
+
+Execute (Check older major, minor cmake version 2):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1] + 1]), 0
+
+Execute (Check older major, minor cmake version 3):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1]]), 0
+
+Execute (Check older major, minor cmake version 3):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0], cur_version[1] - 1]), 0
+
+Execute (Check older major, minor, path cmake version 1):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1], cur_version[2] - 1]), 0
+
+Execute (Check older major, minor, path cmake version 2):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1], cur_version[2] + 1]), 0
+
+Execute (Check older major, minor, path cmake version 3):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1] - 1, cur_version[2] + 1]), 0
+
+Execute (Check older major, minor, path cmake version 4):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] - 1, cur_version[1] + 1, cur_version[2] + 1]), 0
+
+Execute (Check older major, minor, path cmake version 5):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0], cur_version[1], cur_version[2] - 1]), 0
+
+Execute (Check newer cmake version):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1] + 1, cur_version[2] + 1]), 1
+
+Execute (Check newer major, minor cmake version 1):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1] - 1]), 1
+
+Execute (Check newer major, minor cmake version 2):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1] + 1]), 1
+
+Execute (Check newer major, minor cmake version 3):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1]]), 1
+
+Execute (Check newer major, minor cmake version 3):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0], cur_version[1] + 1]), 1
+
+Execute (Check newer major, minor, path cmake version 1):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1], cur_version[2] - 1]), 1
+
+Execute (Check newer major, minor, path cmake version 2):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1], cur_version[2] + 1]), 1
+
+Execute (Check newer major, minor, path cmake version 3):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1] - 1, cur_version[2] + 1]), 1
+
+Execute (Check newer major, minor, path cmake version 4):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0] + 1, cur_version[1] + 1, cur_version[2] + 1]), 1
+
+Execute (Check newer major, minor, path cmake version 5):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0], cur_version[1], cur_version[2] + 1]), 1
+
+Execute (Check equal cmake version):
+    let cur_version = utils#cmake#getVersion()
+    AssertEqual len(cur_version), 3
+    AssertEqual utils#cmake#versionGreater([cur_version[0], cur_version[1], cur_version[2]]), 0
