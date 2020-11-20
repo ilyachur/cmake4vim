@@ -28,7 +28,7 @@ endfunction
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#findBuildDir()
     if l:build_dir !=# ''
-        silent call utils#fs#removeDirectory(l:build_dir)
+        call utils#fs#removeDirectory(l:build_dir)
     endif
     call utils#cmake#common#resetCache()
     echon 'Cmake cache was removed!'
@@ -56,7 +56,7 @@ function! cmake4vim#GenerateCMake(...) abort
         silent exec 'cd' l:build_dir
     endif
     " Generates CMake project
-    silent call utils#common#executeCommand(l:cmake_cmd, s:getCMakeErrorFormat())
+    call utils#common#executeCommand(l:cmake_cmd, s:getCMakeErrorFormat())
     if !utils#cmake#verNewerOrEq([3, 13])
         " Change work directory to source folder
         silent exec 'cd' l:src_dir
@@ -67,22 +67,22 @@ function! cmake4vim#GenerateCMake(...) abort
 
     " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
-        silent call cmake4vim#SelectTarget(g:cmake_build_target)
+        call cmake4vim#SelectTarget(g:cmake_build_target)
     endif
 endfunction
 
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    silent call cmake4vim#ResetCMakeCache()
-    silent call cmake4vim#GenerateCMake(join(a:000))
+    call cmake4vim#ResetCMakeCache()
+    call cmake4vim#GenerateCMake(join(a:000))
 endfunction
 
 " The function is called when user saves cmake scripts
 function! cmake4vim#CMakeFileSaved() abort
     if g:cmake_reload_after_save
         " Reloads CMake project if it is needed
-        silent call cmake4vim#GenerateCMake()
+        call cmake4vim#GenerateCMake()
     endif
 endfunction
 
@@ -144,13 +144,13 @@ function! cmake4vim#CMakeBuild(...) abort
     " Select target
     let l:result = cmake4vim#SelectTarget(l:cmake_target)
     " Build
-    silent call utils#common#executeCommand(l:result)
+    call utils#common#executeCommand(l:result)
 endfunction
 
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
     let g:cmake_build_type = a:buildType
 
-    silent call cmake4vim#GenerateCMake()
+    call cmake4vim#GenerateCMake()
 endfunction
 " }}} Public functions "

@@ -23,16 +23,12 @@ function! utils#gen#vs#getTargets(build_dir) abort
     let l:res = split(system('dir *.vcxproj /S /B'), "\n")
     for l:value in l:res
         if l:value !=# ''
-            let l:files = split(l:value, a:build_dir)
-            if len(l:files) != 2
-                continue
-            endif
+            let l:file = l:value[len(a:build_dir):]
             " Exclude projects from CMakeFiles folder
-            let l:files = split(l:files[1], 'CMakeFiles')
-            if len(l:files) != 1
+            if stridx(l:file, 'CMakeFiles') != -1
                 continue
             endif
-            let l:files = split(l:files[0], '\\')
+            let l:files = split(l:file, '\\')
             let l:list_targets += [fnamemodify(l:files[-1], ':r')]
         endif
     endfor
