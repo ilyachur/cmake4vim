@@ -94,7 +94,7 @@ jobs:
     - name: Run tests
       run: |
         pushd test
-        ${{ matrix.vim_executable }} -Nu vimrc +Vader! 1_plugin_initialization.vader 2_generate_cmake.vader 3_cmake_targets.vader
+        ${{ matrix.vim_executable }} -Nu vimrc +Vader!*
         popd
     - name: Generate report
       run: |
