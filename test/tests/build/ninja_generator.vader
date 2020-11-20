@@ -1,24 +1,25 @@
 Before:
     function! RemoveFile(file)
         if has('win32')
-            echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
         else
-            echo system("rm -rf '".a:file."'")
+            silent echo system("rm -rf '".a:file."'")
         endif
     endfunction
 
     function! RemoveCMakeDirs()
         if has('win32')
-            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
-                echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
+                silent echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
             endfor
         else
-            echo system("rm -rf cmake-build*")
+            silent echo system("rm -rf cmake-build*")
         endif
     endfunction
     cd test\ proj
-    call RemoveFile("compile_commands.json")
-    call RemoveCMakeDirs()
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
+    silent CMakeReset
 
     let g:cmake_compile_commands_link=""
     let g:cmake_compile_commands=0
@@ -33,10 +34,11 @@ Before:
     let g:cmake_build_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
+    silent on
 
 After:
-    call RemoveFile("compile_commands.json")
-    call RemoveCMakeDirs()
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
     cd ..
 
 Execute (Find Ninja generator):
@@ -47,15 +49,16 @@ Execute (Find Ninja generator):
 Execute (Check CMake generator name):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        CMake
-        let gen_name = utils#cmake#getCmakeGeneratorType()
+        silent CMake
+        let cmake_info = utils#cmake#common#getInfo()
+        let gen_name = cmake_info['cmake']['generator']
         AssertEqual 'Ninja', gen_name
     endif
 
 Execute (Generate cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        CMake
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
     endif
@@ -63,10 +66,10 @@ Execute (Generate cmake project with Ninja generator):
 Execute (Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        CMake
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
-        CMakeBuild
+        silent CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
@@ -74,13 +77,13 @@ Execute (Build cmake project with Ninja generator):
 Execute (Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        CMake
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
-        CMakeBuild
+        silent CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-        CMakeClean
+        silent CMakeClean
         Assert !filereadable("cmake-build-Release/app/test_app"), "app should not be built"
         Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should not be built"
     endif
@@ -89,17 +92,17 @@ Execute (Build cmake project with -C param):
     if !has('win32') " Skip for Windows
         let g:make_arguments="-C ."
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        CMake
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
-        CMakeBuild
+        silent CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
 
 Execute (Get all Ninja targets):
     if !has('win32') " Skip for Windows
-    CMake
+    silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let targets = cmake4vim#GetAllTargets()
     Assert len(targets) > 10
