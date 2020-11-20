@@ -57,6 +57,8 @@ Execute (Generate cmake project with default settings):
             Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Generate cmake project with custom options):
@@ -74,6 +76,8 @@ Execute (Generate cmake project with custom options):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Generate cmake project with custom options as argument):
@@ -90,6 +94,8 @@ Execute (Generate cmake project with custom options as argument):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Check CMake generator):
@@ -106,6 +112,8 @@ Execute (Check CMake generator):
             AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
         endif
         echo cmake_gen
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeClean):
@@ -130,6 +138,8 @@ Execute (Check CMakeClean):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Build only library with arguments):
@@ -147,6 +157,8 @@ Execute (Build only library with arguments):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (CMakeBuild for test library):
@@ -165,6 +177,8 @@ Execute (CMakeBuild for test library):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Check all targets):
@@ -178,6 +192,8 @@ Execute (Check all targets):
         else
             AssertEqual len(targets), 8
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Get cmake targets):
@@ -192,25 +208,47 @@ Execute (Get cmake targets):
         else
             AssertEqual len(targets), 8
         endif
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Check all targets for empty project):
-    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
-    let targets = cmake4vim#GetAllTargets()
-    AssertEqual len(targets), 0
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+        let targets = cmake4vim#GetAllTargets()
+        AssertEqual len(targets), 0
+    else
+        echom 'SKIPPED'
+    endif
 
 Execute (Select all targets for empty project):
-    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
-    let cmd = cmake4vim#SelectTarget('all')
-    AssertEqual cmd, ''
-    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+        let cmd = cmake4vim#SelectTarget('all')
+        AssertEqual cmd, ''
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    else
+        echom 'SKIPPED'
+    endif
 
 Execute (Call CMakeBuild for empty project):
-    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
-    let cmd = cmake4vim#CMakeBuild()
-    Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+        let cmd = cmake4vim#CMakeBuild()
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    else
+        echom 'SKIPPED'
+    endif
 
 Execute (Check CMakeClean for empty project):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    CMakeClean
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMakeClean
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    else
+        echom 'SKIPPED'
+    endif
