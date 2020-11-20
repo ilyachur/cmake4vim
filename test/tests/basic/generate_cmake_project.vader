@@ -99,6 +99,7 @@ Execute (Generate cmake project with custom generator):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_project_generator='Unix Makefiles'
     silent CMake
+    silent call utils#gen#common#getDefaultTarget()
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
 
 Execute (Generate cmake project with custom install prefix):
@@ -144,3 +145,42 @@ Execute (Generate MinSizeRel cmake project):
     let g:cmake_build_type='MinSizeRel'
     silent CMake
     Assert filereadable("cmake-build-MinSizeRel/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Check findBuild dir with initialized cache):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    AssertNotEqual utils#cmake#findBuildDir(), ''
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Emulate uninitialized project with existed build folder):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    silent call utils#cmake#common#resetCache()
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target="all"
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
+
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Call prepare file API after project generation):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert isdirectory("cmake-build-Release"), "Build directory should exist"
+    Assert isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory should exist"
+    silent call utils#cmake#fileapi#prepare('cmake-build-Release')
+    Assert !isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory shouldn't exist"
+
