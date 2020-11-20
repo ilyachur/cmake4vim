@@ -20,6 +20,9 @@ endfunction
 function! utils#gen#vs#getTargets(build_dir) abort
     " Parse VS projects
     let l:list_targets = []
+    if !isdirectory(a:build_dir)
+        return l:list_targets
+    endif
     let l:res = split(system('dir *.vcxproj /S /B'), "\n")
     for l:value in l:res
         if l:value !=# ''
