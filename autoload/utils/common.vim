@@ -1,7 +1,9 @@
 " autoload/utils/common.vim - contains cmake helpers
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
-function! utils#common#runDispatch(cmd) abort
+" Private functions {{{ "
+" Use dispatch to make command
+function! s:runDispatch(cmd) abort
     let l:old_make = &l:makeprg
 
     try
@@ -12,12 +14,15 @@ function! utils#common#runDispatch(cmd) abort
     endtry
 endfunction
 
-function! utils#common#runSystem(cmd) abort
+" Use system
+function! s:runSystem(cmd) abort
     let l:s_out = system(a:cmd)
     cgetexpr l:s_out
     copen
 endfunction
+" }}} Private functions "
 
+" Executes the command
 function! utils#common#executeCommand(cmd, ...) abort
     " Close quickfix list in order to don't save custom error format
     silent! cclose
@@ -28,9 +33,9 @@ function! utils#common#executeCommand(cmd, ...) abort
     endif
 
     if exists(':Dispatch')
-        silent call utils#common#runDispatch(a:cmd)
+        silent call s:runDispatch(a:cmd)
     else
-        silent call utils#common#runSystem(a:cmd)
+        silent call s:runSystem(a:cmd)
     endif
 
     if l:errFormat !=# ''
@@ -38,6 +43,7 @@ function! utils#common#executeCommand(cmd, ...) abort
     endif
 endfunction
 
+" Prints warning message
 function! utils#common#Warning(msg) abort
     echohl WarningMsg |
                 \ echomsg a:msg |

@@ -17,14 +17,13 @@ function! utils#gen#vs#getCleanTarget() abort
 endfunction
 
 " Returns the list of targets for CMake generator
-function! utils#gen#vs#getTargets() abort
+function! utils#gen#vs#getTargets(build_dir) abort
     " Parse VS projects
-    let l:build_dir = utils#cmake#detectBuildDir()
     let l:list_targets = []
     let l:res = split(system('dir *.vcxproj /S /B'), "\n")
     for l:value in l:res
         if l:value !=# ''
-            let l:files = split(l:value, l:build_dir)
+            let l:files = split(l:value, a:build_dir)
             if len(l:files) != 2
                 continue
             endif

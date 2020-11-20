@@ -1,97 +1,121 @@
 " autoload/cmake4vim.vim - Cmake4vim common functionality
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
+" Private functions {{{ "
+function! s:getCMakeErrorFormat() abort
+    return ' %#%f:%l %#(%m),'
+                \ .'See also "%f".,'
+                \ .'%E%>CMake Error at %f:%l:,'
+                \ .'%Z  %m,'
+                \ .'%E%>CMake Error at %f:%l (%[%^)]%#):,'
+                \ .'%Z  %m,'
+                \ .'%W%>Cmake Warning at %f:%l (%[%^)]%#):,'
+                \ .'%Z  %m,'
+                \ .'%E%>CMake Error: Error in cmake code at,'
+                \ .'%C%>%f:%l:,'
+                \ .'%Z%m,'
+                \ .'%E%>CMake Error in %.%#:,'
+                \ .'%C%>  %m,'
+                \ .'%C%>,'
+                \ .'%C%>    %f:%l (if),'
+                \ .'%C%>,'
+                \ .'%Z  %m,'
+endfunction
+" }}} Private functions
 " Public functions {{{ "
 
-" Reset cmake cache
+" Method remove build directory and reset the cmake cache
 function! cmake4vim#ResetCMakeCache() abort
-    call utils#cmake#common#cleanCache()
     let l:build_dir = utils#cmake#getBuildDir()
     if l:build_dir !=# ''
         silent call utils#fs#removeDirectory(l:build_dir)
     endif
+    call utils#cmake#common#resetCache()
     echon 'Cmake cache was removed!'
 endfunction
 
-function! cmake4vim#ResetAndReloadCMake(...) abort
-    silent call cmake4vim#ResetCMakeCache()
-    silent call cmake4vim#GenerateCMake(join(a:000))
-endfunction
-
-function! cmake4vim#CMakeFileSaved() abort
-    if g:cmake_reload_after_save
-        silent call cmake4vim#GenerateCMake()
-    endif
-endfunction
-
-function! cmake4vim#CleanCMake() abort
-    let l:build_dir = utils#cmake#getBuildDir()
-    if l:build_dir ==# ''
-        call utils#common#Warning('CMake project was not found!')
-        return
-    endif
-    let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
-    let l:cmake_gen = ''
-    if !empty(l:cmake_info)
-        let l:cmake_gen = l:cmake_info['cmake']['generator']
-    endif
-    let l:cmake_gen = l:cmake_info['cmake']['generator']
-    let l:clean_target = utils#gen#make#getCleanTarget()
-    if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-        let l:clean_target = utils#gen#vs#getCleanTarget()
-    elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
-        let l:clean_target = utils#gen#ninja#getCleanTarget()
-    endif
-
-    let l:cmake_clean_cmd = 'cmake --build ' . utils#fs#fnameescape(l:build_dir) . ' --target ' . l:clean_target . ' -- ' . g:make_arguments
-
-    silent call utils#common#executeCommand(l:cmake_clean_cmd, utils#cmake#getCMakeErrorFormat())
-endfunction
-
-function! cmake4vim#GetAllTargets() abort
-    let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
-    let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
-    let l:cmake_gen = ''
-    if !empty(cmake_info)
-        let l:cmake_gen = l:cmake_info['cmake']['generator']
-    endif
-    if (l:cmake_gen ==# '' && has('win32')) || stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-        return utils#gen#vs#getTargets()
-    elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
-        return utils#gen#ninja#getTargets()
-    elseif stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
-        return utils#gen#make#getTargets()
-    endif
-    call utils#common#Warning('Cmake targets were not found!')
-    return []
-endfunction
-
-function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
-    let l:sorted_targets = cmake4vim#GetAllTargets()
-    return join(l:sorted_targets, "\n")
-endfunction
-
+" Generates CMake project
+" Additional cmake arguments can be passed as arguments of this function
 function! cmake4vim#GenerateCMake(...) abort
-    call utils#cmake#common#cleanCache()
-    let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand(join(a:000))
-    let l:src_dir = getcwd()
-    let l:build_dir = utils#fs#makeDir(utils#cmake#detectBuildDir())
+    " Reset old cmake cache
+    call utils#cmake#common#resetCache()
+    " Creates build directory
+    let l:build_dir = utils#cmake#getBuildDir()
+
+    " Prepare requests to CMake system
     call utils#cmake#common#makeRequests(l:build_dir)
 
+    " Generates a command for CMake
+    let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand(join(a:000))
+
+    " For old CMake version need to change the directory to generate CMake project
+    " -B option was introduced only in CMake 3.13
+    let l:src_dir = getcwd()
     if !utils#cmake#verNewerOrEq([3, 13])
+        " Change work directory
         silent exec 'cd' l:build_dir
     endif
-    silent call utils#common#executeCommand(l:cmake_cmd, utils#cmake#getCMakeErrorFormat())
+    " Generates CMake project
+    silent call utils#common#executeCommand(l:cmake_cmd, s:getCMakeErrorFormat())
     if !utils#cmake#verNewerOrEq([3, 13])
+        " Change work directory to source folder
         silent exec 'cd' l:src_dir
     endif
-    call utils#cmake#common#collectResults(l:build_dir)
 
+    " Collect CMake Information
+    call utils#cmake#common#collectCMakeInfo(l:build_dir)
+
+    " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
     endif
 endfunction
 
+" Reset and reload cmake project. Reset the current build directory and
+" generate cmake project
+function! cmake4vim#ResetAndReloadCMake(...) abort
+    silent call cmake4vim#ResetCMakeCache()
+    silent call cmake4vim#GenerateCMake(join(a:000))
+endfunction
+
+" The function is called when user saves cmake scripts
+function! cmake4vim#CMakeFileSaved() abort
+    if g:cmake_reload_after_save
+        " Reloads CMake project if it is needed
+        silent call cmake4vim#GenerateCMake()
+    endif
+endfunction
+
+" Cleans CMake project
+function! cmake4vim#CleanCMake() abort
+    " Get generator specific clean target name
+    let l:clean_target = utils#common#make#getCleanTarget()
+    if l:clean_target ==# ''
+        call utils#common#Warning('CMake generator is not supported!')
+        return
+    endif
+
+    call cmake4vim#CMakeBuild(l:clean_target)
+endfunction
+
+" Returns all CMake targets
+function! cmake4vim#GetAllTargets() abort
+    let l:build_dir = utils#cmake#getBuildDir()
+    let l:targets = utils#gen#common#getTargets(l:build_dir)
+    if empty(l:targets)
+        call utils#common#Warning('Cmake targets were not found!')
+    endif
+    return l:targets
+endfunction
+
+" Completes CMake target names
+function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
+    let l:sorted_targets = cmake4vim#GetAllTargets()
+    return join(l:sorted_targets, "\n")
+endfunction
+
+" Selects CMake target
+" Returns command line for target build
 function! cmake4vim#SelectTarget(target) abort
     let l:build_dir = utils#cmake#getBuildDir()
     if l:build_dir ==# ''
@@ -99,7 +123,7 @@ function! cmake4vim#SelectTarget(target) abort
         return ''
     endif
     let l:cmake_target = utils#cmake#setBuildTarget(l:build_dir, a:target)
-    let l:cmd = utils#cmake#getBuildCommand(l:cmake_target)
+    let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:cmake_target)
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
@@ -107,6 +131,7 @@ function! cmake4vim#SelectTarget(target) abort
     return l:cmd
 endfunction
 
+" Builds CMake project
 function! cmake4vim#CMakeBuild(...) abort
     let l:build_dir = utils#cmake#getBuildDir()
     if l:build_dir ==# ''
@@ -117,10 +142,13 @@ function! cmake4vim#CMakeBuild(...) abort
     if exists('a:1') && a:1 !=# ''
         let l:cmake_target = a:1
     endif
+    " Select target
     let l:result = cmake4vim#SelectTarget(l:cmake_target)
+    " Build
     silent call utils#common#executeCommand(l:result)
 endfunction
 
+" Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
     let g:cmake_build_type = a:buildType
 

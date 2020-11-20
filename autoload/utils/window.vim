@@ -57,7 +57,7 @@ function! utils#window#PrepareInfo(cache) abort
         let l:info += ['    build directory:    ' . a:cache['cmake']['build_dir']]
         let l:info += ['    generator:          ' . a:cache['cmake']['generator']]
         let l:info += ['    generation command: ' . utils#cmake#getCMakeGenerationCommand()]
-        let l:info += ['    build command:      ' . utils#cmake#getBuildCommand(g:cmake_build_target)]
+        let l:info += ['    build command:      ' . utils#cmake#getBuildCommand(a:cache['cmake']['build_dir'], g:cmake_build_target)]
     endif
     return l:info
 endfunction
