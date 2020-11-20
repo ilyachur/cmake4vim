@@ -180,7 +180,7 @@ Execute (Call prepare file API after project generation):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert isdirectory("cmake-build-Release"), "Build directory should exist"
-    Assert isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory should exist"
-    silent call utils#cmake#fileapi#prepare('cmake-build-Release')
-    Assert !isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory shouldn't exist"
-
+    if isdirectory("cmake-build-Release/.cmake/api/v1/reply")
+        silent call utils#cmake#fileapi#prepare('cmake-build-Release')
+        Assert !isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory shouldn't exist"
+    endif
