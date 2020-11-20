@@ -26,7 +26,7 @@ endfunction
 
 " Method remove build directory and reset the cmake cache
 function! cmake4vim#ResetCMakeCache() abort
-    let l:build_dir = utils#cmake#getBuildDir()
+    let l:build_dir = utils#cmake#findBuildDir()
     if l:build_dir !=# ''
         silent call utils#fs#removeDirectory(l:build_dir)
     endif
@@ -89,7 +89,7 @@ endfunction
 " Cleans CMake project
 function! cmake4vim#CleanCMake() abort
     " Get generator specific clean target name
-    let l:clean_target = utils#common#make#getCleanTarget()
+    let l:clean_target = utils#gen#common#getCleanTarget()
     if l:clean_target ==# ''
         call utils#common#Warning('CMake generator is not supported!')
         return
@@ -100,12 +100,11 @@ endfunction
 
 " Returns all CMake targets
 function! cmake4vim#GetAllTargets() abort
-    let l:build_dir = utils#cmake#getBuildDir()
-    let l:targets = utils#gen#common#getTargets(l:build_dir)
-    if empty(l:targets)
+    let l:build_dir = utils#cmake#findBuildDir()
+    if l:build_dir ==# ''
         call utils#common#Warning('Cmake targets were not found!')
     endif
-    return l:targets
+    return utils#gen#common#getTargets(l:build_dir)
 endfunction
 
 " Completes CMake target names
@@ -117,7 +116,7 @@ endfunction
 " Selects CMake target
 " Returns command line for target build
 function! cmake4vim#SelectTarget(target) abort
-    let l:build_dir = utils#cmake#getBuildDir()
+    let l:build_dir = utils#cmake#findBuildDir()
     if l:build_dir ==# ''
         call utils#common#Warning('CMake project was not found!')
         return ''
@@ -133,7 +132,7 @@ endfunction
 
 " Builds CMake project
 function! cmake4vim#CMakeBuild(...) abort
-    let l:build_dir = utils#cmake#getBuildDir()
+    let l:build_dir = utils#cmake#findBuildDir()
     if l:build_dir ==# ''
         call utils#common#Warning('CMake project was not found!')
         return

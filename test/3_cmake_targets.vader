@@ -205,7 +205,7 @@ Execute (Select all targets for empty project):
     AssertEqual cmd, ''
     Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
 
-Execute (Select all targets for empty project):
+Execute (Call CMakeBuild for empty project):
     Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
     let cmd = cmake4vim#CMakeBuild()
     Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"

@@ -20,7 +20,7 @@ function! s:detectCMakeBuildType() abort
             endif
         endfor
     else
-        let l:build_dir = utils#cmake#getBuildDir()
+        let l:build_dir = utils#cmake#findBuildDir()
     endif
 
     if l:build_dir !=# ''
@@ -36,6 +36,10 @@ endfunction
 function! s:detectCMakeBuildDir() abort
     if g:cmake_build_dir !=# ''
         return g:cmake_build_dir
+    endif
+    let l:cmake_info = utils#cmake#common#getInfo()
+    if !empty(l:cmake_info) && l:cmake_info['cmake']['build_dir'] !=# ''
+        return l:cmake_info['cmake']['build_dir']
     endif
     let l:build_type = s:detectCMakeBuildType()
     return g:cmake_build_dir_prefix . l:build_type
@@ -96,7 +100,7 @@ endfunction
 " Generates the command line for CMake generator
 " Additional cmake arguments can be passed as arguments of this function
 function! utils#cmake#getCMakeGenerationCommand(...) abort
-    let l:build_dir = utils#cmake#getBuildDir()
+    let l:build_dir = utils#cmake#findBuildDir()
     let l:cmake_args = []
 
     " Set build type
@@ -136,19 +140,21 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     return l:cmake_cmd
 endfunction
 
+" Check that build directory exists
+function! utils#cmake#findBuildDir() abort
+    let l:build_dir = finddir(s:detectCMakeBuildDir(), getcwd().';.')
+    if l:build_dir !=# ''
+        let l:build_dir = fnamemodify(l:build_dir, ':p:h')
+    endif
+    return l:build_dir
+endfunction
+
 " Returs the path to build directory if directory was found and returns empty string in other case.
 " Use build directory from the cmake cache or try to find it at the current folder
 " Creates directory if it doesn't exist
 function! utils#cmake#getBuildDir() abort
-    let l:cmake_info = utils#cmake#common#getInfo()
-    if !empty(l:cmake_info)
-        let l:build_dir = l:cmake_info['cmake']['build_dir']
-    else
-        let l:build_dir = s:detectCMakeBuildDir()
-    endif
-    if l:build_dir !=# ''
-        let l:build_dir = utils#fs#makeDir(l:build_dir)
-        let l:build_dir = fnamemodify(l:build_dir, ':p:h')
-    endif
+    let l:build_dir = s:detectCMakeBuildDir()
+    let l:build_dir = utils#fs#makeDir(l:build_dir)
+    let l:build_dir = fnamemodify(l:build_dir, ':p:h')
     return l:build_dir
 endfunction
