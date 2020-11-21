@@ -8,11 +8,10 @@ function! utils#fs#makeDir(dir) abort
         silent call mkdir(a:dir, 'p')
         let l:directory = finddir(a:dir, getcwd().';.')
     endif
-    if l:directory ==# ''
-        call utils#common#Warning('Cannot create a build directory: '.a:dir)
-        return
+    if l:directory !=# ''
+        return fnamemodify(l:directory, ':p:h')
     endif
-    return fnamemodify(l:directory, ':p:h')
+    call utils#common#Warning('Cannot create a build directory: '.a:dir)
 endfunction
 
 " Remove directory

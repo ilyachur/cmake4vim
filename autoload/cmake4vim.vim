@@ -24,6 +24,18 @@ endfunction
 " }}} Private functions
 " Public functions {{{ "
 
+" Completes CMake target names
+function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
+    let l:sorted_targets = cmake4vim#GetAllTargets()
+    return join(l:sorted_targets, "\n")
+endfunction
+
+" Completes CMake build types
+function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
+    let l:sorted_targets = utils#cmake#getDefaultBuildTypes()
+    return join(l:sorted_targets, "\n")
+endfunction
+
 " Method remove build directory and reset the cmake cache
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#findBuildDir()
@@ -105,12 +117,6 @@ function! cmake4vim#GetAllTargets() abort
         call utils#common#Warning('Cmake targets were not found!')
     endif
     return utils#gen#common#getTargets(l:build_dir)
-endfunction
-
-" Completes CMake target names
-function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
-    let l:sorted_targets = cmake4vim#GetAllTargets()
-    return join(l:sorted_targets, "\n")
 endfunction
 
 " Selects CMake target

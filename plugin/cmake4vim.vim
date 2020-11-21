@@ -63,7 +63,7 @@ command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMake call cmake4vim
 command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args>)
 command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeBuild call cmake4vim#CMakeBuild(<f-args>)
 command! -nargs=1 -complete=custom,cmake4vim#CompleteTarget CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
-command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
+command! -nargs=1 -complete=custom,cmake4vim#CompleteBuildType CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo call utils#window#OpenCMakeInfo()
