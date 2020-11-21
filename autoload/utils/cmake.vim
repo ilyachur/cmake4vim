@@ -51,7 +51,7 @@ function! s:detectCMakeBuildDir() abort
 endfunction
 " }}} Private functions "
 
-function! utils#cmake#getDefaultBuildTypes()
+function! utils#cmake#getDefaultBuildTypes() abort
     return ['Release', 'Debug', 'RelWithDebInfo', 'MinSizeRel', '']
 endfunction
 
