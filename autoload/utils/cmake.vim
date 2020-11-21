@@ -24,6 +24,7 @@ function! s:detectCMakeBuildType() abort
     endif
 
     if l:build_dir !=# ''
+        let l:build_dir = fnamemodify(l:build_dir, ':p:h')
         let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
         if !empty(l:cmake_info) && l:cmake_info['cmake']['build_type'] !=# ''
             return l:cmake_info['cmake']['build_type']
