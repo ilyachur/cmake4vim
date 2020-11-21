@@ -204,10 +204,22 @@ Execute (Get cmake targets):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
         if has('win32')
-            AssertEqual len(targets), 5
+            AssertEqual len(result), 5
         else
-            AssertEqual len(targets), 8
+            AssertEqual len(result), 8
         endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Get default build types):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+        AssertEqual len(result), 4
     else
         echom 'SKIPPED'
     endif
