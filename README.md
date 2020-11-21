@@ -23,7 +23,8 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
    * **[FZF](https://github.com/junegunn/fzf.vim)**
 * The plugin allows to specify make arguments for native build system (for example *-jN* and something else for Unix Make).
 * The plugin parses the output of cmake command and supports jump to warnings or errors.
-  ![cmake4vim error](doc/cmake_error.gif)
+* Supports work with multiple build types
+* For CMake newer than 3.13 the plugin uses the CMake file API
 
 ## **Usage**
 
@@ -79,6 +80,17 @@ Plugin is closely integrated with quickfix list and allows to use quickfix featu
 
  - **:cp[revious]** command jumps to previous error/warning message
  - **:cn[ext]** command jumps to next error/warning message
+
+## Demos
+
+* CMakeInfo window:
+![CMakeInfo](doc/CMakeInfo.png)
+* Select build type
+![select build type](doc/select_build_type.gif)
+* Jump to cmake error:
+![cmake error](doc/cmake_error.gif)
+* Ninja compilation error
+![ninja error](doc/error_ninja.gif)
 
 ## **Contributing**
 
