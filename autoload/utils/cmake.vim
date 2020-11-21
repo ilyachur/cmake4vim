@@ -13,8 +13,12 @@ function! s:detectCMakeBuildType() abort
     " WA for recursive DetectBuildDir, try to find the first valid cmake directory
     let l:build_dir = ''
     if g:cmake_build_dir ==# ''
-        for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
-            let l:build_dir = finddir(l:value, getcwd().';.')
+        for l:type in utils#cmake#getDefaultBuildTypes()
+            let l:build_dir = 'cmake-build'
+            if l:type !=# ''
+                let l:build_dir .= '-' . l:type
+            endif
+            let l:build_dir = finddir(l:build_dir, getcwd().';.')
             if l:build_dir !=# ''
                 break
             endif
@@ -46,6 +50,10 @@ function! s:detectCMakeBuildDir() abort
     return g:cmake_build_dir_prefix . l:build_type
 endfunction
 " }}} Private functions "
+
+function! utils#cmake#getDefaultBuildTypes()
+    return ['Release', 'Debug', 'RelWithDebInfo', 'MinSizeRel', '']
+endfunction
 
 " Gets CMake version
 " Returns array [major, minor, patch]
