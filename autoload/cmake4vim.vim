@@ -30,7 +30,7 @@ function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
     return join(l:sorted_targets, "\n")
 endfunction
 
-" Completes CMake target names
+" Completes CMake build types
 function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
     let l:sorted_targets = utils#cmake#getDefaultBuildTypes()
     return join(l:sorted_targets, "\n")

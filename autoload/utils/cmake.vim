@@ -51,6 +51,7 @@ function! s:detectCMakeBuildDir() abort
 endfunction
 " }}} Private functions "
 
+" Returns the list of default CMake build types
 function! utils#cmake#getDefaultBuildTypes() abort
     return ['Release', 'Debug', 'RelWithDebInfo', 'MinSizeRel', '']
 endfunction
