@@ -14,7 +14,7 @@ function! utils#gen#common#getDefaultTarget() abort
         return utils#gen#vs#getDefaultTarget()
     elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
         return utils#gen#ninja#getDefaultTarget()
-    elseif stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
+    elseif l:cmake_gen ==# '' || stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
         return utils#gen#make#getDefaultTarget()
     endif
     return ''

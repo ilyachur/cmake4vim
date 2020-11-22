@@ -156,6 +156,8 @@ function! utils#cmake#findBuildDir() abort
     if l:build_dir !=# ''
         let l:build_dir = fnamemodify(l:build_dir, ':p:h')
     endif
+    " Get cmake information
+    call utils#cmake#common#getInfo(l:build_dir)
     return l:build_dir
 endfunction
 
