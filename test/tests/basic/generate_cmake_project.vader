@@ -32,6 +32,7 @@ Before:
     let g:make_arguments=""
     let g:cmake_build_target="all"
     let g:cmake_build_dir=""
+    let g:cmake_src_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
@@ -183,4 +184,17 @@ Execute (Call prepare file API after project generation):
     if isdirectory("cmake-build-Release/.cmake/api/v1/reply")
         silent call utils#cmake#fileapi#prepare('cmake-build-Release')
         Assert !isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory shouldn't exist"
+    endif
+
+Execute (Generate cmake project in custom source folder):
+    if utils#cmake#verNewerOrEq([3, 13])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_src_dir='test proj'
+        cd ..
+        Assert isdirectory(g:cmake_src_dir), "Source directory should exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent call RemoveFile("compile_commands.json")
+        silent call RemoveCMakeDirs()
+        cd test\ proj
     endif

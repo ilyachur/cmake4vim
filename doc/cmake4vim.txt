@@ -63,6 +63,10 @@ VARIABLES                                                      *cmake-variables*
                                     If variable is empty plugin uses build
                                     directory prefix plus the build type.
 
+*g:cmake_src_dir*                     allows to set cmake source directory.
+                                    Default is '' which evaluates to the
+                                    current working directory.
+
 *g:cmake_build_dir_prefix*            allows to set cmake build directory prefix.
                                     Default is 'cmake-build-'.
 

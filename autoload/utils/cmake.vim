@@ -49,6 +49,13 @@ function! s:detectCMakeBuildDir() abort
     let l:build_type = s:detectCMakeBuildType()
     return g:cmake_build_dir_prefix . l:build_type
 endfunction
+
+function! s:detectCMakeSrcDir() abort
+    if g:cmake_src_dir !=# ''
+        return g:cmake_src_dir
+    endif
+    return getcwd()
+endfunction
 " }}} Private functions "
 
 " Returns the list of default CMake build types
@@ -111,6 +118,7 @@ endfunction
 " Additional cmake arguments can be passed as arguments of this function
 function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:build_dir = utils#cmake#findBuildDir()
+    let l:src_dir = utils#cmake#findSrcDir()
     let l:cmake_args = []
 
     " Set build type
@@ -143,6 +151,7 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     " CMake -B option was introduced in the 3.13 version
     if utils#cmake#verNewerOrEq([3, 13])
         let l:cmake_cmd .= ' -B ' . utils#fs#fnameescape(l:build_dir)
+        let l:cmake_cmd .= ' -S ' . utils#fs#fnameescape(l:src_dir)
     else
         let l:cmake_cmd .= ' ' . utils#fs#fnameescape(getcwd())
     endif
@@ -159,6 +168,15 @@ function! utils#cmake#findBuildDir() abort
     " Get cmake information
     call utils#cmake#common#getInfo(l:build_dir)
     return l:build_dir
+endfunction
+
+" Check that src directory exists
+function! utils#cmake#findSrcDir() abort
+    let l:src_dir = finddir(s:detectCMakeSrcDir(), getcwd().';.')
+    if l:src_dir !=# ''
+        let l:src_dir = fnamemodify(l:src_dir, ':p:h')
+    endif
+    return l:src_dir
 endfunction
 
 " Returs the path to build directory if directory was found and returns empty string in other case.

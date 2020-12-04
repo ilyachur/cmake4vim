@@ -62,7 +62,7 @@ function! cmake4vim#GenerateCMake(...) abort
 
     " For old CMake version need to change the directory to generate CMake project
     " -B option was introduced only in CMake 3.13
-    let l:src_dir = getcwd()
+    let l:src_dir = utils#cmake#findSrcDir()
     if !utils#cmake#verNewerOrEq([3, 13])
         " Change work directory
         silent exec 'cd' l:build_dir
