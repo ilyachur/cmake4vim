@@ -32,6 +32,7 @@ Before:
     let g:make_arguments=""
     let g:cmake_build_target="all"
     let g:cmake_build_dir=""
+    let g:cmake_src_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
