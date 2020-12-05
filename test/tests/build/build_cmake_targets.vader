@@ -187,11 +187,7 @@ Execute (Check all targets):
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = cmake4vim#GetAllTargets()
-        if has('win32')
-            AssertEqual len(targets), 5
-        else
-            AssertEqual len(targets), 18
-        endif
+        Assert len(targets) > 5
     else
         echom 'SKIPPED'
     endif
@@ -203,11 +199,7 @@ Execute (Get cmake targets):
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
-        if has('win32')
-            AssertEqual len(result), 5
-        else
-            AssertEqual len(result), 18
-        endif
+        Assert len(result) > 5
     else
         echom 'SKIPPED'
     endif
