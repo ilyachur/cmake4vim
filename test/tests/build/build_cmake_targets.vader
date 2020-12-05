@@ -190,7 +190,7 @@ Execute (Check all targets):
         if has('win32')
             AssertEqual len(targets), 5
         else
-            AssertEqual len(targets), 8
+            AssertEqual len(targets), 18
         endif
     else
         echom 'SKIPPED'
@@ -206,7 +206,7 @@ Execute (Get cmake targets):
         if has('win32')
             AssertEqual len(result), 5
         else
-            AssertEqual len(result), 8
+            AssertEqual len(result), 18
         endif
     else
         echom 'SKIPPED'
