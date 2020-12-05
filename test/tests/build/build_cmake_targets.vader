@@ -197,7 +197,7 @@ Execute (Check all targets):
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = cmake4vim#GetAllTargets()
-        Assert len(targets) > 5
+        Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
     else
         echom 'SKIPPED'
     endif
@@ -208,8 +208,8 @@ Execute (Get cmake targets):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
-        Assert len(result) > 5
+        let targets = split(cmake4vim#CompleteTarget(0,0,0), "\n")
+        Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
     else
         echom 'SKIPPED'
     endif
