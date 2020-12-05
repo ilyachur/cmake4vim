@@ -58,8 +58,6 @@ Execute (Generate cmake project with default settings):
         else
             Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
-            silent call system("cmake-build-Release/app/Debug/test_app.exe")
-            AssertEqual 0, v:shell_error
         endif
     else
         echom 'SKIPPED'

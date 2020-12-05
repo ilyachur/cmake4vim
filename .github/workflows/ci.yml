@@ -91,6 +91,15 @@ jobs:
     - name: Clone Dispatch
       run: |
         git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
+    - if: matrix.os == 'macos-latest'  # Install gtest in order to avoid problems with cmake 2.8 on macOS
+      run: |
+        git clone --depth 1 https://github.com/google/googletest ${HOME}/gtest
+        mkdir ${HOME}/gtest/build
+        pushd ${HOME}/gtest/build
+        cmake -DCMAKE_CXX_FLAGS="-std=c++11" ..
+        make -j8
+        make install
+        popd
     - name: Run tests
       run: |
         pushd test
