@@ -13,9 +13,7 @@ if(NOT DEFINED CMAKE_CXX_STANDARD)
 endif()
 
 add_subdirectory(lib)
-if (CUSTOM_OP)
-    add_subdirectory(app)
-endif()
+add_subdirectory(app)
 
 # Disabled by default library which has some compilations errors
 add_subdirectory(incorrect_lib)

@@ -53,9 +53,13 @@ Execute (Generate cmake project with default settings):
         if !has('win32')
             Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 0, v:shell_error
         else
             Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 0, v:shell_error
         endif
     else
         echom 'SKIPPED'
@@ -70,11 +74,15 @@ Execute (Generate cmake project with custom options):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
-            Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 1, v:shell_error
         else
-            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 1, v:shell_error
         endif
     else
         echom 'SKIPPED'
@@ -88,11 +96,15 @@ Execute (Generate cmake project with custom options as argument):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
-            Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 1, v:shell_error
         else
-            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 1, v:shell_error
         endif
     else
         echom 'SKIPPED'
