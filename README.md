@@ -46,6 +46,7 @@ The current version of the plugin supports next commands:
 
  - **`:CMake`** creates a build directory (if it is necessary) and generates cmake project.
  - **`:CMakeBuild`** builds current cmake project. The command allows to specify cmake target.
+ - **`:CTest`** runs tests. The command allow to specify Ctest arguments
  - **`:CMakeInfo`** creates a window with CMake information.
  - **`:CMakeResetAndReload`** removes cmake cache and re-generates cmake project.
  - **`:CMakeReset`** removes cmake cache (this command removes the cmake build directory).
@@ -61,7 +62,7 @@ Plugin supports special global variables which are allow to change behaviour of 
 
  - **`g:cmake_reload_after_save`** if this variable is not equal 0, plugin will reload CMake project after saving CMake files. Default is 0.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
- - **`g:cmake_build_dir`** allows to set cmake build directory for all build.  Default is ''. If variable is empty the plugin will use the prefix plus build type.
+ - **`g:cmake_build_dir`** allows to set cmake build directory.  Default is ''. If variable is empty the plugin will use the prefix plus build type.
  - **`g:cmake_src_dir`** allows to set cmake source directory.  Default is '' which evaluates to the current working directory.
  - **`g:cmake_build_dir_prefix`** allows to set cmake build directory prefix. Default is 'cmake-build-'.
  - **`g:cmake_build_target`** set the target name for build. Default is empty and default value depends on CMake Generator
