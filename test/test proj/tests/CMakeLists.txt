@@ -1,7 +1,7 @@
 set (TARGET_NAME unit_tests)
 
 add_executable(${TARGET_NAME} src/main.cpp
-                              src/test_map.cpp)
+                              src/test_class.cpp)
 
 find_package(GTest QUIET)
 

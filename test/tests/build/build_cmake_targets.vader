@@ -67,7 +67,7 @@ Execute (Generate cmake project with custom options):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        let g:cmake_usr_args='-DCUSTOM_OP=OFF'
+        let g:cmake_usr_args='-DCUSTOM_OP=ON'
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
@@ -90,7 +90,7 @@ Execute (Generate cmake project with custom options as argument):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake -DCUSTOM_OP=OFF
+        silent CMake -DCUSTOM_OP=ON
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
