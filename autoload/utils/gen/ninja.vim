@@ -37,7 +37,7 @@ function! utils#gen#ninja#getTargets(build_dir) abort
             let l:list_targets += [l:target]
         endif
     endfor
-    if l:all_exist == 0
+    if l:all_exist == 0 && !empty(l:list_targets)
         let l:list_targets += ['all']
     endif
     return l:list_targets
