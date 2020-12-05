@@ -53,6 +53,8 @@ Execute (Generate cmake project with default settings):
         if !has('win32')
             Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 0, v:shell_error
         else
             Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
@@ -65,16 +67,20 @@ Execute (Generate cmake project with custom options):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        let g:cmake_usr_args='-DCUSTOM_OP=OFF'
+        let g:cmake_usr_args='-DCUSTOM_OP=ON'
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
-            Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 1, v:shell_error
         else
-            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 1, v:shell_error
         endif
     else
         echom 'SKIPPED'
@@ -84,15 +90,19 @@ Execute (Generate cmake project with custom options as argument):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake -DCUSTOM_OP=OFF
+        silent CMake -DCUSTOM_OP=ON
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
-            Assert !filereadable("cmake-build-Release/app/test_app"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 1, v:shell_error
         else
-            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn't be built"
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 1, v:shell_error
         endif
     else
         echom 'SKIPPED'
@@ -187,11 +197,7 @@ Execute (Check all targets):
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = cmake4vim#GetAllTargets()
-        if has('win32')
-            AssertEqual len(targets), 5
-        else
-            AssertEqual len(targets), 8
-        endif
+        Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
     else
         echom 'SKIPPED'
     endif
@@ -202,12 +208,8 @@ Execute (Get cmake targets):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteTarget(0,0,0), "\n")
-        if has('win32')
-            AssertEqual len(result), 5
-        else
-            AssertEqual len(result), 8
-        endif
+        let targets = split(cmake4vim#CompleteTarget(0,0,0), "\n")
+        Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
     else
         echom 'SKIPPED'
     endif

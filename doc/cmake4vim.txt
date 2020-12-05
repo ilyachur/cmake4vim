@@ -18,14 +18,17 @@ COMMANDS                                                        *cmake-commands*
     Creates a build directory (if it is necessary) and generates cmake
     project.  All arguments are directly passed on to CMake.
 
-:CMakeBuild[{Args}]                                                     *:CMakeBuild*
+:CMakeBuild[{Args}]                                                *:CMakeBuild*
     Builds cmake project. You can specify the cmake target using the command
     line argument.
 
-:CMakeInfo                                                        *:CMakeInfo*
+:CTest[{Args}]                                                     *:CTest*
+    Runs tests. You can pass additional ctest arguments.
+
+:CMakeInfo                                                         *:CMakeInfo*
     Creates a window with some CMake parameters
 
-:CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
+:CMakeResetAndReload[{Args}]                                       *:CMakeResetAndReload*
     Removes cmake cache and re-generates cmake project.  All arguments are
     directly passed on to CMake.
 

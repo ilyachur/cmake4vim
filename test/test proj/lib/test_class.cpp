@@ -1,18 +1,17 @@
 #include "test_class.hpp"
-#include <iostream>
 
 using namespace TestLib;
 
 TestClass::TestClass() {}
 
-void TestClass::f1() {
-    std::cout << "F1" << std::endl;
+std::string TestClass::f1() {
+    return "F1";
 }
 
-void TestClass::f2() {
+std::string TestClass::f2() {
 #if defined(CUSTOM_OP)
-    std::cout << "F2 custom" << std::endl;
+    return "F2 custom";
 #else
-    std::cout << "F2 default" << std::endl;
+    return "F2 default";
 #endif
 }

@@ -88,6 +88,18 @@ Execute (Build cmake project with Ninja generator):
         Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should not be built"
     endif
 
+Execute (Build cmake project with Ninja generator and tests):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake -DENABLE_TESTS=ON
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        silent CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    endif
+
 Execute (Build cmake project with -C param):
     if !has('win32') " Skip for Windows
         let g:make_arguments="-C ."

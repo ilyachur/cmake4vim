@@ -153,6 +153,19 @@ function! cmake4vim#CMakeBuild(...) abort
     call utils#common#executeCommand(l:result)
 endfunction
 
+" Run Ctest
+function! cmake4vim#CTest(...) abort
+    let l:build_dir = utils#cmake#findBuildDir()
+    if l:build_dir ==# ''
+        call utils#common#Warning('CMake project was not found!')
+        return
+    endif
+    let l:cmake_target = 'test'
+    let l:result = cmake4vim#SelectTarget(l:cmake_target) . ' ARGS="' . join(a:000) . '"'
+    " Run
+    call utils#common#executeCommand(l:result)
+endfunction
+
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
     let g:cmake_build_type = a:buildType
