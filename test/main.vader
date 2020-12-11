@@ -12,5 +12,5 @@ Include (Get CMake Info):                                   tests/basic/change_c
 
 Include (Build CMake targets by default Generator):         ./tests/build/build_cmake_targets.vader
 Include (Build with Ninja generator):                       ./tests/build/ninja_generator.vader
-Include (Build CMake targets by default Generator):         ./tests/build/ctest_run.vader
+Include (Check CTest support):                              ./tests/build/ctest_run.vader
 Include (Build with Dispatch plugin):                       ./tests/build/check_dispatch.vader

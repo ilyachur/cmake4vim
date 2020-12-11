@@ -114,6 +114,34 @@ Execute (CTest with default settings):
         echom 'SKIPPED'
     endif
 
+Execute (CTest check target):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        if !has('win32')
+            AssertEqual g:cmake_build_target, 'all'
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            AssertEqual g:cmake_build_target, 'ALL_BUILD'
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+        silent CTest
+        if !has('win32')
+            AssertEqual g:cmake_build_target, 'all'
+        else
+            AssertEqual g:cmake_build_target, 'ALL_BUILD'
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
 Execute (CTest with custom settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
