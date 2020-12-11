@@ -9,6 +9,8 @@ function! s:getCMakeErrorFormat() abort
                 \ .'%Z  %m,'
                 \ .'%E%>CMake Error at %f:%l (%[%^)]%#):,'
                 \ .'%Z  %m,'
+                \ .'%W%>Cmake Deprecation Warning at %f:%l (%[%^)]%#):,'
+                \ .'%Z  %m,'
                 \ .'%W%>Cmake Warning at %f:%l (%[%^)]%#):,'
                 \ .'%Z  %m,'
                 \ .'%E%>CMake Error: Error in cmake code at,'
