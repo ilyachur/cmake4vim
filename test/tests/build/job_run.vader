@@ -66,8 +66,8 @@ Execute (Check job cancel command without run):
 
 Execute (Generate cmake project with default settings 2 times):
     silent call utils#exec#job#run('sleep 100', '')
-    sleep 1
-    silent call utils#exec#job#run('sleep 100', '')
+    let ret_code = utils#exec#job#run('sleep 10', '')
+    AssertEqual ret_code, -1
     let ret_code = utils#exec#job#stop()
     AssertEqual ret_code, 0
 

@@ -133,10 +133,10 @@ endfunction
 " Use job
 function! utils#exec#job#run(cmd, err_fmt) abort
     " Create a new quickfix
-    let l:openbufnr = bufwinnr(s:cmake4vim_buf)
-    if l:openbufnr != -1
+    let l:openbufnr = bufloaded(s:cmake4vim_buf)
+    if l:openbufnr != 0
         call utils#common#Warning('Async execute is already running')
-        return
+        return -1
     endif
     let l:outbufnr = s:createJobBuf()
     let s:err_fmt = a:err_fmt
@@ -155,4 +155,5 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ })
         let s:job_cbs = [l:job]
     endif
+    return l:job
 endfunction
