@@ -12,7 +12,7 @@ function! s:appendLine(text) abort
 
     if l:oldnr != l:winnr
         if l:winnr == -1
-            silent exec "sp ".escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+            silent exec 'sp ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
             setlocal modifiable
             silent call append('$', a:text)
             silent hide
@@ -48,7 +48,7 @@ function! s:createQuickFix() abort
         exec l:winnr.'wincmd c'
         exec l:oldnr.'wincmd w'
     endif
-    silent exec "bdelete ".escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    silent exec 'bdelete ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
@@ -111,12 +111,12 @@ function! utils#exec#job#stop() abort
     let s:job_cbs = []
     if has('nvim')
         if !jobstop(l:job)
-            call utils#common#Warning("Cannot stop the current job!")
+            call utils#common#Warning('Cannot stop the current job!')
             return 1
         endif
     else
         if !job_stop(l:job)
-            call utils#common#Warning("Cannot stop the current job!")
+            call utils#common#Warning('Cannot stop the current job!')
             return 1
         endif
     endif
@@ -125,7 +125,7 @@ function! utils#exec#job#stop() abort
     if l:oldnr != l:winnr && l:winnr == -1
         exec l:winnr.'wincmd c'
     endif
-    silent exec "bdelete ".escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    silent exec 'bdelete ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
     echom 'Job is canceled!'
     return 0
 endfunction
