@@ -29,10 +29,18 @@ function! s:appendLine(text) abort
     exec l:oldnr.'wincmd w'
 endfunction
 
-function! s:createQuickFix() abort
+function! s:closeBuffer() abort
     let l:oldnr = winnr()
-    let l:bufnr = bufnr(s:cmake4vim_buf)
     let l:winnr = bufwinnr(s:cmake4vim_buf)
+
+    if l:oldnr != l:winnr && l:winnr != -1
+        exec l:winnr.'wincmd c'
+    endif
+    silent exec 'bwipeout ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+endfunction
+
+function! s:createQuickFix() abort
+    let l:bufnr = bufnr(s:cmake4vim_buf)
     if l:bufnr == -1
         return
     endif
@@ -42,10 +50,7 @@ function! s:createQuickFix() abort
         let &errorformat = s:err_fmt
     endif
     execute 'cbuffer ' . l:bufnr
-    if l:oldnr != l:winnr && l:winnr != -1
-        exec l:winnr.'wincmd c'
-    endif
-    silent exec 'bwipeout ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    call s:closeBuffer()
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
@@ -117,12 +122,7 @@ function! utils#exec#job#stop() abort
             return 1
         endif
     endif
-    let l:oldnr = winnr()
-    let l:winnr = bufwinnr(s:cmake4vim_buf)
-    if l:oldnr != l:winnr && l:winnr == -1
-        exec l:winnr.'wincmd c'
-    endif
-    silent exec 'bwipeout ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    call s:closeBuffer()
     echom 'Job is canceled!'
     return 0
 endfunction

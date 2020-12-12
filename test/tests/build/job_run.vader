@@ -55,17 +55,17 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     endif
 
-Execute (Check job cancel command):
-    silent call utils#exec#job#run('sleep 100', '')
-    let ret_code = utils#exec#job#stop()
-    AssertEqual ret_code, 0
-
 Execute (Check job cancel command without run):
     let ret_code = utils#exec#job#stop()
     AssertEqual ret_code, 0
 
+Execute (Check job cancel command):
+    silent call utils#exec#job#run('sleep 10', '')
+    let ret_code = utils#exec#job#stop()
+    AssertEqual ret_code, 0
+
 Execute (Generate cmake project with default settings 2 times):
-    silent call utils#exec#job#run('sleep 100', '')
+    silent call utils#exec#job#run('sleep 10', '')
     let ret_code = utils#exec#job#run('sleep 10', '')
     AssertEqual ret_code, -1
     let ret_code = utils#exec#job#stop()
