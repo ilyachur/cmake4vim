@@ -31,24 +31,21 @@ endfunction
 
 function! s:createQuickFix() abort
     let l:oldnr = winnr()
+    let l:bufnr = bufnr(s:cmake4vim_buf)
     let l:winnr = bufwinnr(s:cmake4vim_buf)
-    if l:winnr == -1
+    if l:bufnr == -1
         return
     endif
     cexpr ''
-    if l:oldnr != l:winnr
-        exec l:winnr.'wincmd w'
-    endif
     let l:old_error = &errorformat
     if s:err_fmt !=# ''
         let &errorformat = s:err_fmt
     endif
-    cbuffer
-    if l:oldnr != l:winnr
+    execute 'cbuffer ' . l:bufnr
+    if l:oldnr != l:winnr && l:winnr != -1
         exec l:winnr.'wincmd c'
-        exec l:oldnr.'wincmd w'
     endif
-    silent exec 'bdelete ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    silent exec 'bwipeout ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
@@ -125,7 +122,7 @@ function! utils#exec#job#stop() abort
     if l:oldnr != l:winnr && l:winnr == -1
         exec l:winnr.'wincmd c'
     endif
-    silent exec 'bdelete ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    silent exec 'bwipeout ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
     echom 'Job is canceled!'
     return 0
 endfunction
@@ -133,8 +130,8 @@ endfunction
 " Use job
 function! utils#exec#job#run(cmd, err_fmt) abort
     " Create a new quickfix
-    let l:openbufnr = bufloaded(s:cmake4vim_buf)
-    if l:openbufnr != 0
+    let l:openbufnr = bufnr(s:cmake4vim_buf)
+    if l:openbufnr != -1
         call utils#common#Warning('Async execute is already running')
         return -1
     endif
