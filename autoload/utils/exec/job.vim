@@ -105,29 +105,29 @@ endfunction
 
 function! utils#exec#job#stop() abort
     if empty(s:job_cbs)
-        return
+        return 0
     endif
     let l:job = s:job_cbs[0]
     let s:job_cbs = []
     if has('nvim')
         if !jobstop(l:job)
             call utils#common#Warning("Cannot stop the current job!")
+            return 1
         endif
     else
         if !job_stop(l:job)
             call utils#common#Warning("Cannot stop the current job!")
+            return 1
         endif
     endif
     let l:oldnr = winnr()
     let l:winnr = bufwinnr(s:cmake4vim_buf)
-    if l:winnr == -1
-        return
-    endif
-    if l:oldnr != l:winnr
+    if l:oldnr != l:winnr && l:winnr == -1
         exec l:winnr.'wincmd c'
     endif
     silent exec "bdelete ".escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
     echom 'Job is canceled!'
+    return 0
 endfunction
 
 " Use job

@@ -34,7 +34,6 @@ Before:
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
-    let g:cmake_build_executor = 'dispatch'
     " Use on in order to close all windows and avoid E36 error
     silent on
 
@@ -45,11 +44,6 @@ After:
 
 Execute (Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
-        let old_rtp = &rtp
-        set rtp+=$HOME/.vim/plugged/vim-dispatch
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
-        source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let iter = 0
@@ -58,5 +52,9 @@ Execute (Generate cmake project with default settings):
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let &rtp = old_rtp
     endif
+
+Execute (Check job cancel command):
+    silent call utils#exec#job#run('sleep 100', '')
+    let ret_code = utils#exec#job#stop()
+    AssertEqual ret_code, 0
