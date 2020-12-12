@@ -17,6 +17,7 @@ Before:
         endif
     endfunction
     cd test\ proj
+    let g:cmake_build_executor = 'system'
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
     silent CMakeReset
