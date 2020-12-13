@@ -107,24 +107,20 @@ endfunction
 
 function! utils#exec#job#stop() abort
     if empty(s:job_cbs)
-        return 0
+        return
     endif
     let l:job = s:job_cbs[0]
     let s:job_cbs = []
-    if has('nvim')
-        if !jobstop(l:job)
-            call utils#common#Warning('Cannot stop the current job!')
-            return 1
+    try
+        if has('nvim')
+            call jobstop(l:job)
+        else
+            call job_stop(l:job)
         endif
-    else
-        if !job_stop(l:job)
-            call utils#common#Warning('Cannot stop the current job!')
-            return 1
-        endif
-    endif
+    catch
+    endtry
     call s:closeBuffer()
     echom 'Job is canceled!'
-    return 0
 endfunction
 
 " Use job
