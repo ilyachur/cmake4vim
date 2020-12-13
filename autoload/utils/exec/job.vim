@@ -38,7 +38,10 @@ function! s:closeBuffer() abort
         exec l:winnr.'wincmd c'
     endif
     if l:bufnr != -1
-        silent exec 'bwipeout ' . escape(bufname(l:bufnr), ' \')
+        try
+            silent exec 'bwipeout ' . escape(bufname(l:bufnr), ' \')
+        catch
+        endtry
     endif
 endfunction
 
