@@ -32,11 +32,14 @@ endfunction
 function! s:closeBuffer() abort
     let l:oldnr = winnr()
     let l:winnr = bufwinnr(s:cmake4vim_buf)
+    let l:bufnr = bufnr(s:cmake4vim_buf)
 
     if l:oldnr != l:winnr && l:winnr != -1
         exec l:winnr.'wincmd c'
     endif
-    silent exec 'bwipeout ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
+    if l:bufnr != -1
+        silent exec 'bwipeout ' . escape(bufname(l:bufnr), ' \')
+    endif
 endfunction
 
 function! s:createQuickFix() abort
