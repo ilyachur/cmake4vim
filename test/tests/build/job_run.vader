@@ -34,7 +34,7 @@ Before:
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
-    let g:cmake_build_executor = 'dispatch'
+    let g:cmake_build_executor = 'job'
     " Use on in order to close all windows and avoid E36 error
     silent on
 
@@ -45,11 +45,6 @@ After:
 
 Execute (Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
-        let old_rtp = &rtp
-        set rtp+=$HOME/.vim/plugged/vim-dispatch
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
-        source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let iter = 0
@@ -58,5 +53,43 @@ Execute (Generate cmake project with default settings):
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let &rtp = old_rtp
     endif
+
+Execute (Generate cmake project with default settings and build error target):
+    if !has('win32')    " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        let iter = 0
+        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild incorrect_lib
+        silent on
+        let iter = 0
+        let window_counter = 0
+        while iter < 30
+            windo let window_counter = window_counter + 1
+            if window_counter > 1
+                break
+            endif
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert window_counter > 1
+    endif
+
+Execute (Check job cancel command without run):
+    silent call utils#exec#job#stop()
+
+Execute (Check job cancel command):
+    silent call utils#exec#job#run('sleep 10', '')
+    silent call utils#exec#job#stop()
+
+Execute (Generate cmake project with default settings 2 times):
+    silent call utils#exec#job#run('sleep 10', '')
+    let ret_code = utils#exec#job#run('sleep 10', '')
+    AssertEqual ret_code, -1
+    silent call utils#exec#job#stop()
+

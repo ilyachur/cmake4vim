@@ -81,7 +81,7 @@ function! cmake4vim#GenerateCMake(...) abort
 
     " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
-        call cmake4vim#SelectTarget(g:cmake_build_target)
+        silent call cmake4vim#SelectTarget(g:cmake_build_target)
     endif
 endfunction
 

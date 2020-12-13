@@ -34,6 +34,7 @@ Before:
     let g:cmake_build_dir=""
     let g:cmake_change_build_command=1
     let g:cmake_reload_after_save=0
+    let g:cmake_build_executor = 'system'
     silent on
 
 After:
