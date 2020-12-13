@@ -7,10 +7,10 @@ function! utils#common#executeCommand(cmd, ...) abort
     silent! cclose
     let l:errFormat = get(a:, 1, '')
 
-    if (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
-        call utils#exec#job#run(a:cmd, l:errFormat)
-    elseif (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
+    if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
         call utils#exec#dispatch#run(a:cmd, l:errFormat)
+    elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
+        call utils#exec#job#run(a:cmd, l:errFormat)
     else
         call utils#exec#system#run(a:cmd, l:errFormat)
     endif
