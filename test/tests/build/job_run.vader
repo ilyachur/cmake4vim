@@ -55,6 +55,31 @@ Execute (Generate cmake project with default settings):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     endif
 
+Execute (Generate cmake project with default settings and build error target):
+    if !has('win32')    " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        let iter = 0
+        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild incorrect_lib
+        silent on
+        let iter = 0
+        let window_counter = 0
+        while iter < 30
+            windo let window_counter = window_counter + 1
+            if window_counter > 1
+                break
+            endif
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert window_counter > 1
+    endif
+
 Execute (Check job cancel command without run):
     silent call utils#exec#job#stop()
 
