@@ -1,0 +1,269 @@
+Before:
+    function! RemoveFile(file)
+        if has('win32')
+            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+        else
+            silent echo system("rm -rf '".a:file."'")
+        endif
+    endfunction
+
+    function! RemoveCMakeDirs()
+        if has('win32')
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
+                silent echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
+            endfor
+        else
+            silent echo system("rm -rf cmake-build*")
+        endif
+    endfunction
+    cd test\ proj
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
+    silent CMakeReset
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target=""
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
+    let g:cmake_build_executor = 'system'
+    " Use on in order to close all windows and avoid E36 error
+    silent on
+
+After:
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
+    cd ..
+
+Execute (Generate cmake project with default settings):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 0, v:shell_error
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Generate cmake project with custom options):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_usr_args='-DCUSTOM_OP=ON'
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 1, v:shell_error
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 1, v:shell_error
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Generate cmake project with custom options as argument):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake -DCUSTOM_OP=ON
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/test_app")
+            AssertEqual 1, v:shell_error
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            silent call system("cmake-build-Release/app/Debug/test_app.exe")
+            AssertEqual 1, v:shell_error
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Check CMake generator):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let cmake_info = utils#cmake#common#getInfo()
+        let cmake_gen = cmake_info['cmake']['generator']
+        if has('win32')
+            AssertNotEqual stridx(cmake_gen, utils#gen#vs#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
+        else
+            AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
+        endif
+        echo cmake_gen
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Check CMakeClean):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+        silent CMakeClean
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Build only library with arguments):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeSelectTarget test_lib
+        silent CMakeBuild
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (CMakeBuild for test library):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        " Check that make command works with changed build command
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild test_lib
+        silent! make
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Check all targets):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let targets = cmake4vim#GetAllTargets()
+        Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Get cmake targets):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let targets = split(cmake4vim#CompleteTarget(0,0,0), "\n")
+        Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Get default build types):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+        AssertEqual len(result), 4
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Check all targets for empty project):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+        let targets = cmake4vim#GetAllTargets()
+        AssertEqual len(targets), 0
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Select all targets for empty project):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+        let cmd = cmake4vim#SelectTarget('all')
+        AssertEqual cmd, ''
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Call CMakeBuild for empty project):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+        silent CMakeBuild
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt shouldn't be generated"
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Check CMakeClean for empty project):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        CMakeClean
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    else
+        echom 'SKIPPED'
+    endif

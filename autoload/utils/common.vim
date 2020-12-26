@@ -1,39 +1,24 @@
 " autoload/utils/common.vim - contains cmake helpers
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
-function! utils#common#runDispatch(cmd) abort
-    let l:old_make = &l:makeprg
-
-    try
-        let &l:makeprg = a:cmd
-        silent! execute 'Make'
-    finally
-        let &l:makeprg = l:old_make
-    endtry
-endfunction
-
-function! utils#common#runSystem(cmd) abort
-    let l:s_out = system(a:cmd)
-    cgetexpr l:s_out
-    copen
-endfunction
-
+" Executes the command
 function! utils#common#executeCommand(cmd, ...) abort
     " Close quickfix list in order to don't save custom error format
     silent! cclose
     let l:errFormat = get(a:, 1, '')
-    let l:old_error = &l:errorformat
-    if l:errFormat !=# ''
-        let &l:errorformat = l:errFormat
-    endif
 
-    if exists(':Dispatch')
-        silent call utils#common#runDispatch(a:cmd)
+    if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
+        call utils#exec#dispatch#run(a:cmd, l:errFormat)
+    elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
+        call utils#exec#job#run(a:cmd, l:errFormat)
     else
-        silent call utils#common#runSystem(a:cmd)
+        call utils#exec#system#run(a:cmd, l:errFormat)
     endif
+endfunction
 
-    if l:errFormat !=# ''
-        let &l:errorformat = l:old_error
-    endif
+" Prints warning message
+function! utils#common#Warning(msg) abort
+    echohl WarningMsg |
+                \ echomsg a:msg |
+                \ echohl None
 endfunction

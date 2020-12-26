@@ -38,6 +38,9 @@ endif
 if !exists('g:cmake_build_dir')
     let g:cmake_build_dir = ''
 endif
+if !exists('g:cmake_src_dir')
+    let g:cmake_src_dir = ''
+endif
 if !exists('g:cmake_build_dir_prefix')
     let g:cmake_build_dir_prefix = 'cmake-build-'
 endif
@@ -56,6 +59,12 @@ endif
 if !exists('g:cmake_usr_args')
     let g:cmake_usr_args = ''
 endif
+
+" Optional variable allow to specify the build executor
+" Possible values: 'job', 'dispatch', 'system', ''
+if !exists('g:cmake_build_executor')
+    let g:cmake_build_executor = ''
+endif
 " }}} Options "
 
 " Commands {{{ "
@@ -63,9 +72,11 @@ command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMake call cmake4vim
 command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args>)
 command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeBuild call cmake4vim#CMakeBuild(<f-args>)
 command! -nargs=1 -complete=custom,cmake4vim#CompleteTarget CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
+command! -nargs=1 -complete=custom,cmake4vim#CompleteBuildType CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
+command! -nargs=?  CTest call cmake4vim#CTest(<f-args>)
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
-command! CMakeInfo echon join(cmake4vim#GetCMakeInfo(), "\n")
+command! CMakeInfo call utils#window#OpenCMakeInfo()
 command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
 command! CMakeRun call cmake4vim#RunTarget()
 " }}} Commands "

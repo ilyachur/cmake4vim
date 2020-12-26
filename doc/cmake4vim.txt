@@ -2,11 +2,15 @@
 
 Authors:    Ilya Churaev <https://github.com/ilyachur>
 Licence:    GPLv3
-Version:    0.3.2
 
 INTRODUCTION                                                             *cmake*
 
-Plugin add CMake integration to Vim.
+Plugin adds CMake integration to Vim.
+At the current moment plugins supports next CMake generators:
+
+  * Unix Makefiles
+  * Visual Studio
+  * Ninja
 
 COMMANDS                                                        *cmake-commands*
 
@@ -14,14 +18,17 @@ COMMANDS                                                        *cmake-commands*
     Creates a build directory (if it is necessary) and generates cmake
     project.  All arguments are directly passed on to CMake.
 
-:CMakeBuild[{Args}]                                                     *:CMakeBuild*
+:CMakeBuild[{Args}]                                                *:CMakeBuild*
     Builds cmake project. You can specify the cmake target using the command
     line argument.
 
-:CMakeInfo                                                        *:CMakeInfo*
-    Prints some CMake parameters [Experimental feature]
+:CTest[{Args}]                                                     *:CTest*
+    Runs tests. You can pass additional ctest arguments.
 
-:CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
+:CMakeInfo                                                         *:CMakeInfo*
+    Creates a window with some CMake parameters
+
+:CMakeResetAndReload[{Args}]                                       *:CMakeResetAndReload*
     Removes cmake cache and re-generates cmake project.  All arguments are
     directly passed on to CMake.
 
@@ -62,6 +69,10 @@ VARIABLES                                                      *cmake-variables*
                                     all build. Default is ''.
                                     If variable is empty plugin uses build
                                     directory prefix plus the build type.
+
+*g:cmake_src_dir*                     allows to set cmake source directory.
+                                    Default is '' which evaluates to the
+                                    current working directory.
 
 *g:cmake_build_dir_prefix*            allows to set cmake build directory prefix.
                                     Default is 'cmake-build-'.
@@ -106,5 +117,9 @@ VARIABLES                                                      *cmake-variables*
                                     plugin will create a link on generated data
                                     base using the path from this variable.
                                     Default is empty.
+
+g:cmake_build_executor              allows to force set the build executor.
+                                    Available values are 'job', 'dispatch',
+                                    'system' and ''. Default is empty.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help

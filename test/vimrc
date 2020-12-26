@@ -11,7 +11,7 @@ syntax enable
 set runtimepath +=$HOME/.vim/plugged/vader.vim
 " set rtp+=$HOME/.fzf
 " set rtp+=$HOME/.vim/plugged/fzf.vim
-set runtimepath +=$PLUGIN_HOME
+exe 'set runtimepath +=' . expand('<sfile>:h').'/../'
 
 set winminheight=0
 set winheight=999
