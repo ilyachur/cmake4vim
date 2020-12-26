@@ -45,16 +45,58 @@ After:
     cd ..
 
 Execute (Should not find non-binary target):
-    silent! CMake
-    silent! CMakeBuild
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent CMakeBuild
+    if !has('win32')
+        AssertEqual g:cmake_build_target, 'all'
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    else
+        AssertEqual g:cmake_build_target, 'ALL_BUILD'
+        Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    endif
+    CMakeSelectTarget all
     let result = utils#cmake#getBinaryPath()
-    AssertEqual '', result
+    AssertEqual result, ''
 
 Execute (Should find binary target):
-    CMake
-    CMakeBuild
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent CMakeBuild
+    if !has('win32')
+        AssertEqual g:cmake_build_target, 'all'
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    else
+        AssertEqual g:cmake_build_target, 'ALL_BUILD'
+        Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+    endif
     CMakeSelectTarget test_app
     let result = utils#cmake#getBinaryPath()
     if !has('win32')
-    AssertEqual 'cmake-build-Release/app/test_app', result
+        AssertEqual result, 'cmake-build-Release/app/test_app'
+    else
+        AssertEqual result, 'cmake-build-Release/app/Debug/test_app.exe'
     endif
+
+Execute (Run test_app target and open quickfix):
+    silent CMake
+    silent CMakeBuild
+    silent CMakeSelectTarget test_app
+    silent CMakeRun
+    cope
+
+Expect (See 'F1' result in quickfix):
+  || F1
+
+Execute (Run non-binary target and open quickfix):
+    silent CMake
+    silent CMakeBuild
+    silent CMakeSelectTarget all
+    silent CMakeRun
+    AssertEqual v:errmsg , 'Executable "all" was not found'

@@ -188,7 +188,8 @@ function! cmake4vim#RunTarget() abort
     if strlen(l:exec_path)
         call utils#common#executeCommand(l:exec_path)
     else
-        echom 'Executable "' . g:cmake_build_target . '" was not found'
+        let v:errmsg = 'Executable "' . g:cmake_build_target . '" was not found'
+        call utils#common#Warning(v:errmsg)
     endif
 endfunction
 " }}} Public functions "
