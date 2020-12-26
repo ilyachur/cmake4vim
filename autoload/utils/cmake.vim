@@ -197,6 +197,6 @@ function! utils#cmake#getBinaryPath() abort
         let l:exec_filename = g:cmake_build_target
     endif
 
-    let l:exec_path = findfile(exec_filename, utils#cmake#getBuildDir() . '**')
+    let l:exec_path = findfile(fnameescape(exec_filename), fnameescape(utils#cmake#getBuildDir()) . '**/')
     return l:exec_path
 endfunction
