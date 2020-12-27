@@ -54,9 +54,11 @@ Execute (Should not find non-binary target):
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     else
-        AssertEqual g:cmake_build_target, 'ALL_BUILD'
-        Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        if utils#cmake#verNewerOrEq([3, 14])
+            AssertEqual g:cmake_build_target, 'ALL_BUILD'
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
     CMakeSelectTarget all
     let result = utils#cmake#getBinaryPath()
@@ -72,9 +74,11 @@ Execute (Should find binary target):
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     else
-        AssertEqual g:cmake_build_target, 'ALL_BUILD'
-        Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-        Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        if utils#cmake#verNewerOrEq([3, 14])
+            AssertEqual g:cmake_build_target, 'ALL_BUILD'
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
     endif
     CMakeSelectTarget test_app
     let result = utils#cmake#getBinaryPath()

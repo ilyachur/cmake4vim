@@ -191,7 +191,7 @@ endfunction
 
 function! utils#cmake#getBinaryPath() abort
     let l:cmake_info = utils#cmake#common#getInfo()
-    if has_key(l:cmake_info['targets'], g:cmake_build_target)
+    if has_key(l:cmake_info, 'targets') && has_key(l:cmake_info['targets'], g:cmake_build_target)
         let l:target = l:cmake_info['targets'][g:cmake_build_target]
         if l:target['type'] !=# 'EXECUTABLE'
             let v:errmsg = 'Target ' . g:cmake_build_target . 'is not an executable'
@@ -211,6 +211,6 @@ function! utils#cmake#getBinaryPath() abort
         let l:exec_filename = g:cmake_build_target
     endif
 
-    let l:exec_path = findfile(utils#fs#fnameescape(exec_filename), utils#fs#fnameescape(utils#cmake#getBuildDir()) . '**/')
+    let l:exec_path = findfile(utils#fs#fnameescape(exec_filename), utils#fs#fnameescape(utils#cmake#getBuildDir() . '**/'))
     return l:exec_path
 endfunction
