@@ -190,6 +190,20 @@ function! utils#cmake#getBuildDir() abort
 endfunction
 
 function! utils#cmake#getBinaryPath() abort
+    let l:cmake_info = utils#cmake#common#getInfo()
+    if has_key(l:cmake_info['targets'], g:cmake_build_target)
+        let l:target = l:cmake_info['targets'][g:cmake_build_target]
+        if l:target['type'] !=# 'EXECUTABLE'
+            let v:errmsg = 'Target ' . g:cmake_build_target . 'is not an executable'
+            call utils#common#Warning(v:errmsg)
+            return ''
+        endif
+        if has('win32')
+            return utils#fs#fnameescape(utils#cmake#getBuildDir() . '\' . l:target['pathes'][0])
+        else
+            return utils#fs#fnameescape(utils#cmake#getBuildDir() . '/' . l:target['pathes'][0])
+        endif
+    endif
     let l:exec_filename = ''
     if has('win32')
         let l:exec_filename = g:cmake_build_target . '.exe'
@@ -197,6 +211,6 @@ function! utils#cmake#getBinaryPath() abort
         let l:exec_filename = g:cmake_build_target
     endif
 
-    let l:exec_path = findfile(fnameescape(exec_filename), fnameescape(utils#cmake#getBuildDir()) . '**/')
+    let l:exec_path = findfile(utils#fs#fnameescape(exec_filename), utils#fs#fnameescape(utils#cmake#getBuildDir()) . '**/')
     return l:exec_path
 endfunction
