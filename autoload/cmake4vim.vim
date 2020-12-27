@@ -162,13 +162,9 @@ function! cmake4vim#CTest(...) abort
         call utils#common#Warning('CMake project was not found!')
         return
     endif
-    let l:old_target = g:cmake_build_target
-    let l:cmake_target = 'test'
-    let l:result = cmake4vim#SelectTarget(l:cmake_target) . ' ARGS="' . join(a:000) . '"'
+    let l:cmd = '(cd ' . utils#fs#fnameescape(l:build_dir) . ' && ctest ' . join(a:000) . ')'
     " Run
-    call utils#common#executeCommand(l:result)
-    " Set old target
-    call cmake4vim#SelectTarget(l:old_target)
+    call utils#common#executeCommand(l:cmd)
 endfunction
 
 " Functions allows to switch between build types
