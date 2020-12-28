@@ -2,7 +2,7 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 " Private functions {{{ "
-let s:job_cbs = []
+let s:cmake4vim_job = {}
 let s:cmake4vim_buf = 'cmake4vim_execute'
 let s:err_fmt = ''
 
@@ -63,17 +63,17 @@ function! s:createQuickFix() abort
 endfunction
 
 function! s:vimOut(channel, message) abort
-    if empty(s:job_cbs)
+    if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['channel']
         return
     endif
     call s:appendLine(a:message)
 endfunction
 
 function! s:vimExit(channel, message) abort
-    if empty(s:job_cbs)
+    if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['job']
         return
     endif
-    let s:job_cbs = []
+    let s:cmake4vim_job = {}
     call s:createQuickFix()
     if a:message != 0
         copen
@@ -81,7 +81,7 @@ function! s:vimExit(channel, message) abort
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
-    if empty(s:job_cbs)
+    if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
         return
     endif
     for val in a:data
@@ -90,10 +90,10 @@ function! s:nVimOut(job_id, data, event) abort
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
-    if empty(s:job_cbs)
+    if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
         return
     endif
-    let s:job_cbs = []
+    let s:cmake4vim_job = {}
     call s:createQuickFix()
     if a:data != 0
         copen
@@ -112,11 +112,11 @@ endfunction
 " }}} Private functions "
 
 function! utils#exec#job#stop() abort
-    if empty(s:job_cbs)
+    if empty(s:cmake4vim_job)
         return
     endif
-    let l:job = s:job_cbs[0]
-    let s:job_cbs = []
+    let l:job = s:cmake4vim_job['job']
+    let s:cmake4vim_job = {}
     try
         if has('nvim')
             call jobstop(l:job)
@@ -145,14 +145,19 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'on_stderr': function('s:nVimOut'),
                     \ 'on_exit': function('s:nVimExit'),
                     \ })
-        let s:job_cbs = [l:job]
+        let s:cmake4vim_job = {
+                    \ 'job': l:job
+                    \ }
     else
         let l:job = job_start(a:cmd, {
                     \ 'out_cb': function('s:vimOut'),
                     \ 'err_cb': function('s:vimOut'),
                     \ 'exit_cb': function('s:vimExit'),
                     \ })
-        let s:job_cbs = [l:job]
+        let s:cmake4vim_job = {
+                    \ 'job': l:job,
+                    \ 'channel': job_getchannel(l:job)
+                    \ }
     endif
     return l:job
 endfunction
