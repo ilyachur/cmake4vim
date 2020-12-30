@@ -37,6 +37,9 @@ endfunction
 function! s:parseTarget(path) abort
     let l:targetInfo = json_decode(join(readfile(a:path), ''))
     let l:pathes = []
+    if !has_key(l:targetInfo, 'artifacts')
+        return {'type': l:targetInfo['type']}
+    endif
     for l:artifact in l:targetInfo['artifacts']
         call add(l:pathes, l:artifact['path'])
     endfor
@@ -48,8 +51,9 @@ function! s:parseCodemodel(reply_folder, jsonFile, hash) abort
     let l:common = a:hash
     let l:targetsInfo = {}
     for l:configuration in l:codemodel['configurations']
+        let l:targetsInfo[l:configuration['name']] = {}
         for l:target in l:configuration['targets']
-            let l:targetsInfo[l:target['name']] = s:parseTarget(a:reply_folder . '/' . l:target['jsonFile'])
+            let l:targetsInfo[l:configuration['name']][l:target['name']] = s:parseTarget(a:reply_folder . '/' . l:target['jsonFile'])
         endfor
     endfor
     let l:common['cmake']['build_dir'] = l:codemodel['paths']['build']
