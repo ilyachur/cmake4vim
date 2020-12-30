@@ -83,9 +83,9 @@ Execute (Should find binary target):
     CMakeSelectTarget test_app
     let result = utils#cmake#getBinaryPath()
     if !has('win32')
-        AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir()) . '/app/test_app'
+        AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/test_app')
     else
-        AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir()) . '\app\Debug\test_app.exe'
+        AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Debug/test_app.exe')
     endif
 
 Execute (Run test_app target and open quickfix):

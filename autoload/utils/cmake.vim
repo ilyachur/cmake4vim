@@ -198,11 +198,7 @@ function! utils#cmake#getBinaryPath() abort
             call utils#common#Warning(v:errmsg)
             return ''
         endif
-        if has('win32')
-            return utils#fs#fnameescape(utils#cmake#getBuildDir() . '\' . l:target['pathes'][0])
-        else
-            return utils#fs#fnameescape(utils#cmake#getBuildDir() . '/' . l:target['pathes'][0])
-        endif
+        return utils#fs#fnameescape(utils#cmake#getBuildDir() . '/' . l:target['pathes'][0])
     endif
     let l:exec_filename = ''
     if has('win32')
