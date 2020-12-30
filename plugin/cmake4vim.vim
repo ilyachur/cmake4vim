@@ -78,5 +78,5 @@ command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo call utils#window#OpenCMakeInfo()
 command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
-command! CMakeRun call cmake4vim#RunTarget()
+command! -nargs=? CMakeRun call cmake4vim#RunTarget(<f-args>)
 " }}} Commands "
