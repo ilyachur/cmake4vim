@@ -64,7 +64,7 @@ function! cmake4vim#GenerateCMake(...) abort
 
     " For old CMake version need to change the directory to generate CMake project
     " -B option was introduced only in CMake 3.13
-    let l:src_dir = utils#cmake#findSrcDir()
+    let l:cw_dir = getcwd()
     if !utils#cmake#verNewerOrEq([3, 13])
         " Change work directory
         silent exec 'cd' l:build_dir
@@ -72,8 +72,8 @@ function! cmake4vim#GenerateCMake(...) abort
     " Generates CMake project
     call utils#common#executeCommand(l:cmake_cmd, s:getCMakeErrorFormat())
     if !utils#cmake#verNewerOrEq([3, 13])
-        " Change work directory to source folder
-        silent exec 'cd' l:src_dir
+        " Change work directory to old work directory
+        silent exec 'cd' l:cw_dir
     endif
 
     " Collect CMake Information
@@ -162,13 +162,14 @@ function! cmake4vim#CTest(...) abort
         call utils#common#Warning('CMake project was not found!')
         return
     endif
-    let l:old_target = g:cmake_build_target
-    let l:cmake_target = 'test'
-    let l:result = cmake4vim#SelectTarget(l:cmake_target) . ' ARGS="' . join(a:000) . '"'
+    let l:cw_dir = getcwd()
+    " Change work directory
+    silent exec 'cd' l:build_dir
+    let l:cmd = 'ctest ' . join(a:000)
     " Run
-    call utils#common#executeCommand(l:result)
-    " Set old target
-    call cmake4vim#SelectTarget(l:old_target)
+    call utils#common#executeCommand(l:cmd)
+    " Change work directory to old work directory
+    silent exec 'cd' l:cw_dir
 endfunction
 
 " Functions allows to switch between build types
