@@ -180,7 +180,7 @@ function! cmake4vim#SelectBuildType(buildType) abort
 endfunction
 
 function! cmake4vim#RunTarget(...) abort
-    if !exists('g:cmake_build_target')
+    if !exists('g:cmake_build_target') || g:cmake_build_target ==# ''
         echom 'Please select target first!'
         return
     endif
