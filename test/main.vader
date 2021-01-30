@@ -15,3 +15,4 @@ Include (Build with Ninja generator):                       ./tests/build/ninja_
 Include (Check CTest support):                              ./tests/build/ctest_run.vader
 Include (Build with job):                                   ./tests/build/job_run.vader
 Include (Build with Dispatch plugin):                       ./tests/build/check_dispatch.vader
+Include (Check run target support):                         ./tests/build/run_target.vader

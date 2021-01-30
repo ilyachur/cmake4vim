@@ -34,10 +34,30 @@ function! s:createQuery() abort
     return l:query
 endfunction
 
-function! s:parseCodemodel(path, hash) abort
-    let l:codemodel = json_decode(join(readfile(a:path), ''))
+function! s:parseTarget(path) abort
+    let l:targetInfo = json_decode(join(readfile(a:path), ''))
+    let l:pathes = []
+    if !has_key(l:targetInfo, 'artifacts')
+        return {'type': l:targetInfo['type']}
+    endif
+    for l:artifact in l:targetInfo['artifacts']
+        call add(l:pathes, l:artifact['path'])
+    endfor
+    return {'type': l:targetInfo['type'], 'pathes': l:pathes}
+endfunction
+
+function! s:parseCodemodel(reply_folder, jsonFile, hash) abort
+    let l:codemodel = json_decode(join(readfile(a:reply_folder . '/' . a:jsonFile), ''))
     let l:common = a:hash
+    let l:targetsInfo = {}
+    for l:configuration in l:codemodel['configurations']
+        let l:targetsInfo[l:configuration['name']] = {}
+        for l:target in l:configuration['targets']
+            let l:targetsInfo[l:configuration['name']][l:target['name']] = s:parseTarget(a:reply_folder . '/' . l:target['jsonFile'])
+        endfor
+    endfor
     let l:common['cmake']['build_dir'] = l:codemodel['paths']['build']
+    let l:common['targets'] = l:targetsInfo
     return l:common
 endfunction
 
@@ -70,7 +90,7 @@ function! s:parseAll(reply_folder, index) abort
     let l:responses = l:index['reply']['client-cmake4vim']['query.json']['responses']
     for l:resp in l:responses
         if l:resp['kind'] ==# 'codemodel'
-            let l:common = s:parseCodemodel(a:reply_folder . '/' . l:resp['jsonFile'], l:common)
+            let l:common = s:parseCodemodel(a:reply_folder, l:resp['jsonFile'], l:common)
         endif
         if l:resp['kind'] ==# 'cache'
             let l:common = s:parseCache(a:reply_folder . '/' . l:resp['jsonFile'], l:common)

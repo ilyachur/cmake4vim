@@ -55,6 +55,7 @@ The current version of the plugin supports next commands:
  - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
  - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
  - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
+ - **`:CMakeRun`** Run the current the binary of currently selected target (Dispatch will be used if installed).
 
 ### **Variables**
 

@@ -49,7 +49,11 @@ endfunction
 " Extends default fnameescape, adds double quotes for Windows
 function! utils#fs#fnameescape(file) abort
     if has('win32')
-        return '"' . substitute(a:file, '\/', '\\', 'g') . '"'
+        let l:path = substitute(a:file, '\/', '\\', 'g')
+        if l:path !=# ''
+            let l:path = '"' . l:path . '"'
+        endif
+        return l:path
     else
         return fnameescape(a:file)
     endif
