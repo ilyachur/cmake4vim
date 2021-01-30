@@ -52,6 +52,17 @@ Execute (Should not find non-binary target):
     let result = utils#cmake#getBinaryPath()
     AssertEqual result, ''
 
+Execute (Should not find library target):
+    if utils#cmake#verNewerOrEq([3, 14])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        CMakeSelectTarget test_lib
+        silent CMakeBuild
+        let result = utils#cmake#getBinaryPath()
+        AssertEqual result, ''
+    endif
+
 Execute (Should find binary target):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
@@ -74,6 +85,10 @@ Execute (Should find binary target):
             AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Debug/test_app.exe')
         endif
     endif
+
+Execute (Run for empty target):
+    let g:cmake_build_target=""
+    silent CMakeRun
 
 Execute (Run test_app target and open quickfix):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
