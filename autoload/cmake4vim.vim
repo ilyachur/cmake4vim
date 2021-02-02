@@ -187,7 +187,7 @@ function! cmake4vim#RunTarget(...) abort
 
     let l:exec_path = utils#cmake#getBinaryPath()
     if strlen(l:exec_path)
-        call utils#common#executeCommand(join([l:exec_path] + a:000) . ' ' . g:cmake_run_target_args, ' ')
+        call utils#common#executeCommand(join([l:exec_path] + a:000 + [g:cmake_run_target_args], ' '))
     else
         let v:errmsg = 'Executable "' . g:cmake_build_target . '" was not found'
         call utils#common#Warning(v:errmsg)
