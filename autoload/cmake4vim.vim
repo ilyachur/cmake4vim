@@ -109,7 +109,9 @@ function! cmake4vim#CleanCMake() abort
         return
     endif
 
+    let l:current_cmake_target = g:cmake_build_target
     call cmake4vim#CMakeBuild(l:clean_target)
+    call cmake4vim#SelectTarget(l:current_cmake_target)
 endfunction
 
 " Returns all CMake targets
