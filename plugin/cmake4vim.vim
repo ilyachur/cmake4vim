@@ -59,6 +59,9 @@ endif
 if !exists('g:cmake_usr_args')
     let g:cmake_usr_args = ''
 endif
+if !exists('g:cmake_run_target_args')
+    let g:cmake_run_target_args = ''
+endif
 
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''

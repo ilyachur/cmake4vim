@@ -67,6 +67,7 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_src_dir`** allows to set cmake source directory.  Default is '' which evaluates to the current working directory.
  - **`g:cmake_build_dir_prefix`** allows to set cmake build directory prefix. Default is 'cmake-build-'.
  - **`g:cmake_build_target`** set the target name for build. Default is empty and default value depends on CMake Generator
+ - **`g:cmake_run_target_args`** set the arguments for running the current target, e.g. '--gtest_filter=TestSuite.\*'. Default is empty
  - **`g:make_arguments`** allows to set custom parameters for make command. Default is empty. If variable is empty, plugin launches `make` without arguments.
  - **`g:cmake_project_generator`** allows to set the project generator for build scripts. Default is empty.
  - **`g:cmake_install_prefix`** allows to change **`-DCMAKE_INSTALL_PREFIX`**. Default is empty.
