@@ -59,6 +59,9 @@ endif
 if !exists('g:cmake_usr_args')
     let g:cmake_usr_args = ''
 endif
+if !exists('g:cmake_gen_vimspector')
+    let g:cmake_gen_vimspector = 0
+endif
 
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
@@ -78,5 +81,5 @@ command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo call utils#window#OpenCMakeInfo()
 command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
-command! -nargs=? CMakeRun call cmake4vim#RunTarget(<f-args>)
+command! -nargs=* CMakeRun call cmake4vim#RunTarget(<f-args>)
 " }}} Commands "

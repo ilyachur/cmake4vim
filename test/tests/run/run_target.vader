@@ -79,10 +79,10 @@ Execute (Should find binary target):
     endif
     let result = utils#cmake#getBinaryPath()
     if !has('win32')
-        AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/test_app')
+        AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/test_app')
     else
         if utils#cmake#verNewerOrEq([3, 14])
-            AssertEqual result, utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Debug/test_app.exe')
+            AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Debug/test_app.exe')
         endif
     endif
 

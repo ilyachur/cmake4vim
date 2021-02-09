@@ -204,11 +204,11 @@ function! utils#cmake#getBinaryPath() abort
             return ''
         endif
         if !has('win32')
-            return utils#fs#fnameescape(utils#cmake#getBuildDir() . '/' . l:target['pathes'][0])
+            return utils#cmake#getBuildDir() . '/' . l:target['pathes'][0]
         else
             for l:path in l:target['pathes']
                 if l:path =~# '\.exe'
-                    return utils#fs#fnameescape(utils#cmake#getBuildDir() . '/' . l:path)
+                    return utils#cmake#getBuildDir() . '/' . l:path
                 endif
             endfor
         endif
@@ -224,5 +224,5 @@ function! utils#cmake#getBinaryPath() abort
     if l:exec_path !=# ''
         let l:exec_path = fnamemodify(l:exec_path, ':p')
     endif
-    return utils#fs#fnameescape(l:exec_path)
+    return l:exec_path
 endfunction
