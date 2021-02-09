@@ -23,8 +23,8 @@ function! s:writeVimspectorConfig(content) abort
     q!
 endfunction
 
-function! s:writeJson(json_content)
-    let l:result = a:json_content->json_encode()
+function! s:writeJson(json_content) abort
+    let l:result = json_encode(a:json_content)
     " Apply pretty format if vim supports python3 (vimspector requires py3)
     if has('python3')
 py3 << EOF
