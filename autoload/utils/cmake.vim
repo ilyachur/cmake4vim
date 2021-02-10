@@ -68,9 +68,9 @@ endfunction
 function! utils#cmake#getVersion() abort
     let l:version_out = system('cmake --version')
     let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
-    let l:version_str = split(l:version_str, '\.')
+    let l:version_exp = split(l:version_str, '\.')
     let l:version = []
-    for l:val in l:version_str
+    for l:val in l:version_exp
         let l:version += [str2nr(l:val)]
     endfor
     return l:version
