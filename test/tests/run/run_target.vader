@@ -112,8 +112,8 @@ Execute (Run non-binary target and open quickfix):
     silent CMakeRun
     AssertEqual v:errmsg , 'Executable "all" was not found'
 
-Execute (Run test_app target and open quickfix):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+Execute (Run test_app target with runtime output and open quickfix):
+    if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
         silent CMake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/tmp
         silent CMakeSelectTarget test_app
         silent CMakeBuild
