@@ -141,6 +141,11 @@ Execute (Run test_app target and change vimspector config):
         Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
         Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
         AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 3
         AssertEqual config['configurations']['test_app']['configuration']['args'], ['1', '2', '3']
     else
@@ -172,7 +177,11 @@ Execute (Run test_app target with vimspector args):
         Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
         Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
         Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
-        AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
     else
         " WA to skip test
@@ -203,7 +212,11 @@ Execute (Run test_app target with reset vimspector args):
         Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
         Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
         Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
-        AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 0
     else
         " WA to skip test
