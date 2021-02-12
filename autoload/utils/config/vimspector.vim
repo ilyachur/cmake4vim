@@ -35,7 +35,6 @@ try:
     content = json.loads(json_content)
     sorted_content = json.dumps(content, indent=4, sort_keys=True)
     sorted_content = sorted_content.split('\n')
-    print(sorted_content)
     vim.command("let l:result = " + str(sorted_content))
 except Exception as e:
     print(e)

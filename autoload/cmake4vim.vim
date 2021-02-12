@@ -181,7 +181,7 @@ function! cmake4vim#SelectBuildType(buildType) abort
     call cmake4vim#GenerateCMake()
 endfunction
 
-function! cmake4vim#RunTarget(...) abort
+function! cmake4vim#RunTarget(bang, ...) abort
     if !exists('g:cmake_build_target') || g:cmake_build_target ==# ''
         echom 'Please select target first!'
         return
@@ -189,7 +189,7 @@ function! cmake4vim#RunTarget(...) abort
 
     let l:exec_path = utils#cmake#getBinaryPath()
     let l:args = a:000
-    if empty(l:args)
+    if empty(l:args) && a:bang == 0
         let l:old_conf = utils#config#vimspector#getTargetConfig(g:cmake_build_target)
         let l:args = l:old_conf['args']
     endif
