@@ -77,7 +77,7 @@ function! s:updateConfig(vimspector_config, targets_config) abort
         endif
         " Each target should have configuration section
         if !has_key(l:res_config[target], 'configuration') || !has_key(config, 'app') || !has_key(config, 'args')
-            return {}
+            throw 'Unsupported target configuration!'
         endif
         let l:res_config[target]['configuration']['program'] = config['app']
         let l:res_config[target]['configuration']['args'] = config['args']
@@ -99,7 +99,11 @@ function! utils#config#vimspector#updateConfig(config) abort
     endif
     let l:vimspector_config = s:readVimspectorConfig()
     if has_key(l:vimspector_config, 'configurations')
-        let l:vimspector_config['configurations'] = s:updateConfig(l:vimspector_config['configurations'], a:config)
+        try
+            let l:vimspector_config['configurations'] = s:updateConfig(l:vimspector_config['configurations'], a:config)
+        catch
+            let l:vimspector_config = {}
+        endtry
     endif
     if !has_key(l:vimspector_config, 'configurations')
         call utils#common#Warning('Unsupported vimspector format!')
