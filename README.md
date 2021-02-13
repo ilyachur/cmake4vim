@@ -57,8 +57,8 @@ The current version of the plugin supports next commands:
  - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
  - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
  - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
- - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the vimspector config file. **Attention! The support of [Vimspector](https://github.com/puremourning/vimspector) config is experimental feature.**
- - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is experimental feature.**
+ - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is an experimental feature.**
 
 ### **Variables**
 
@@ -80,7 +80,7 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
- - **`g:cmake_gen_vimspector`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is experimental feature.**
+ - **`g:cmake_gen_vimspector`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
 
 
 ### **Jump to**
