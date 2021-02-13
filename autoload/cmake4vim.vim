@@ -181,15 +181,23 @@ function! cmake4vim#SelectBuildType(buildType) abort
     call cmake4vim#GenerateCMake()
 endfunction
 
-function! cmake4vim#RunTarget(...) abort
+function! cmake4vim#RunTarget(bang, ...) abort
     if !exists('g:cmake_build_target') || g:cmake_build_target ==# ''
         echom 'Please select target first!'
         return
     endif
 
     let l:exec_path = utils#cmake#getBinaryPath()
+    let l:args = a:000
+    if empty(l:args) && a:bang == 0
+        let l:old_conf = utils#config#vimspector#getTargetConfig(g:cmake_build_target)
+        let l:args = l:old_conf['args']
+    endif
+    let l:conf = {}
+    let l:conf[g:cmake_build_target] = {'app': l:exec_path, 'args': l:args}
+    call utils#config#vimspector#updateConfig(l:conf)
     if strlen(l:exec_path)
-        call utils#common#executeCommand(join([l:exec_path] + a:000, ' '))
+        call utils#common#executeCommand(join([utils#fs#fnameescape(l:exec_path)] + l:args, ' '))
     else
         let v:errmsg = 'Executable "' . g:cmake_build_target . '" was not found'
         call utils#common#Warning(v:errmsg)
