@@ -48,7 +48,7 @@ Execute (Generate cmake project with default settings):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let iter = 0
-        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
             sleep 1
             let iter += 1
         endwhile
@@ -60,7 +60,7 @@ Execute (Generate cmake project with default settings and build error target):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let iter = 0
-        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
             sleep 1
             let iter += 1
         endwhile
@@ -69,7 +69,7 @@ Execute (Generate cmake project with default settings and build error target):
         silent on
         let iter = 0
         let window_counter = 0
-        while iter < 30
+        while iter < 40
             windo let window_counter = window_counter + 1
             if window_counter > 1
                 break
