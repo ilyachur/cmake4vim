@@ -72,20 +72,23 @@ Execute (Avoid incorrect vimspector configs):
     Assert empty(config), "Config should be empty!"
 
 Execute (Read incorrect vimspector config):
-    Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
-    " Create incorrect config
-    new
-    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-    let text = join(readfile('../tests/integration/vimspector.vader'), '')
-    put=text
-    execute 'w! .vimspector.json'
-    q
-    Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
-    let config = utils#config#vimspector#updateConfig({})
-    Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
-    Assert empty(config), "Config should be empty!"
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/vimspector.vader'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        Assert empty(config), "Config should be empty!"
+    endif
 
 Execute (Read correct vimspector config):
+    if !has('win32')
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     " Create incorrect config
     new
@@ -105,8 +108,10 @@ Execute (Read correct vimspector config):
     AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
 
     Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
+    endif
 
 Execute (Change correct vimspector config):
+    if !has('win32')
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     " Create incorrect config
     new
@@ -126,8 +131,10 @@ Execute (Change correct vimspector config):
     AssertEqual len(config['configurations']['test_app']['configuration']['args']), 0
 
     Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
+    endif
 
 Execute (Change correct vimspector config to incorrect data):
+    if !has('win32')
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     " Create incorrect config
     new
@@ -139,6 +146,7 @@ Execute (Change correct vimspector config to incorrect data):
     Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
     let config = utils#config#vimspector#updateConfig({'test_app': {}})
     Assert empty(config), "Config should be empty!"
+    endif
 
 Execute (Run test_app target and change vimspector config):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
