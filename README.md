@@ -25,7 +25,8 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 * The plugin parses the output of cmake command and supports jump to warnings or errors.
 * Supports work with multiple build types
 * For CMake newer than 3.13 the plugin uses the CMake file API
-* Plugin allows to find and run executable file for selected target. Moreover plugin can generate and modify vimspector configuration file in order to save command line arguments and allows to debug application.
+* Plugin allows to find and run executable file for selected target.
+* Plugin supports [Vimspector](https://github.com/puremourning/vimspector) plugin. Plugin can generate and modify Vimspector configuration file in order to save command line arguments and allows to debug application.
 
 ## **Usage**
 
@@ -56,8 +57,8 @@ The current version of the plugin supports next commands:
  - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
  - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
  - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
- - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the vimspector config file.
- - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from vimspector plugin.
+ - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the vimspector config file. **Attention! The support of [Vimspector](https://github.com/puremourning/vimspector) config is experimental feature.**
+ - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is experimental feature.**
 
 ### **Variables**
 
@@ -79,7 +80,8 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
- - **`g:cmake_gen_vimspector`** enables generation and modification of Vimspector config file.
+ - **`g:cmake_gen_vimspector`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is experimental feature.**
+
 
 ### **Jump to**
 
