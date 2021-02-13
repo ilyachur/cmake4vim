@@ -91,7 +91,7 @@ endfunction
 "           "target_name": {"app": "path", "args", [...]}
 "     }
 function! utils#config#vimspector#updateConfig(config) abort
-    if !g:cmake_gen_vimspector
+    if !g:cmake_vimspector_support
         return {}
     endif
     if !filereadable(s:getVimspectorConfig())

@@ -126,7 +126,7 @@ g:cmake_build_executor              allows to force set the build executor.
                                     Available values are 'job', 'dispatch',
                                     'system' and ''. Default is empty.
 
-g:cmake_gen_vimspector              enables support of vimspector config.
+g:cmake_vimspector_support          enables support of vimspector config.
                                     Plugin can read and change command line
                                     arguments for the selected target in
                                     vimspector config.
