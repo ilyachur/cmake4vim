@@ -59,8 +59,8 @@ endif
 if !exists('g:cmake_usr_args')
     let g:cmake_usr_args = ''
 endif
-if !exists('g:cmake_gen_vimspector')
-    let g:cmake_gen_vimspector = 0
+if !exists('g:cmake_vimspector_support')
+    let g:cmake_vimspector_support = 0
 endif
 
 " Optional variable allow to specify the build executor
