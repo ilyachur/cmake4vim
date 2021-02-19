@@ -34,7 +34,7 @@ endfunction
 
 " Completes CMake build types
 function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
-    let l:sorted_targets = utils#cmake#getDefaultBuildTypes()
+    let l:sorted_targets = keys( g:cmake_variants) + utils#cmake#getDefaultBuildTypes()
     return join(l:sorted_targets, "\n")
 endfunction
 
@@ -174,9 +174,21 @@ function! cmake4vim#CTest(...) abort
     silent exec 'cd' l:cw_dir
 endfunction
 
+function! cmake4vim#populateDefaultCmakeVariants() abort
+    for build in utils#cmake#getDefaultBuildTypes()
+        if build !=# ''
+            g:cmake_variants[ build ][ 'cmake_build_type' ] = build
+            g:cmake_variants[ build ][ 'cmake_usr_args'   ] = g:cmake_usr_args
+        endif
+    endfor
+endfunction
+
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
-    let g:cmake_build_type = a:buildType
+    " TODO: this should be called only once
+    call cmake4vim#populateDefaultCmakeVariants()
+    let g:cmake_build_type = g:cmake_variants[ a:build_type ][ 'cmake_build_type' ]
+    let g:cmake_usr_args   = g:cmake_variants[ a:build_type ][ 'cmake_usr_args'   ]
 
     call cmake4vim#GenerateCMake()
 endfunction

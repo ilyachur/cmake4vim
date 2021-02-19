@@ -63,6 +63,8 @@ if !exists('g:cmake_vimspector_support')
     let g:cmake_vimspector_support = 0
 endif
 
+let g:cmake_variants = get( g:, 'cmake_variants', {} )
+
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
 if !exists('g:cmake_build_executor')
