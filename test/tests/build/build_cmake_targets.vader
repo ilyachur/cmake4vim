@@ -36,6 +36,7 @@ Before:
     let g:cmake_reload_after_save=0
     let g:cmake_build_dir_prefix="cmake-build-"
     let g:cmake_build_executor = 'system'
+    let g:cmake_variants = {}
     " Use on in order to close all windows and avoid E36 error
     silent on
 
@@ -211,6 +212,86 @@ Execute (Get cmake targets):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = split(cmake4vim#CompleteTarget(0,0,0), "\n")
         Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Get custom build types):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+        AssertEqual len(result), 5
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Override default build types):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        let g:cmake_variants = { 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+        AssertEqual len(result), 4
+        AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ] ==# '-DCUSTOM_OP=ON'
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Store g:cmake_usr_args with default build types):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        let g:cmake_usr_args = '-DCUSTOM_OP=ON'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+        AssertEqual len(result), 4
+        for build_type in g:cmake_variants
+            AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ] ==# '-DCUSTOM_OP'
+        endfor
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Restore default build types):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        let default_usr_args = '-DDEFAULT_OP=ON'
+        let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
+        let g:cmake_usr_args = default_usr_args
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent cmake4vim#CompleteBuildType(0,0,0)
+        AssertEqual len(result), 5
+        silent CMakeSelectBuildType custom-build
+        AssertEqual g:cmake_usr_args, g:cmake_variants[ 'custom-build' ]
+        silent CMakeSelectBuildType Release
+        AssertEqual g:cmake_usr_args, default_usr_args
+    else
+        echom 'SKIPPED'
+    endif
+
+Execute (Only default build types have default values):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
+        let g:cmake_usr_args = '-DDEFAULT_OP=ON'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+        AssertEqual len(result), 5
+        for build_type in filter( items( g:cmake_variants ), "v:val !=# 'custom-build'" )
+            AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], '-DDEFAULT_OP=ON'
+        endfor
+        AssertEqual g:cmake_variants[ 'custom-build' ][ 'cmake_usr_args' ], '-DCUSTOM_OP=ON'
     else
         echom 'SKIPPED'
     endif
