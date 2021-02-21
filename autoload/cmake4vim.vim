@@ -193,6 +193,11 @@ endfunction
 
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
+    " so it's called only once
+    if ( !exists( 's:initialized_default_build_types' ) )
+        call cmake4vim#populateDefaultCMakeVariants()
+    endif
+    let s:initialized_default_build_types = v:true
     let g:cmake_build_type = g:cmake_variants[ a:buildType ][ 'cmake_build_type' ]
     let g:cmake_usr_args   = g:cmake_variants[ a:buildType ][ 'cmake_usr_args'   ]
 
