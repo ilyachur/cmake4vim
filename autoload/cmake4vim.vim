@@ -32,19 +32,23 @@ function! cmake4vim#CompleteTarget(arg_lead, cmd_line, cursor_pos) abort
     return join(l:sorted_targets, "\n")
 endfunction
 
+function! cmake4vim#populateDefaultCMakeVariants() abort
+    for build_type in filter( utils#cmake#getDefaultBuildTypes(), "v:val !=# ''" )
+        if ( !has_key( g:cmake_variants, build_type ) )
+            let g:cmake_variants[ build_type ] =
+                \ {
+                \   'cmake_build_type' : build_type,
+                \   'cmake_usr_args'   : g:cmake_usr_args
+                \ }
+        endif
+    endfor
+endfunction
+
 " Completes CMake build types
 function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
     " so it's called only once
     if ( !exists( 's:initialized_default_build_types' ) )
-        for build_type in filter( utils#cmake#getDefaultBuildTypes(), "v:val !=# ''" )
-            if ( !has_key( g:cmake_variants, build_type ) )
-                let g:cmake_variants[ build_type ] =
-                    \ {
-                    \   'cmake_build_type' : build_type,
-                    \   'cmake_usr_args'   : g:cmake_usr_args
-                    \ }
-            endif
-        endfor
+        call cmake4vim#populateDefaultCMakeVariants()
     endif
     let s:initialized_default_build_types = v:true
 
