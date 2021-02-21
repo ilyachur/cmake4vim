@@ -193,8 +193,8 @@ endfunction
 
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
-    let g:cmake_build_type = g:cmake_variants[ a:build_type ][ 'cmake_build_type' ]
-    let g:cmake_usr_args   = g:cmake_variants[ a:build_type ][ 'cmake_usr_args'   ]
+    let g:cmake_build_type = g:cmake_variants[ a:buildType ][ 'cmake_build_type' ]
+    let g:cmake_usr_args   = g:cmake_variants[ a:buildType ][ 'cmake_usr_args'   ]
 
     call cmake4vim#GenerateCMake()
 endfunction
