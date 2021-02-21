@@ -238,7 +238,7 @@ Execute (Override default build types):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
         AssertEqual len(result), 4
-        AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ] ==# '-DCUSTOM_OP=ON'
+        AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ], '-DCUSTOM_OP=ON'
     else
         echom 'SKIPPED'
     endif
@@ -253,7 +253,7 @@ Execute (Store g:cmake_usr_args with default build types):
         let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
         AssertEqual len(result), 4
         for build_type in g:cmake_variants
-            AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ] ==# '-DCUSTOM_OP'
+            AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], '-DCUSTOM_OP'
         endfor
     else
         echom 'SKIPPED'
@@ -268,7 +268,7 @@ Execute (Restore default build types):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent cmake4vim#CompleteBuildType(0,0,0)
+        let result = cmake4vim#CompleteBuildType(0,0,0)
         AssertEqual len(result), 5
         silent CMakeSelectBuildType custom-build
         AssertEqual g:cmake_usr_args, g:cmake_variants[ 'custom-build' ]
