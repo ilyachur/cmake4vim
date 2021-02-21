@@ -52,7 +52,7 @@ function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
     endif
     let s:initialized_default_build_types = v:true
 
-    return join( keys( g:cmake_variants ), "\n")
+    return join( sort( keys( g:cmake_variants ), 'i' ), "\n")
 endfunction
 
 " Method remove build directory and reset the cmake cache
