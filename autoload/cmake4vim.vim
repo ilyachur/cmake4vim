@@ -34,8 +34,21 @@ endfunction
 
 " Completes CMake build types
 function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
-    let l:sorted_targets = keys( g:cmake_variants) + utils#cmake#getDefaultBuildTypes()
-    return join(l:sorted_targets, "\n")
+    " so it's called only once
+    if ( !exists( 's:initialized_default_build_types' ) )
+        for build_type in filter( utils#cmake#getDefaultBuildTypes(), "v:val !=# ''" )
+            if ( !has_key( g:cmake_variants, build_type ) )
+                let g:cmake_variants[ build_type ] =
+                    \ {
+                    \   'cmake_build_type' : build_type,
+                    \   'cmake_usr_args'   : g:cmake_usr_args
+                    \ }
+            endif
+        endfor
+    endif
+    let s:initialized_default_build_types = v:true
+
+    return join( keys( g:cmake_variants ), "\n")
 endfunction
 
 " Method remove build directory and reset the cmake cache
@@ -174,19 +187,8 @@ function! cmake4vim#CTest(...) abort
     silent exec 'cd' l:cw_dir
 endfunction
 
-function! cmake4vim#populateDefaultCmakeVariants() abort
-    for build in utils#cmake#getDefaultBuildTypes()
-        if build !=# ''
-            g:cmake_variants[ build ][ 'cmake_build_type' ] = build
-            g:cmake_variants[ build ][ 'cmake_usr_args'   ] = g:cmake_usr_args
-        endif
-    endfor
-endfunction
-
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
-    " TODO: this should be called only once
-    call cmake4vim#populateDefaultCmakeVariants()
     let g:cmake_build_type = g:cmake_variants[ a:build_type ][ 'cmake_build_type' ]
     let g:cmake_usr_args   = g:cmake_variants[ a:build_type ][ 'cmake_usr_args'   ]
 
