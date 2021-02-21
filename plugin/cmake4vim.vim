@@ -82,6 +82,5 @@ command! -nargs=?  CTest call cmake4vim#CTest(<f-args>)
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo call utils#window#OpenCMakeInfo()
-command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
 command! -bang -nargs=* CMakeRun call cmake4vim#RunTarget(<bang>0, <f-args>)
 " }}} Commands "
