@@ -9,6 +9,7 @@ if !exists(':FZF')
 endif
 
 command! -bang -nargs=* FZFCMakeSelectTarget call fzf#cmake4vim#SelectTarget(<q-args>, <bang>0)
+command! FZFCMakeSelectBuildType call fzf#cmake4vim#SelectBuildType()
 
 let &cpoptions = s:old_cpo
 unlet s:old_cpo

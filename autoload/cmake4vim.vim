@@ -44,14 +44,14 @@ function! s:populateDefaultCMakeVariants() abort
     endfor
 endfunction
 
-function! s:getCMakeVariants() abort
+function! cmake4vim#GetCMakeVariants() abort
     call s:populateDefaultCMakeVariants()
     return g:cmake_variants
 endfunction
 
 " Completes CMake build types
 function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
-    return join( sort( keys( s:getCMakeVariants() ), 'i' ), "\n")
+    return join( sort( keys( cmake4vim#GetCMakeVariants() ), 'i' ), "\n")
 endfunction
 
 " Method remove build directory and reset the cmake cache
@@ -192,7 +192,7 @@ endfunction
 
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
-    let l:cmake_variants = s:getCMakeVariants()
+    let l:cmake_variants = cmake4vim#GetCMakeVariants()
     let g:cmake_build_type = l:cmake_variants[ a:buildType ][ 'cmake_build_type' ]
     let g:cmake_usr_args   = l:cmake_variants[ a:buildType ][ 'cmake_usr_args'   ]
 
