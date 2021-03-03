@@ -96,7 +96,8 @@ VARIABLES                                                      *cmake-variables*
 *g:cmake_install_prefix*              allows to change -DCMAKE_INSTALL_PREFIX.
                                     Default is empty.
 
-*g:cmake_build_type*                  allows to change -DCMAKE_BUILD_TYPE.
+*g:cmake_build_type*                  allows to change -DCMAKE_BUILD_TYPE
+                                    through the g:cmake_variants variable.
                                     Default is empty.
                                     If variable is empty, plugin tries to
                                     detect cached build type.
@@ -130,5 +131,10 @@ g:cmake_vimspector_support          enables support of vimspector config.
                                     Plugin can read and change command line
                                     arguments for the selected target in
                                     vimspector config.
+
+`g:cmake_variants                   enables predefined cmake build variants
+                                    in the form of a dictionary.
+                                    It is populated by default CMake
+                                    build types.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help

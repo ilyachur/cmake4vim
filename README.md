@@ -89,7 +89,7 @@ Plugin supports special global variables which are allow to change behaviour of 
 Plugin is closely integrated with quickfix list and allows to use quickfix features to jump between error or warning messages.
 
  - **:cp[revious]** command jumps to previous error/warning message
- - **:cn[ext]** command jumps to next error/warning message
+ - **:cn[ext]**     command jumps to next     error/warning message
 
 ## Demos
 

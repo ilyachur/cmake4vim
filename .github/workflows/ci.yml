@@ -32,6 +32,7 @@ jobs:
   tests:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     strategy:
+      fail-fast: false
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
