@@ -197,7 +197,11 @@ function! cmake4vim#RunTarget(bang, ...) abort
     let l:conf[g:cmake_build_target] = {'app': l:exec_path, 'args': l:args}
     call utils#config#vimspector#updateConfig(l:conf)
     if strlen(l:exec_path)
-        silent! let l:status = system('command -v noglob')
+        if has('win32')
+            let l:status = ''
+        else
+            silent! let l:status = system('command -v noglob')
+        endif
         if l:status !~# '\w\+'
             let l:noglob = ''
         else
