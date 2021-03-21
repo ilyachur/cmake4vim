@@ -198,7 +198,7 @@ function! cmake4vim#RunTarget(bang, ...) abort
     call utils#config#vimspector#updateConfig(l:conf)
     if strlen(l:exec_path)
         silent! let l:status = system('command -v noglob')
-        if l:status !~ '\w\+'
+        if l:status !~# '\w\+'
             let l:noglob = ''
         else
             let l:noglob = 'noglob'
