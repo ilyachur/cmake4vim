@@ -126,3 +126,18 @@ Execute (Run test_app target with runtime output and open quickfix):
 
 Expect (See '123 F1' result in quickfix):
   || 123 F1
+
+Execute (Run test_app target with mask arguments):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        silent CMakeRun --gtest_filter=Test*
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1')
+    endif
+    cope
+
+Expect (See 'F1' result in quickfix):
+  || --gtest_filter=Test* F1

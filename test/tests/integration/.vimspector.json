@@ -6,7 +6,7 @@
                 "type": "cppdbg",
                 "request": "launch",
                 "program": "${workspaceRoot}/test_app",
-                "args": ["1", "2", "3", "4"],
+                "args": ["1", "2", "3*", "4"],
                 "cwd": "${workspaceRoot}",
                 "externalConsole": false,
                 "stopAtEntry": true,

@@ -205,11 +205,11 @@ Execute (Run test_app target with vimspector args):
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
     else
         " WA to skip test
-        call utils#common#executeCommand('echo 1 2 3 4 F1')
+        call utils#common#executeCommand('echo 1 2 3* 4 F1')
     endif
 
-Expect (See '1 2 3 4 F1' result in quickfix):
-  || 1 2 3 4 F1
+Expect (See '1 2 3* 4 F1' result in quickfix):
+  || 1 2 3* 4 F1
 
 Execute (Run test_app target with reset vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
