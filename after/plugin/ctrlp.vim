@@ -8,7 +8,8 @@ endif
 let s:old_cpo = &cpoptions
 set cpoptions&vim
 
-command! CtrlPCMakeTarget call ctrlp#init(ctrlp#cmake4vim#id())
+command! CtrlPCMakeTarget    call ctrlp#init(ctrlp#cmake4vim#TargetID())
+command! CtrlPCMakeBuildType call ctrlp#init(ctrlp#cmake4vim#BuildTypeID())
 
 let &cpoptions = s:old_cpo
 unlet s:old_cpo
