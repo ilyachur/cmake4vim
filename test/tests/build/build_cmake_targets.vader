@@ -7,10 +7,18 @@ Before:
         endif
     endfunction
 
+    function! RemoveDirectory(folder)
+        if has('win32')
+            silent echo system(printf('rd /S /Q "%s" >nul 2>&1', a:folder))
+        else
+            silent echo system(printf('rm -rf "%s"', a:folder))
+        endif
+    endfunction
+
     function! RemoveCMakeDirs()
         if has('win32')
             for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
-                silent echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
+                silent call RemoveDirectory(l:value)
             endfor
         else
             silent echo system("rm -rf cmake-build*")
@@ -271,6 +279,7 @@ Execute (Restore default build types):
         let result = split( cmake4vim#CompleteBuildType(0,0,0), "\n" )
         AssertEqual len(result), 5
         silent CMakeSelectBuildType custom-build
+        silent call RemoveDirectory("cmake-build-custom-build")
         AssertEqual g:cmake_usr_args, g:cmake_variants[ 'custom-build' ][ 'cmake_usr_args' ]
         silent CMakeSelectBuildType Release
         AssertEqual g:cmake_usr_args, default_usr_args

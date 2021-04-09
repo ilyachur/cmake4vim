@@ -54,7 +54,7 @@ jobs:
             vim_executable: nvim
 
     runs-on: '${{ matrix.os  }}'
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
     - name: Clone CMake4Vim
