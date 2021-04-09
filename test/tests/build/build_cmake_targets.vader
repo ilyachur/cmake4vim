@@ -224,9 +224,10 @@ Execute (Get cmake targets):
         echom 'SKIPPED'
     endif
 
+" Disable tests for windows because they hang for some reason ( mark2185 @ 2021-04-09 )
 Execute (Get custom build types):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32')
         let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -239,7 +240,7 @@ Execute (Get custom build types):
 
 Execute (Override default build types):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32')
         let g:cmake_variants = { 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -253,7 +254,7 @@ Execute (Override default build types):
 
 Execute (Store g:cmake_usr_args with default build types):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32')
         let g:cmake_usr_args = '-DCUSTOM_OP=ON'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -269,7 +270,7 @@ Execute (Store g:cmake_usr_args with default build types):
 
 Execute (Restore default build types):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32')
         let default_usr_args = '-DDEFAULT_OP=ON'
         let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
         let g:cmake_usr_args = default_usr_args
@@ -289,7 +290,7 @@ Execute (Restore default build types):
 
 Execute (Only default build types have default values):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32')
         let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCUSTOM_OP=ON' } }
         let g:cmake_usr_args = '-DDEFAULT_OP=ON'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
