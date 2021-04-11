@@ -63,6 +63,8 @@ if !exists('g:cmake_vimspector_support')
     let g:cmake_vimspector_support = 0
 endif
 
+let g:cmake_variants = get( g:, 'cmake_variants', {} )
+
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
 if !exists('g:cmake_build_executor')
@@ -80,6 +82,5 @@ command! -nargs=?  CTest call cmake4vim#CTest(<f-args>)
 command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo call utils#window#OpenCMakeInfo()
-command! -nargs=1 CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
 command! -bang -nargs=* CMakeRun call cmake4vim#RunTarget(<bang>0, <f-args>)
 " }}} Commands "

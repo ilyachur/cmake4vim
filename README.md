@@ -81,6 +81,7 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCONAN_PATH=~/.conan' } }`
 
 
 ### **Jump to**
@@ -88,7 +89,7 @@ Plugin supports special global variables which are allow to change behaviour of 
 Plugin is closely integrated with quickfix list and allows to use quickfix features to jump between error or warning messages.
 
  - **:cp[revious]** command jumps to previous error/warning message
- - **:cn[ext]** command jumps to next error/warning message
+ - **:cn[ext]**     command jumps to next     error/warning message
 
 ## Demos
 

@@ -13,11 +13,8 @@ function! s:detectCMakeBuildType() abort
     " WA for recursive DetectBuildDir, try to find the first valid cmake directory
     let l:build_dir = ''
     if g:cmake_build_dir ==# ''
-        for l:type in utils#cmake#getDefaultBuildTypes()
-            let l:build_dir = 'cmake-build'
-            if l:type !=# ''
-                let l:build_dir .= '-' . l:type
-            endif
+        for l:type in keys( utils#cmake#getCMakeVariants() )
+            let l:build_dir = 'cmake-build-' . l:type
             let l:build_dir = finddir(l:build_dir, getcwd().';.')
             if l:build_dir !=# ''
                 break
@@ -56,11 +53,29 @@ function! s:detectCMakeSrcDir() abort
     endif
     return getcwd()
 endfunction
+
+function! s:populateDefaultCMakeVariants() abort
+    for build_type in filter( utils#cmake#getDefaultBuildTypes(), "v:val !=# ''" )
+        if ( !has_key( g:cmake_variants, build_type ) )
+            let g:cmake_variants[ build_type ] =
+                \ {
+                \   'cmake_build_type' : build_type,
+                \   'cmake_usr_args'   : g:cmake_usr_args
+                \ }
+        endif
+    endfor
+endfunction
 " }}} Private functions "
 
 " Returns the list of default CMake build types
 function! utils#cmake#getDefaultBuildTypes() abort
     return ['Release', 'Debug', 'RelWithDebInfo', 'MinSizeRel', '']
+endfunction
+
+" Return the names of possible builds, includes default CMake build types
+function! utils#cmake#getCMakeVariants() abort
+    call s:populateDefaultCMakeVariants()
+    return g:cmake_variants
 endfunction
 
 " Gets CMake version
@@ -119,10 +134,11 @@ endfunction
 function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:build_dir = utils#cmake#findBuildDir()
     let l:src_dir = utils#cmake#findSrcDir()
+    let l:cmake_variant = utils#cmake#getCMakeVariants()[ s:detectCMakeBuildType() ]
     let l:cmake_args = []
 
     " Set build type
-    let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . s:detectCMakeBuildType()]
+    let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . l:cmake_variant['cmake_build_type']]
     " Specify generator
     if g:cmake_project_generator !=# ''
         let l:cmake_args += ['-G "' . g:cmake_project_generator . '"']
@@ -142,9 +158,7 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
         let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
     endif
     " Add user arguments
-    if g:cmake_usr_args !=# ''
-        let l:cmake_args += [g:cmake_usr_args]
-    endif
+    let l:cmake_args += [l:cmake_variant['cmake_usr_args']]
 
     " Generates the command line
     let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)

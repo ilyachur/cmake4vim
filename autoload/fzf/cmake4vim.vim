@@ -16,3 +16,12 @@ function! fzf#cmake4vim#SelectTarget(...) abort
     endif
 endfunction
 
+function! fzf#cmake4vim#SelectBuildType() abort
+    if exists(':FZF')
+        return fzf#run({
+                    \ 'source': sort( keys( utils#cmake#getCMakeVariants() ), 'i' ),
+                    \ 'options': '+m -n 1 --prompt CMakeBuildType\>\ ',
+                    \ 'down':    '30%',
+                    \ 'sink':    function('cmake4vim#SelectBuildType')})
+    endif
+endfunction
