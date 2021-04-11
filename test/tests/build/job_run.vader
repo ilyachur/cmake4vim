@@ -84,7 +84,7 @@ Execute (Generate cmake project with default settings and build error target):
     endif
 
 Execute (Generate cmake project with default settings in template buffer):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let winnr = bufwinnr('cmake4vim_execute')
