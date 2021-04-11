@@ -84,7 +84,7 @@ Execute (Generate cmake project with default settings and build error target):
     endif
 
 Execute (Generate cmake project with default settings in template buffer):
-    if !has('win32')    " Skip for Windows
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let winnr = bufwinnr('cmake4vim_execute')
@@ -99,6 +99,8 @@ Execute (Generate cmake project with default settings in template buffer):
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt") || iter < 40, "CMakeCache.txt should be generated"
+    else
+        echom 'SKIPPED'
     endif
 
 Execute (Check job cancel command without run):
