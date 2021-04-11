@@ -22,6 +22,7 @@ function! s:appendLine(text) abort
             silent call append('$', a:text)
         endif
     else
+        setlocal modifiable
         silent call append('$', a:text)
     endif
     $
@@ -55,11 +56,13 @@ function! s:createQuickFix() abort
     if s:err_fmt !=# ''
         let &errorformat = s:err_fmt
     endif
-    execute 'cbuffer ' . l:bufnr
+    execute 'cgetbuffer ' . l:bufnr
     call s:closeBuffer()
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
+    " Remove cmake4vim job
+    let s:cmake4vim_job = {}
 endfunction
 
 function! s:vimOut(channel, message) abort
@@ -73,7 +76,6 @@ function! s:vimExit(channel, message) abort
     if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['job']
         return
     endif
-    let s:cmake4vim_job = {}
     call s:createQuickFix()
     if a:message != 0
         copen
@@ -93,7 +95,6 @@ function! s:nVimExit(job_id, data, event) abort
     if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
         return
     endif
-    let s:cmake4vim_job = {}
     call s:createQuickFix()
     if a:data != 0
         copen
@@ -116,7 +117,6 @@ function! utils#exec#job#stop() abort
         return
     endif
     let l:job = s:cmake4vim_job['job']
-    let s:cmake4vim_job = {}
     try
         if has('nvim')
             call jobstop(l:job)
@@ -125,7 +125,8 @@ function! utils#exec#job#stop() abort
         endif
     catch
     endtry
-    call s:closeBuffer()
+    call s:createQuickFix()
+    copen
     echom 'Job is canceled!'
 endfunction
 
