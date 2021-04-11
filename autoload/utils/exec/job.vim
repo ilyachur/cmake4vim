@@ -56,7 +56,7 @@ function! s:createQuickFix() abort
     if s:err_fmt !=# ''
         let &errorformat = s:err_fmt
     endif
-    execute 'cbuffer ' . l:bufnr
+    execute 'cgetbuffer ' . l:bufnr
     call s:closeBuffer()
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
