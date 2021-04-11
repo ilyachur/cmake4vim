@@ -22,6 +22,7 @@ function! s:appendLine(text) abort
             silent call append('$', a:text)
         endif
     else
+        setlocal modifiable
         silent call append('$', a:text)
     endif
     $
@@ -73,11 +74,16 @@ function! s:vimExit(channel, message) abort
     if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['job']
         return
     endif
-    let s:cmake4vim_job = {}
-    call s:createQuickFix()
     if a:message != 0
         copen
     endif
+endfunction
+
+function! s:vimClose(channel) abort
+    if a:channel == s:cmake4vim_job['channel']
+        let s:cmake4vim_job = {}
+    endif
+    call s:createQuickFix()
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
@@ -153,6 +159,7 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'out_cb': function('s:vimOut'),
                     \ 'err_cb': function('s:vimOut'),
                     \ 'exit_cb': function('s:vimExit'),
+                    \ 'close_cb': function('s:vimClose'),
                     \ })
         let s:cmake4vim_job = {
                     \ 'job': l:job,
