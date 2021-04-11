@@ -36,7 +36,7 @@ jobs:
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
-        cmake_version: ['2.8', '3.13', '3.18'] # empty means the latest version, but use 3.18 due to some issues on macOS
+        cmake_version: ['2.8', '3.13', ''] # empty means the latest version
         platform: ['Linux', 'MacOS', 'Windows']
 
         include:
