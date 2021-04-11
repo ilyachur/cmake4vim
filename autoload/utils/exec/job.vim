@@ -74,6 +74,7 @@ function! s:vimExit(channel, message) abort
     if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['job']
         return
     endif
+    call s:createQuickFix()
     if a:message != 0
         copen
     endif
@@ -84,7 +85,6 @@ function! s:vimClose(channel) abort
         return
     endif
     let s:cmake4vim_job = {}
-    call s:createQuickFix()
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
