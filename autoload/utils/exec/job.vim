@@ -80,9 +80,10 @@ function! s:vimExit(channel, message) abort
 endfunction
 
 function! s:vimClose(channel) abort
-    if a:channel == s:cmake4vim_job['channel']
-        let s:cmake4vim_job = {}
+    if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['channel']
+        return
     endif
+    let s:cmake4vim_job = {}
     call s:createQuickFix()
 endfunction
 
