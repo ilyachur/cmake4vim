@@ -77,14 +77,43 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty. If variable is empty, plugin tries to detect cached build type. And selects 'Release' type if cmake cache doesn't exist.
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
- - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
+ - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty. It can be either a string or a dictionary.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
- - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCONAN_PATH=~/.conan' } }`
  - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
+ - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CONAN_PATH' : '~/.conan' } }`
+ - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
+ - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
+ - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
+ - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf`. e.g.:
+     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`, **Note:** it takes precedence over `g:cmake_build_dir_prefix`
 
+Example of supported functions in `g:cmake_kits`:
+```
+let g:cmake_kits = {
+            \  "android-ndk-r22": {
+            \    "toolchain_file": "~/toolchains/android.cmake",
+            \    "environment_variables": {
+            \      "PATH_TO_CACHE": "/Users/vimmer/cache",
+            \      "PATH_TO_CONFIG": "/Users/vimmer/config"
+            \    },
+            \    "cmake_usr_args": {
+            \      "USE_BROWSER": "chrome",
+            \      "TIMEOUT_IN_SECONDS": "300"
+            \    },
+            \    "generator": "Ninja"
+            \  } }
+let g:cmake_kits = {
+            \  "gcc": {
+            \    "compilers": {
+            \        "C": "/usr/bin/gcc",
+            \        "CXX": "/usr/bin/g++"
+            \  } }
+```
+
+If you specify both `toolchain_file` and `compilers`, the `toolchain_file` takes precedence and `compilers` are ignored.
 
 ### **Jump to**
 
@@ -108,6 +137,60 @@ Plugin is closely integrated with quickfix list and allows to use quickfix featu
 
 Bug reports, feedback, feature and other pull requests are appreciated. Check the [Contributing Guidelines](CONTRIBUTING.md) for how to
 create a feature request, submit a pull request or post an issue.
+
+## **Tips and tricks**
+
+### ccmake
+
+If you want to run `ccmake` in the build directory, you can do something like this:
+```
+nnoremap <expr> <leader>cc ":tab terminal ++close ccmake " . utils#cmake#getBuildDir() . "\<CR>"
+```
+
+Or if you want to open a shell in the build directory:
+```
+nnoremap <expr> <leader>db printf(":bo new\<CR>:lcd %s\<CR>:res 15\<CR>:term ++curwin\<CR>", utils#cmake#getBuildDir() )
+```
+
+### YouCompleteMe
+
+If you're using `YouCompleteMe` and want `clangd-completer` to work with different compilers, you could pass `clangd` a `-query-driver` argument.
+
+E.g. for developing `emscripten`, you could pass `em++` to `clangd` via `g:ycm_clangd_args`.
+
+You could add such entries to your `g:cmake_kits` and override `CMakeSelectKit` and `FZFCMakeSelectKit`.
+
+Add this to the `after` directory, e.g. `~/.vim/after/plugin/cmake.vim`:
+```
+function! s:customSelectKit(name) abort
+    if !has_key( g:cmake_kits, a:name )
+        echom printf("CMake kit '%s' not found", a:name)
+        return
+    endif
+
+    call cmake4vim#SelectKit(a:name)
+
+    let l:cmake_kit = g:cmake_kits[ g:cmake_selected_kit ]
+    let g:ycm_clangd_args = filter( g:ycm_clangd_args, "v:val !~# 'query-driver'" )
+    if has_key( l:cmake_kit, 'query_driver' )
+        let g:ycm_clangd_args += [ printf( '-query-driver=%s', l:cmake_kit[ 'query_driver' ] ) ]
+        YcmRestartServer
+    endif
+endfunction
+
+function! s:FZFSelectKit() abort
+    if exists(':FZF')
+        return fzf#run({
+                    \ 'source': sort( keys( g:cmake_kits ), 'i' ),
+                    \ 'options': '+m -n 1 --prompt CMakeKit\>\ ',
+                    \ 'down':    '30%',
+                    \ 'sink':    function('s:customSelectKit')})
+    endif
+endfunction
+
+command! -nargs=1 -complete=custom,cmake4vim#CompleteKit CMakeSelectKit    call s:customSelectKit(<f-args>)
+command!                                                 FZFCMakeSelectKit call s:FZFSelectKit()
+```
 
 ## **References**
 

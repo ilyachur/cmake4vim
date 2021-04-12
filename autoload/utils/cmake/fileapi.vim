@@ -115,7 +115,7 @@ function! utils#cmake#fileapi#prepare(build_dir) abort
     call s:createFile(l:client_folder . '/query.json', json_encode(s:createQuery()))
 endfunction
 
-function! utils#cmake#fileapi#parceReply(build_dir) abort
+function! utils#cmake#fileapi#parseReply(build_dir) abort
     let l:reply_folder = s:getReplyFolder(a:build_dir)
     if l:reply_folder ==# ''
         return {}

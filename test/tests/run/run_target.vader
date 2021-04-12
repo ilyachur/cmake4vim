@@ -37,6 +37,10 @@ Before:
     let g:cmake_build_dir_prefix="cmake-build-"
     let g:cmake_build_executor = 'system'
     let g:cmake_variants = {}
+    let g:cmake_kits = {}
+    let g:cmake_selected_kit = ''
+    let g:cmake_build_path_pattern = []
+    let g:cmake_toolchain_file = ''
     " Use on in order to close all windows and avoid E36 error
     silent on
 
