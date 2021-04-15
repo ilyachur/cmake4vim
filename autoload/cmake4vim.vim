@@ -157,7 +157,7 @@ function! cmake4vim#CMakeBuild(...) abort
 endfunction
 
 " Run Ctest
-function! cmake4vim#CTest(...) abort
+function! cmake4vim#CTest(bang, ...) abort
     let l:build_dir = utils#cmake#findBuildDir()
     if l:build_dir ==# ''
         call utils#common#Warning('CMake project was not found!')
@@ -166,7 +166,7 @@ function! cmake4vim#CTest(...) abort
     let l:cw_dir = getcwd()
     " Change work directory
     silent exec 'cd' l:build_dir
-    let l:cmd = 'ctest ' . join(a:000)
+    let l:cmd = printf('ctest %s %s', a:bang ? '' : g:cmake_ctest_args, join( a:000 ) )
     " Run
     call utils#common#executeCommand(l:cmd)
     " Change work directory to old work directory

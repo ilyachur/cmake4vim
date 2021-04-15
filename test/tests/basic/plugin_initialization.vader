@@ -56,3 +56,4 @@ Execute (Check default initialization):
     AssertEqual g:cmake_change_build_command, 1
     AssertEqual g:cmake_reload_after_save, 0
     AssertEqual sort( keys(g:cmake_variants) ), ['Debug', 'MinSizeRel', 'RelWithDebInfo', 'Release']
+    AssertEqual g:cmake_ctest_args, ''

@@ -9,6 +9,7 @@ function! utils#exec#system#run(cmd, errFormat) abort
     endif
     let l:s_out = system(a:cmd)
     cgetexpr l:s_out
+    call setqflist( [], 'a', { 'title' : a:cmd } )
     copen
     if a:errFormat !=# ''
         let &l:errorformat = l:old_error

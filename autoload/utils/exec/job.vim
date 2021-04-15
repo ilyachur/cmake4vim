@@ -57,6 +57,7 @@ function! s:createQuickFix() abort
         let &errorformat = s:err_fmt
     endif
     execute 'cgetbuffer ' . l:bufnr
+    call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
     call s:closeBuffer()
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
@@ -147,7 +148,8 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'on_exit': function('s:nVimExit'),
                     \ })
         let s:cmake4vim_job = {
-                    \ 'job': l:job
+                    \ 'job': l:job,
+                    \ 'cmd': a:cmd
                     \ }
     else
         let l:job = job_start(a:cmd, {
@@ -157,7 +159,8 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ })
         let s:cmake4vim_job = {
                     \ 'job': l:job,
-                    \ 'channel': job_getchannel(l:job)
+                    \ 'channel': job_getchannel(l:job),
+                    \ 'cmd': a:cmd
                     \ }
     endif
     return l:job

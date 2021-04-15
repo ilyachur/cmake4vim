@@ -37,6 +37,7 @@ Before:
     let g:cmake_build_dir_prefix="cmake-build-"
     let g:cmake_build_executor = 'system'
     let g:cmake_variants = {}
+    let g:cmake_ctest_args = ''
     " Use on in order to close all windows and avoid E36 error
     silent on
 
@@ -165,4 +166,37 @@ Execute (CTest with custom settings):
         silent CTest
     else
         echom 'SKIPPED'
+    endif
+
+Execute (CTest with custom args):
+    if !has('win32')
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake -DCUSTOM_OP=ON
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        let g:cmake_ctest_args = '-j2 --output-on-failure --verbose'
+        silent CTest -R "non-existant_pattern"
+        silent copen
+        Assert w:quickfix_title =~# '-j2 --output-on-failure --verbose -R "non-existant_pattern"'
+        silent cclose
+    endif
+
+Execute (CTest with custom args and a bang):
+    if !has('win32')
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake -DCUSTOM_OP=ON
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        let g:cmake_ctest_args = '-j2 --output-on-failure --verbose'
+        silent CTest! -R "non-existant_pattern"
+        silent copen
+        Assert w:quickfix_title !~# '-j2 --output-on-failure --verbose'
+        Assert w:quickfix_title =~# '-R "non-existant_pattern"'
+        silent cclose
     endif

@@ -48,7 +48,8 @@ The current version of the plugin supports next commands:
 
  - **`:CMake`** creates a build directory (if it is necessary) and generates cmake project.
  - **`:CMakeBuild`** builds current cmake project. The command allows to specify cmake target.
- - **`:CTest`** runs tests. The command allow to specify Ctest arguments
+ - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
+ - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
  - **`:CMakeInfo`** creates a window with CMake information.
  - **`:CMakeResetAndReload`** removes cmake cache and re-generates cmake project.
  - **`:CMakeReset`** removes cmake cache (this command removes the cmake build directory).
@@ -82,6 +83,7 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
  - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCONAN_PATH=~/.conan' } }`
+ - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
 
 
 ### **Jump to**
