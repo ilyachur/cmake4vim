@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
@@ -36,7 +36,7 @@ jobs:
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
-        cmake_version: ['2.8', '3.13', '3.18'] # empty means the latest version, but use 3.18 due to some issues on macOS
+        cmake_version: ['2.8', '3.13', ''] # empty means the latest version
         platform: ['Linux', 'MacOS', 'Windows']
 
         include:
@@ -63,7 +63,7 @@ jobs:
 
     steps:
     - name: Clone CMake4Vim
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
@@ -78,7 +78,7 @@ jobs:
         neovim: ${{ matrix.nvim }}
         version: ${{ matrix.vim_version  }}
     - name: Install cmake
-      uses: jwlawson/actions-setup-cmake@v1.4
+      uses: jwlawson/actions-setup-cmake@master
       with:
           cmake-version: ${{ matrix.cmake_version }}
     - name: Check cmake
@@ -133,7 +133,7 @@ jobs:
     needs: [tests]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Download artifacts
       uses: actions/download-artifact@v2
       with:
