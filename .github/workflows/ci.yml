@@ -78,7 +78,7 @@ jobs:
         neovim: ${{ matrix.nvim }}
         version: ${{ matrix.vim_version  }}
     - name: Install cmake
-      uses: jwlawson/actions-setup-cmake@v1.4
+      uses: jwlawson/actions-setup-cmake@v1.8
       with:
           cmake-version: ${{ matrix.cmake_version }}
     - name: Check cmake
