@@ -14,62 +14,26 @@ augroup END
 " }}} Initialization "
 
 " Options {{{ "
-if !exists('g:make_arguments')
-    let g:make_arguments = ''
-endif
-if !exists('g:cmake_build_target')
-    let g:cmake_build_target = ''
-endif
-if !exists('g:cmake_change_build_command')
-    let g:cmake_change_build_command = 1
-endif
-if !exists('g:cmake_reload_after_save')
-    let g:cmake_reload_after_save = 0
-endif
-if !exists('g:cmake_compile_commands')
-    let g:cmake_compile_commands = 0
-endif
-if !exists('g:cmake_compile_commands_link')
-    let g:cmake_compile_commands_link = ''
-endif
-if !exists('g:cmake_build_type')
-    let g:cmake_build_type = ''
-endif
-if !exists('g:cmake_build_dir')
-    let g:cmake_build_dir = ''
-endif
-if !exists('g:cmake_src_dir')
-    let g:cmake_src_dir = ''
-endif
-if !exists('g:cmake_build_dir_prefix')
-    let g:cmake_build_dir_prefix = 'cmake-build-'
-endif
-if !exists('g:cmake_project_generator')
-    let g:cmake_project_generator = ''
-endif
-if !exists('g:cmake_install_prefix')
-    let g:cmake_install_prefix = ''
-endif
-if !exists('g:cmake_c_compiler')
-    let g:cmake_c_compiler = ''
-endif
-if !exists('g:cmake_cxx_compiler')
-    let g:cmake_cxx_compiler = ''
-endif
-if !exists('g:cmake_usr_args')
-    let g:cmake_usr_args = ''
-endif
-if !exists('g:cmake_vimspector_support')
-    let g:cmake_vimspector_support = 0
-endif
-
+let g:make_arguments = get(g:, 'make_arguments', '')
+let g:cmake_build_target = get(g:, 'cmake_build_target', '')
+let g:cmake_change_build_command = get(g:, 'cmake_change_build_command', 1)
+let g:cmake_reload_after_save = get(g:, 'cmake_reload_after_save', 0)
+let g:cmake_compile_commands = get(g:, 'cmake_compile_commands', 0)
+let g:cmake_compile_commands_link = get(g:, 'cmake_compile_commands_link', '')
+let g:cmake_build_type = get(g:, 'cmake_build_type', '')
+let g:cmake_build_dir = get(g:, 'cmake_build_dir', '')
+let g:cmake_src_dir = get(g:, 'cmake_src_dir', '')
+let g:cmake_build_dir_prefix = get(g:, 'cmake_build_dir_prefix', 'cmake-build-')
+let g:cmake_project_generator = get(g:, 'cmake_project_generator', '')
+let g:cmake_install_prefix = get(g:, 'cmake_install_prefix', '')
+let g:cmake_c_compiler = get(g:, 'cmake_c_compiler', '')
+let g:cmake_cxx_compiler = get(g:, 'cmake_cxx_compiler', '')
+let g:cmake_usr_args = get(g:, 'cmake_usr_args', '')
+let g:cmake_vimspector_support = get(g:, 'cmake_vimspector_support', 0)
 let g:cmake_variants = get( g:, 'cmake_variants', {} )
-
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
-if !exists('g:cmake_build_executor')
-    let g:cmake_build_executor = ''
-endif
+let g:cmake_build_executor = get(g:, 'cmake_build_executor', '')
 " }}} Options "
 
 " Commands {{{ "
