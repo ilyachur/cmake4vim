@@ -31,20 +31,22 @@ let g:cmake_cxx_compiler = get(g:, 'cmake_cxx_compiler', '')
 let g:cmake_usr_args = get(g:, 'cmake_usr_args', '')
 let g:cmake_vimspector_support = get(g:, 'cmake_vimspector_support', 0)
 let g:cmake_variants = get( g:, 'cmake_variants', {} )
+let g:cmake_ctest_args = get( g:, 'cmake_ctest_args', '' )
+
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
 let g:cmake_build_executor = get(g:, 'cmake_build_executor', '')
 " }}} Options "
 
 " Commands {{{ "
-command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMake call cmake4vim#GenerateCMake(<f-args>)
-command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeResetAndReload call cmake4vim#ResetAndReloadCMake(<f-args>)
-command! -nargs=? -complete=custom,cmake4vim#CompleteTarget CMakeBuild call cmake4vim#CMakeBuild(<f-args>)
-command! -nargs=1 -complete=custom,cmake4vim#CompleteTarget CMakeSelectTarget call cmake4vim#SelectTarget(<f-args>)
-command! -nargs=1 -complete=custom,cmake4vim#CompleteBuildType CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
-command! -nargs=?  CTest call cmake4vim#CTest(<f-args>)
-command! CMakeReset call cmake4vim#ResetCMakeCache()
-command! CMakeClean call cmake4vim#CleanCMake()
-command! CMakeInfo call utils#window#OpenCMakeInfo()
-command! -bang -nargs=* CMakeRun call cmake4vim#RunTarget(<bang>0, <f-args>)
+command!       -nargs=? -complete=custom,cmake4vim#CompleteTarget    CMake                call cmake4vim#GenerateCMake(<f-args>)
+command!       -nargs=? -complete=custom,cmake4vim#CompleteTarget    CMakeResetAndReload  call cmake4vim#ResetAndReloadCMake(<f-args>)
+command!       -nargs=? -complete=custom,cmake4vim#CompleteTarget    CMakeBuild           call cmake4vim#CMakeBuild(<f-args>)
+command!       -nargs=1 -complete=custom,cmake4vim#CompleteTarget    CMakeSelectTarget    call cmake4vim#SelectTarget(<f-args>)
+command!       -nargs=1 -complete=custom,cmake4vim#CompleteBuildType CMakeSelectBuildType call cmake4vim#SelectBuildType(<f-args>)
+command! -bang -nargs=?  CTest      call cmake4vim#CTest(<bang>0, <f-args>)
+command!                 CMakeReset call cmake4vim#ResetCMakeCache()
+command!                 CMakeClean call cmake4vim#CleanCMake()
+command!                 CMakeInfo  call utils#window#OpenCMakeInfo()
+command! -bang -nargs=*  CMakeRun   call cmake4vim#RunTarget(<bang>0, <f-args>)
 " }}} Commands "

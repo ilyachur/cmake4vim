@@ -23,7 +23,10 @@ COMMANDS                                                        *cmake-commands*
     line argument.
 
 :CTest[{Args}]                                                     *:CTest*
-    Runs tests. You can pass additional ctest arguments.
+    Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest arguments.
+
+:CTest![{Args}]                                                     *:CTest*
+    Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest arguments.
 
 :CMakeInfo                                                         *:CMakeInfo*
     Creates a window with some CMake parameters
@@ -132,9 +135,16 @@ g:cmake_vimspector_support          enables support of vimspector config.
                                     arguments for the selected target in
                                     vimspector config.
 
-`g:cmake_variants                   enables predefined cmake build variants
+g:cmake_variants                    enables predefined cmake build variants
                                     in the form of a dictionary.
                                     It is populated by default CMake
                                     build types.
+
+g:cmake_ctest_args                  enables arguments for `ctest`,
+                                    e.g. `'-j8 --output-on-failure --verbose'`
+                                    If the user calls `:CTest <some arguments>`,
+                                    the `g:cmake_ctest_args` are inserted directly
+                                    after `ctest`, before the `<some arguments>` parameter.
+                                    Default is empty. 
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help
