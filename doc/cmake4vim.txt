@@ -1,0 +1,150 @@
+*cmake4vim.txt* cmake integration for Vim
+
+Authors:    Ilya Churaev <https://github.com/ilyachur>
+Licence:    GPLv3
+
+INTRODUCTION                                                             *cmake*
+
+Plugin adds CMake integration to Vim.
+At the current moment plugins supports next CMake generators:
+
+  * Unix Makefiles
+  * Visual Studio
+  * Ninja
+
+COMMANDS                                                        *cmake-commands*
+
+:CMake[{Args}]                                                          *:CMake*
+    Creates a build directory (if it is necessary) and generates cmake
+    project.  All arguments are directly passed on to CMake.
+
+:CMakeBuild[{Args}]                                                *:CMakeBuild*
+    Builds cmake project. You can specify the cmake target using the command
+    line argument.
+
+:CTest[{Args}]                                                     *:CTest*
+    Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest arguments.
+
+:CTest![{Args}]                                                     *:CTest*
+    Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest arguments.
+
+:CMakeInfo                                                         *:CMakeInfo*
+    Creates a window with some CMake parameters
+
+:CMakeResetAndReload[{Args}]                                       *:CMakeResetAndReload*
+    Removes cmake cache and re-generates cmake project.  All arguments are
+    directly passed on to CMake.
+
+:CMakeReset                                                        *:CMakeReset*
+    Removes cmake cache (this command removes the cmake build directory).
+
+:CMakeClean                                                        *:CMakeClean*
+    Cleans the project (it is equal of the execution make clean).
+
+:CMakeSelectTarget[{Args}]                                  *:CMakeSelectTarget*
+    Selects a target for project. You should put target name as a parameter for
+    the command.
+
+:CtrlPCMakeTarget                                            *:CtrlPCMakeTarget*
+    You can use CtrlP in order to select a target for project.
+
+:FZFCMakeSelectTarget                                    *:FZFCMakeSelectTarget*
+    You can use FZF in order to select a target for project.
+
+:CMakeSelectBuildType[{Args}]                            *:CMakeSelectBuildType*
+    Change to the CMakeBuildType with the argument passed,
+    and will call :CMake after.
+
+:CMakeRun                                                           *:CMakeRun*
+    Run the current target if it is runnable and compiled.
+    Command supports reading arguments from the vimspector config
+
+:CMakeRun!                                                          *:CMakeRun!*
+    Run the current target if it is runnable and compiled.
+    Command allows to reset arguments from vimspector config
+
+VARIABLES                                                      *cmake-variables*
+
+*g:cmake_reload_after_save*           if this variable is not equal 0, plugin
+                                    will reload CMake project after saving
+                                    CMake files. Default is 0.
+
+*g:cmake_change_build_command*        if this variable is not equal 0, plugin
+                                    will change the make command. Default is 1.
+
+*g:cmake_build_dir*                   allows to set cmake build directory for
+                                    all build. Default is ''.
+                                    If variable is empty plugin uses build
+                                    directory prefix plus the build type.
+
+*g:cmake_src_dir*                     allows to set cmake source directory.
+                                    Default is '' which evaluates to the
+                                    current working directory.
+
+*g:cmake_build_dir_prefix*            allows to set cmake build directory prefix.
+                                    Default is 'cmake-build-'.
+
+*g:cmake_build_target*                set the target name for build.
+                                    Default is empty and default value depends
+                                    on CMake Generator
+
+*g:make_arguments*                    allows to set custom parameters for make
+                                    command. Default is empty.
+                                    If variable is empty, plugin launches make
+                                    without arguments.
+
+*g:cmake_project_generator*           allows to set the project generator for
+                                    build scripts. Default is empty.
+
+*g:cmake_install_prefix*              allows to change -DCMAKE_INSTALL_PREFIX.
+                                    Default is empty.
+
+*g:cmake_build_type*                  allows to change -DCMAKE_BUILD_TYPE
+                                    through the g:cmake_variants variable.
+                                    Default is empty.
+                                    If variable is empty, plugin tries to
+                                    detect cached build type.
+                                    And selects 'Release' type if cmake cache
+                                    doesn't exist.
+
+*g:cmake_c_compiler*                  allows to change -DCMAKE_C_COMPILER.
+                                    Default is empty.
+
+*g:cmake_cxx_compiler*                allows to change -DCMAKE_CXX_COMPILER.
+                                    Default is empty.
+
+*g:cmake_usr_args*                    allows to set user arguments for cmake
+                                    Default is empty.
+
+*g:cmake_compile_commands*            if this variable is not equal 0, plugin
+                                    will generate compile commands data base.
+                                    Default is 0.
+
+*g:cmake_compile_commands_link*       if this variable is not empty and plugin
+                                    generates compile commands data base,
+                                    plugin will create a link on generated data
+                                    base using the path from this variable.
+                                    Default is empty.
+
+g:cmake_build_executor              allows to force set the build executor.
+                                    Available values are 'job', 'dispatch',
+                                    'system' and ''. Default is empty.
+
+g:cmake_vimspector_support          enables support of vimspector config.
+                                    Plugin can read and change command line
+                                    arguments for the selected target in
+                                    vimspector config.
+
+g:cmake_variants                    enables predefined cmake build variants
+                                    in the form of a dictionary.
+                                    It is populated by default CMake
+                                    build types.
+
+g:cmake_ctest_args                  enables arguments for `ctest`,
+                                    e.g. `'-j8 --output-on-failure --verbose'`
+                                    If the user calls `:CTest <some arguments>`,
+                                    the `g:cmake_ctest_args` are inserted directly
+                                    after `ctest`, before the `<some arguments>` parameter.
+                                    Default is empty. 
+
+ vim: tw=79 ts=8 sw=4 sts=4 et ft=help

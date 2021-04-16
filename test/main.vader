@@ -1,0 +1,24 @@
+# Main Vader file
+
+# Basic test cases
+
+Include (Plugin initialization):                            ./tests/basic/plugin_initialization.vader
+Include (Check CMake version detection):                    ./tests/basic/cmake_version.vader
+Include (Generate CMake project):                           ./tests/basic/generate_cmake_project.vader
+Include (Generate CMake project if script was changed):     ./tests/basic/change_cmake_file.vader
+Include (Get CMake Info):                                   ./tests/basic/change_cmake_file.vader
+
+# Build test cases
+
+Include (Build CMake targets by default Generator):         ./tests/build/build_cmake_targets.vader
+Include (Build with Ninja generator):                       ./tests/build/ninja_generator.vader
+Include (Check CTest support):                              ./tests/build/ctest_run.vader
+Include (Build with job):                                   ./tests/build/job_run.vader
+Include (Build with Dispatch plugin):                       ./tests/build/check_dispatch.vader
+Include (Build with CMakeKits):                             ./tests/build/cmake_kits.vader
+
+# Run targets
+Include (Check run target support):                         ./tests/run/run_target.vader
+
+# Integrate vimspector
+Include (Check vimspector config):                          ./tests/integration/vimspector.vader

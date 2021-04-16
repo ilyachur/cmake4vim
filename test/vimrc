@@ -1,0 +1,17 @@
+" Needed for a code coverage
+profile start $HOME/vim-profile.txt
+profile! file ../*
+
+execute 'set encoding=utf-8'
+" vint: next-line -ProhibitSetNoCompatible
+set nocompatible
+filetype off
+filetype plugin indent on
+syntax enable
+set runtimepath +=$HOME/.vim/plugged/vader.vim
+" set rtp+=$HOME/.fzf
+" set rtp+=$HOME/.vim/plugged/fzf.vim
+exe 'set runtimepath +=' . expand('<sfile>:h').'/../'
+
+set winminheight=0
+set winheight=999

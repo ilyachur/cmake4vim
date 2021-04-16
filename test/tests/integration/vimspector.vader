@@ -1,0 +1,247 @@
+Before:
+    function! RemoveFile(file)
+        if has('win32')
+            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+        else
+            silent echo system("rm -rf '".a:file."'")
+        endif
+    endfunction
+
+    function! RemoveCMakeDirs()
+        if has('win32')
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
+                silent echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
+            endfor
+        else
+            silent echo system("rm -rf cmake-build*")
+        endif
+    endfunction
+    cd test\ proj
+    silent call RemoveFile(".vimspector.json")
+    silent call RemoveCMakeDirs()
+    silent CMakeReset
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target="all"
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
+    let g:cmake_build_executor = 'system'
+    let g:cmake_vimspector_support = 1
+    " Use on in order to close all windows and avoid E36 error
+    silent on
+
+After:
+    silent call RemoveFile(".vimspector.json")
+    silent call RemoveCMakeDirs()
+    cd ..
+
+Execute (Don't create default vimspector config):
+    let g:cmake_vimspector_support=0
+    Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+    let config = utils#config#vimspector#updateConfig({})
+    Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+
+Execute (Create default vimspector config):
+    Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+    let config = utils#config#vimspector#updateConfig({})
+    Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+    Assert has_key(config, 'configurations'), "Config should have configurations"
+
+Execute (Avoid incorrect vimspector configs):
+    Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+    " Create incorrect config
+    new
+    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+    let text = "{  }"
+    put=text
+    execute 'w! .vimspector.json'
+    q
+    Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+    let config = utils#config#vimspector#updateConfig({})
+    Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+    Assert empty(config), "Config should be empty!"
+
+Execute (Read incorrect vimspector config):
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/vimspector.vader'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        Assert empty(config), "Config should be empty!"
+    endif
+
+Execute (Read correct vimspector config):
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/.vimspector.json'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
+        AssertEqual config['configurations']['test_app']['configuration']['program'], "${workspaceRoot}/test_app"
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
+
+        Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
+    endif
+
+Execute (Change correct vimspector config):
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/.vimspector.json'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({'test_app': {'app': 'new_bin/test_app', 'args': []}})
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
+        AssertEqual config['configurations']['test_app']['configuration']['program'], "new_bin/test_app"
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 0
+
+        Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
+    endif
+
+Execute (Change correct vimspector config to incorrect data):
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/.vimspector.json'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({'test_app': {}})
+        Assert empty(config), "Config should be empty!"
+    endif
+
+Execute (Run test_app target and change vimspector config):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        silent CMakeRun 1 2 3
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 3
+        AssertEqual config['configurations']['test_app']['configuration']['args'], ['1', '2', '3']
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo 1 2 3 F1')
+    endif
+
+Expect (See '1 2 3 F1' result in quickfix):
+  || 1 2 3 F1
+
+Execute (Run test_app target with vimspector args):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/.vimspector.json'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        silent CMakeRun
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo 1 2 3* 4 F1')
+    endif
+
+Expect (See '1 2 3* 4 F1' result in quickfix):
+  || 1 2 3* 4 F1
+
+Execute (Run test_app target with reset vimspector args):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create incorrect config
+        new
+        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+        let text = join(readfile('../tests/integration/.vimspector.json'), '')
+        put=text
+        execute 'w! .vimspector.json'
+        q
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        silent CMakeRun!
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 0
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo F1')
+    endif
+
+Expect (See 'F1' result in quickfix):
+  || F1

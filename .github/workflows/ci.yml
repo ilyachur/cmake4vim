@@ -1,0 +1,146 @@
+name: CI
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  code_style:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Install Vint
+      run: |
+          pip3 install vim-vint
+
+    - name: Run code style check
+      run: |
+        vint .
+
+  tests:
+    name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
+    strategy:
+      fail-fast: false
+      matrix:
+        vim_type: ['Vim', 'Neovim']
+        vim_version: ['stable']
+        cmake_version: ['2.8', '3.13', ''] # empty means the latest version
+        platform: ['Linux', 'MacOS', 'Windows']
+
+        include:
+          - platform: 'Linux'
+            os: 'ubuntu-latest'
+          - platform: 'MacOS'
+            os: 'macos-latest'
+          - platform: 'Windows'
+            os: 'windows-latest'
+          - vim_type: 'Vim'
+            nvim: false
+            vim_executable: vim
+          - vim_type: 'Neovim'
+            nvim: true
+            vim_executable: nvim
+        exclude:
+          - platform: 'Windows'
+            cmake_version: '2.8'  # Excluded because tests are hanging
+          - platform: 'Windows'
+            cmake_version: '3.13' # Excluded because tests are hanging
+
+    runs-on: '${{ matrix.os  }}'
+    timeout-minutes: 25
+
+    steps:
+    - name: Clone CMake4Vim
+      uses: actions/checkout@v2
+    - name: Setup python modules
+      uses: actions/setup-python@master
+      with:
+          python-version: 3.7
+    - name: Install covimerage
+      run: |
+          pip3 install covimerage
+          pip3 install coveralls
+    - name: Install vim
+      uses: rhysd/action-setup-vim@v1
+      with:
+        neovim: ${{ matrix.nvim }}
+        version: ${{ matrix.vim_version  }}
+    - name: Install cmake
+      uses: jwlawson/actions-setup-cmake@master
+      with:
+          cmake-version: ${{ matrix.cmake_version }}
+    - name: Check cmake
+      run: |
+          which cmake
+          cmake --version
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Check Ninja
+      run: |
+          which ninja
+          ninja --version
+    - name: Clone Vader
+      run: |
+        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
+    - name: Clone Dispatch
+      run: |
+        git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
+    - if: matrix.os == 'macos-latest'  # Install gtest in order to avoid problems with cmake 2.8 on macOS
+      run: |
+        git clone --depth 1 https://github.com/google/googletest ${HOME}/gtest
+        mkdir ${HOME}/gtest/build
+        pushd ${HOME}/gtest/build
+        cmake -DCMAKE_CXX_FLAGS="-std=c++11" ..
+        make -j8
+        make install
+        popd
+    - name: Run tests
+      run: |
+        pushd test
+        ${{ matrix.vim_executable }} -Nu vimrc +Vader!*
+        popd
+    - name: Generate report
+      run: |
+        python -m covimerage write_coverage ${HOME}/vim-profile.txt
+        python -m coverage xml
+    - if: matrix.os == 'windows-latest'
+      run: |
+        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+    - if: matrix.os != 'windows-latest'
+      run: |
+        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+        if-no-files-found: error
+
+  Report:
+    runs-on: ubuntu-latest
+    needs: [tests]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+          name: coverage
+          path: ./cov_report
+    - name: Upload coverage to Codecov
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
+      run: |
+        bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z

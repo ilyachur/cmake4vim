@@ -1,0 +1,210 @@
+Before:
+    function! RemoveFile(file)
+        if has('win32')
+            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+        else
+            silent echo system("rm -rf '".a:file."'")
+        endif
+    endfunction
+
+    function! RemoveDirectory(folder)
+        if has('win32')
+            silent echo system(printf('rd /S /Q "%s" >nul 2>&1', a:folder))
+        else
+            silent echo system(printf('rm -rf "%s"', a:folder))
+        endif
+    endfunction
+
+    function! RemoveCMakeDirs()
+        if has('win32')
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build', 'build_test']
+                silent call RemoveDirectory(l:value)
+            endfor
+        else
+            silent echo system("rm -rf build_test cmake-*")
+        endif
+    endfunction
+    cd test\ proj
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
+    silent CMakeReset
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target=""
+    let g:cmake_build_dir=""
+    let g:cmake_src_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
+    let g:cmake_build_executor = 'system'
+    let g:cmake_variants = {}
+    " Use on in order to close all windows and avoid E36 error
+    silent on
+
+After:
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
+    cd ..
+
+Execute (Generate cmake project with default settings):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+
+Execute (Remove cmake build forder):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert isdirectory("cmake-build-Release"), "Build directory should be created"
+    silent CMakeReset
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+
+Execute (Generate Debug cmake project):
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    let g:cmake_build_type='Debug'
+    silent CMake
+    Assert filereadable("cmake-build-Debug/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Validate create link method):
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMakeResetAndReload
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert !filereadable("compile_commands.json"), "compile_commands.json shouldn't be generated"
+        silent call utils#fs#createLink("cmake-build-Release/CMakeCache.txt", "compile_commands.json")
+        Assert filereadable("compile_commands.json"), "compile_commands.json shouldn be exist"
+
+Execute (Generate cmake project with compilation database generation):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_compile_commands=1
+        silent CMakeResetAndReload
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/compile_commands.json"), "compile_commands.json should be generated"
+    endif
+
+Execute (Generate cmake project with link to compilation database):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_compile_commands=1
+        let g:cmake_compile_commands_link='./'
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/compile_commands.json"), "compile_commands.json should be generated"
+        Assert filereadable("compile_commands.json"), "Link to compile_commands.json should be generated"
+    endif
+
+Execute (Generate cmake project in custom build folder):
+    Assert !isdirectory("build_test"), "Build directory shouldn't exist"
+    let g:cmake_build_dir='build_test'
+    silent CMakeResetAndReload
+    Assert filereadable("build_test/CMakeCache.txt"), "CMakeCache.txt should be generated"
+
+Execute (Generate cmake project with custom generator):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    let g:cmake_project_generator='Unix Makefiles'
+    silent CMake
+    silent call utils#gen#common#getDefaultTarget()
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Generate cmake project with custom install prefix):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    let g:cmake_install_prefix='.'
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Generate cmake project with custom compilers):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    let g:cmake_c_compiler='gcc'
+    let g:cmake_cxx_compiler='g++'
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Generate cmake project in prefix build folder):
+    Assert !isdirectory("cmake-vador-Release"), "Build directory shouldn't exist"
+    let g:cmake_build_dir_prefix='cmake-vador-'
+    silent CMakeResetAndReload
+    Assert filereadable("cmake-vador-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent call RemoveDirectory("cmake-vador-Release")
+
+Execute (Generate cmake project and change BuildType):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    let g:cmake_build_dir_prefix='cmake-vador-'
+    silent CMakeResetAndReload
+    Assert filereadable("cmake-vador-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    Assert !isdirectory("cmake-build-Debug"), "Build directory shouldn't exist"
+    silent CMakeSelectBuildType Debug
+    Assert filereadable("cmake-vador-Debug/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent call RemoveDirectory("cmake-vador-Release")
+    silent call RemoveDirectory("cmake-vador-Debug")
+
+Execute (Generate RelWithDebInfo cmake project):
+    Assert !isdirectory("cmake-build-RelWithDebInfo"), "Build directory shouldn't exist"
+    let g:cmake_build_type='RelWithDebInfo'
+    silent CMake
+    Assert filereadable("cmake-build-RelWithDebInfo/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Generate MinSizeRel cmake project):
+    Assert !isdirectory("cmake-build-MinSizeRel"), "Build directory shouldn't exist"
+    let g:cmake_build_type='MinSizeRel'
+    silent CMake
+    Assert filereadable("cmake-build-MinSizeRel/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Check findBuild dir with initialized cache):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    AssertNotEqual utils#cmake#findBuildDir(), ''
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Emulate uninitialized project with existed build folder):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    silent call utils#cmake#common#resetCache()
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target=""
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
+
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be exist"
+
+Execute (Call prepare file API after project generation):
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert isdirectory("cmake-build-Release"), "Build directory should exist"
+    if isdirectory("cmake-build-Release/.cmake/api/v1/reply")
+        silent call utils#cmake#fileapi#prepare('cmake-build-Release')
+        Assert !isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory shouldn't exist"
+    endif
+
+Execute (Generate cmake project in custom source folder):
+    if utils#cmake#verNewerOrEq([3, 13])
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_src_dir='test proj'
+        cd ..
+        Assert isdirectory(g:cmake_src_dir), "Source directory should exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent call RemoveFile("compile_commands.json")
+        silent call RemoveCMakeDirs()
+        cd test\ proj
+    endif

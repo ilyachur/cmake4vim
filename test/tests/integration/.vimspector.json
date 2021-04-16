@@ -1,0 +1,29 @@
+{
+    "configurations": {
+        "test_app": {
+            "adapter": "CodeLLDB",
+            "configuration": {
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/test_app",
+                "args": ["1", "2", "3*", "4"],
+                "cwd": "${workspaceRoot}",
+                "externalConsole": false,
+                "stopAtEntry": true,
+                "MImode": "lldb"
+            }
+        },
+        "something_else": {
+            "adapter": "CodeLLDB",
+            "configuration": {
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/test_app",
+                "cwd": "${workspaceRoot}",
+                "externalConsole": false,
+                "stopAtEntry": true,
+                "MImode": "lldb"
+            }
+        }
+    }
+}
