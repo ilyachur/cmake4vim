@@ -10,8 +10,11 @@ function! utils#common#executeCommand(cmd, ...) abort
         silent! cclose
         call utils#exec#dispatch#run(a:cmd, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
+        " job#run behaves differently if the qflist is open or closed
         call utils#exec#job#run(a:cmd, l:errFormat)
     else
+        " Close quickfix list to discard custom error format
+        silent! cclose
         call utils#exec#system#run(a:cmd, l:errFormat)
     endif
 endfunction

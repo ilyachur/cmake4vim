@@ -69,7 +69,7 @@ function! s:vimClose(channel) abort
     call s:closeBuffer()
     let s:cmake4vim_job = {}
 
-    copen
+    cwindow
     cbottom
 endfunction
 
@@ -94,8 +94,11 @@ function! s:nVimExit(job_id, data, event) abort
 endfunction
 
 function! s:createJobBuf() abort
-    let l:in_quickfix = getwininfo(win_getid())[0]['quickfix']
-    if l:in_quickfix
+    let l:cursor_was_in_quickfix = getwininfo(win_getid())[0]['quickfix']
+    " qflist is open somewhere
+    if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
+        " move the cursor there
+        copen
         silent execute 'edit ' . s:cmake4vim_buf
     else
         silent execute 'belowright 10split ' . s:cmake4vim_buf
@@ -103,11 +106,10 @@ function! s:createJobBuf() abort
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
     nmap <buffer> <C-c> :call utils#exec#job#stop()<CR>
-    let l:bufnum = winbufnr(0)
-    if !l:in_quickfix
+    if !l:cursor_was_in_quickfix
         wincmd p
     endif
-    return l:bufnum
+    return winbufnr(0)
 endfunction
 " }}} Private functions "
 
