@@ -100,8 +100,6 @@ Execute (Generate cmake project with default settings in template buffer):
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt") || iter < 40, "CMakeCache.txt should be generated"
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check job cancel command without run):

@@ -75,8 +75,6 @@ Execute (Check CMakeKit autocomplete):
         let kits = split(cmake4vim#CompleteKit(0,0,0))
         AssertEqual len(kits), 3
         AssertEqual kits, [ "First", "Second", "Third" ]
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit toolchain file):
@@ -87,8 +85,6 @@ Execute (Check CMakeKit toolchain file):
         Assert isdirectory("cmake-build-Release"), "Build directory should exist"
         let generation_command = utils#cmake#getCMakeGenerationCommand()
         Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake'
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check toolchain file precedence over compilers):
@@ -101,8 +97,6 @@ Execute (Check toolchain file precedence over compilers):
         Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake'
         Assert generation_command !~# '-DCMAKE_C_COMPILER'
         Assert generation_command !~# '-DCMAKE_CXX_COMPILER'
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit compilers setting):
@@ -115,8 +109,6 @@ Execute (Check CMakeKit compilers setting):
         let generation_command = utils#cmake#getCMakeGenerationCommand()
         Assert generation_command =~# '-DCMAKE_C_COMPILER=clang'
         Assert generation_command =~# '-DCMAKE_CXX_COMPILER=clang++'
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit generator setting):
@@ -135,8 +127,6 @@ Execute (Check CMakeKit generator setting):
         silent CMake
         Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
         Assert filereadable('cmake-build-Release/Makefile'), 'Makefile should exist'
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit cmake_usr_args setting):
@@ -150,8 +140,6 @@ Execute (Check CMakeKit cmake_usr_args setting):
         Assert generation_command =~# '-DANDROID_STL=c++_static'
         Assert generation_command =~# '-DANDROID_TOOLCHAIN=clang'
         Assert generation_command =~# '-DANDROID_ABI=arm64-v8a'
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit environment variables):
@@ -164,8 +152,6 @@ Execute (Check CMakeKit environment variables):
         AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
         unlet $MY_CUSTOM_VARIABLE
         unlet $MY_OTHER_CUSTOM_VARIABLE
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit change kit unset environment variables):
@@ -180,8 +166,6 @@ Execute (Check CMakeKit change kit unset environment variables):
         silent CMake
         Assert !exists('$MY_CUSTOM_VARIABLE')
         Assert !exists('$MY_OTHER_CUSTOM_VARIABLE')
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit default):
@@ -194,8 +178,6 @@ Execute (Check CMakeKit default):
         AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
         unlet $MY_CUSTOM_VARIABLE
         unlet $MY_OTHER_CUSTOM_VARIABLE
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeKit selected kit without CMakeSelectKit):
@@ -206,8 +188,6 @@ Execute (Check CMakeKit selected kit without CMakeSelectKit):
         Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
         let generation_command = utils#cmake#getCMakeGenerationCommand()
         Assert generation_command =~# '-DFlag=ON'
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check build path pattern):
@@ -220,8 +200,6 @@ Execute (Check build path pattern):
         silent CMakeSelectBuildType Release
         Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
         silent call RemoveDirectory('custom-build-name')
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check build path pattern precedence over build_dir_prefix):
@@ -235,6 +213,20 @@ Execute (Check build path pattern precedence over build_dir_prefix):
         Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
         Assert !isdirectory('my-custom-prefixRelease'), 'Build directory should not exist'
         silent call RemoveDirectory('custom-build-name')
-    else
-        echom 'SKIPPED'
     endif
+
+Execute (Call joinUserArgs with a string):
+    let usr_args = '-DOPTION=YES -DSETTING=YES'
+    AssertEqual usr_args, utils#cmake#joinUserArgs( usr_args )
+
+Execute (Call splitUserArgs with a dict):
+    let usr_args = {'OPTION':'YES', 'SETTING':'YES'}
+    let new_args = utils#cmake#splitUserArgs( usr_args )
+    Assert has_key( new_args, 'OPTION' )
+    Assert has_key( new_args, 'SETTING' )
+    Assert new_args['OPTION'] ==# 'YES'
+    Assert new_args['SETTING'] ==# 'YES'
+
+Execute (Select a non-existing kit):
+    call cmake4vim#SelectKit('nonexistant_key')
+    Assert g:cmake_selected_kit ==# ''

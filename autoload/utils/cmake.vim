@@ -55,9 +55,6 @@ function! s:detectCMakeBuildDir() abort
     if len( g:cmake_build_path_pattern ) == 2
         return s:getCMakeBuildPattern()
     endif
-    if !empty(g:cmake_build_path_pattern)
-        return s:getCMakeBuildPattern()
-    endif
     return g:cmake_build_dir_prefix . l:build_type
 endfunction
 

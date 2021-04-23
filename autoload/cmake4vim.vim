@@ -186,7 +186,7 @@ endfunction
 " Functions allows to switch between cmake kits
 function! cmake4vim#SelectKit(name) abort
     if !has_key( g:cmake_kits, a:name )
-        echom printf("CMake kit '%s' not found", a:name)
+        call utils#common#Warning(printf("CMake kit '%s' not found", a:name))
         return
     endif
 
@@ -197,7 +197,7 @@ endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
     if !exists('g:cmake_build_target') || g:cmake_build_target ==# ''
-        echom 'Please select target first!'
+        call utils#common#Warning('Please select target first!')
         return
     endif
 
