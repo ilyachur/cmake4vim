@@ -53,17 +53,25 @@ Execute (Get ccmake modes):
 
 # TODO: I don't know how I can check ccmake results in vader, but these tests should check at least that terminal with command can be opened
 Execute (Run ccmake in default mode):
+    if !has('win32')
         silent CMake
         CCMake
+    endif
 
 Execute (Run ccmake in horizontal mode):
+    if !has('win32')
         silent CMake
         CCMake h
+    endif
 
 Execute (Run ccmake in vertical mode):
+    if !has('win32')
         silent CMake
         CCMake v
+    endif
 
 Execute (Run ccmake in tab mode):
+    if !has('win32')
         silent CMake
         CCMake t
+    endif
