@@ -52,11 +52,6 @@ jobs:
           - vim_type: 'Neovim'
             nvim: true
             vim_executable: nvim
-        exclude:
-          - platform: 'Windows'
-            cmake_version: '2.8'  # Excluded because tests are hanging
-          - platform: 'Windows'
-            cmake_version: '3.13' # Excluded because tests are hanging
 
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 25
