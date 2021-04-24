@@ -230,7 +230,7 @@ endfunction
 
 " Complete CCMake window modes
 function! cmake4vim#CompleteCCMakeModes(arg_lead, cmd_line, cursor_pos) abort
-    let l:modes = ['', 'h', 'v', 't']
+    let l:modes = ['h', 'v', 't']
     return join(l:modes, "\n")
 endfunction
 
