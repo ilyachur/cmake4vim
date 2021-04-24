@@ -13,6 +13,9 @@ function! s:detectCMakeBuildType() abort
     " WA for recursive DetectBuildDir, try to find the first valid cmake directory
     let l:build_dir = ''
     if g:cmake_build_dir ==# ''
+        if !empty(g:cmake_build_path_pattern)
+            let l:build_dir = finddir( s:getCMakeBuildPattern() )
+        endif
         for l:type in keys( utils#cmake#getCMakeVariants() )
             let l:build_dir = 'cmake-build-' . l:type
             let l:build_dir = finddir(l:build_dir, getcwd().';.')
@@ -35,6 +38,11 @@ function! s:detectCMakeBuildType() abort
     return 'Release'
 endfunction
 
+function! s:getCMakeBuildPattern() abort
+    let [ l:fmt, l:args ] = g:cmake_build_path_pattern
+    return eval( printf('printf("%s", %s)', l:fmt, l:args ) )
+endfunction
+
 function! s:detectCMakeBuildDir() abort
     if g:cmake_build_dir !=# ''
         return g:cmake_build_dir
@@ -44,6 +52,9 @@ function! s:detectCMakeBuildDir() abort
         return l:cmake_info['cmake']['build_dir']
     endif
     let l:build_type = s:detectCMakeBuildType()
+    if len( g:cmake_build_path_pattern ) == 2
+        return s:getCMakeBuildPattern()
+    endif
     return g:cmake_build_dir_prefix . l:build_type
 endfunction
 
@@ -60,12 +71,51 @@ function! s:populateDefaultCMakeVariants() abort
             let g:cmake_variants[ build_type ] =
                 \ {
                 \   'cmake_build_type' : build_type,
-                \   'cmake_usr_args'   : g:cmake_usr_args
+                \   'cmake_usr_args'   : utils#cmake#splitUserArgs(g:cmake_usr_args)
                 \ }
         endif
     endfor
 endfunction
 " }}} Private functions "
+
+function! utils#cmake#setEnv(name) abort
+    let l:cmake_kit  = get( g:cmake_kits, a:name, {} )
+    for [key, val] in items( get( l:cmake_kit, 'environment_variables', {} ) )
+        execute printf('let $%s="%s"', key, val)
+    endfor
+endfunction
+
+function! utils#cmake#unsetEnv(name) abort
+    let l:cmake_kit  = get( g:cmake_kits, a:name, {} )
+    for key in keys( get( l:cmake_kit, 'environment_variables', {} ) )
+        execute printf('unlet $%s', key)
+    endfor
+endfunction
+
+function! utils#cmake#joinUserArgs(cmakeArguments) abort
+    if type(a:cmakeArguments) == v:t_string
+        return a:cmakeArguments
+    endif
+
+    let l:ret = []
+    for [ key, val ] in items(a:cmakeArguments)
+        let l:ret += [ printf('-D%s=%s', key, val ) ]
+    endfor
+    return join(l:ret)
+endfunction
+
+function! utils#cmake#splitUserArgs(cmakeArguments) abort
+    if type(a:cmakeArguments) == v:t_dict
+        return a:cmakeArguments
+    endif
+
+    let l:ret = {}
+    for cmake_arg in split( g:cmake_usr_args )
+        let [ key, val ] = split( cmake_arg[ 2: ], '=' )
+        let l:ret[ key ] = val
+    endfor
+    return l:ret
+endfunction
 
 " Returns the list of default CMake build types
 function! utils#cmake#getDefaultBuildTypes() abort
@@ -133,32 +183,65 @@ endfunction
 " Additional cmake arguments can be passed as arguments of this function
 function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:build_dir = utils#cmake#findBuildDir()
-    let l:src_dir = utils#cmake#findSrcDir()
+    let l:src_dir   = utils#cmake#findSrcDir()
     let l:cmake_variant = utils#cmake#getCMakeVariants()[ s:detectCMakeBuildType() ]
     let l:cmake_args = []
 
     " Set build type
     let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . l:cmake_variant['cmake_build_type']]
+
+    let l:cmake_project_generator = g:cmake_project_generator
+    let l:cmake_toolchain_file    = g:cmake_toolchain_file
+    let l:cmake_c_compiler        = g:cmake_c_compiler
+    let l:cmake_cxx_compiler      = g:cmake_cxx_compiler
+
+    " CMakeKit can contain:
+    " * additional user arguments
+    " * project generator
+    " * toolchain file
+    " * compilers
+    if g:cmake_selected_kit !=# '' && has_key( g:cmake_kits, g:cmake_selected_kit )
+        silent call utils#cmake#setEnv( g:cmake_selected_kit ) " just in case the user has set the variable manually
+        let l:active_kit = g:cmake_kits[ g:cmake_selected_kit ]
+        let l:cmake_project_generator = get( l:active_kit, 'generator'     , l:cmake_project_generator )
+        let l:cmake_toolchain_file    = get( l:active_kit, 'toolchain_file', l:cmake_toolchain_file    )
+        let l:cmake_kit_usr_args      = [ utils#cmake#joinUserArgs( get( l:active_kit, 'cmake_usr_args', {} ) ) ]
+        if !has_key( l:active_kit, 'toolchain_file' ) && has_key( l:active_kit, 'compilers' )
+            let l:cmake_c_compiler   = get( l:active_kit[ 'compilers' ], 'C'  , l:cmake_c_compiler   )
+            let l:cmake_cxx_compiler = get( l:active_kit[ 'compilers' ], 'CXX', l:cmake_cxx_compiler )
+        endif
+    endif
+
     " Specify generator
-    if g:cmake_project_generator !=# ''
-        let l:cmake_args += ['-G "' . g:cmake_project_generator . '"']
+    if l:cmake_project_generator !=# ''
+        let l:cmake_args += [printf('-G "%s"', l:cmake_project_generator)]
     endif
     if g:cmake_install_prefix !=# ''
         let l:cmake_args += ['-DCMAKE_INSTALL_PREFIX=' . g:cmake_install_prefix]
     endif
-    " Set c and c++ compilers
-    if g:cmake_c_compiler !=# ''
-        let l:cmake_args += ['-DCMAKE_C_COMPILER=' . g:cmake_c_compiler]
+
+    " Set toolchain file ( it has priority over compilers )
+    if l:cmake_toolchain_file !=# ''
+        let l:cmake_args += ['-DCMAKE_TOOLCHAIN_FILE=' . l:cmake_toolchain_file]
+    else
+        " Set c and c++ compilers
+        if l:cmake_c_compiler !=# ''
+            let l:cmake_args += ['-DCMAKE_C_COMPILER=' . l:cmake_c_compiler]
+        endif
+        if l:cmake_cxx_compiler !=# ''
+            let l:cmake_args += ['-DCMAKE_CXX_COMPILER=' . l:cmake_cxx_compiler]
+        endif
     endif
-    if g:cmake_cxx_compiler !=# ''
-        let l:cmake_args += ['-DCMAKE_CXX_COMPILER=' . g:cmake_cxx_compiler]
-    endif
+
     " Add command to export compilation database
     if g:cmake_compile_commands
         let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
     endif
+
     " Add user arguments
-    let l:cmake_args += [l:cmake_variant['cmake_usr_args']]
+    let l:cmake_variant_usr_args = [ utils#cmake#joinUserArgs( l:cmake_variant[ 'cmake_usr_args' ] ) ]
+
+    let l:cmake_args += l:cmake_variant_usr_args + get( l:, 'cmake_kit_usr_args', [] )
 
     " Generates the command line
     let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)

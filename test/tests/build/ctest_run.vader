@@ -70,8 +70,6 @@ Execute (Run tests with default settings):
             Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Run tests with custom settings):
@@ -92,8 +90,6 @@ Execute (Run tests with custom settings):
             Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (CTest with default settings):
@@ -113,8 +109,6 @@ Execute (CTest with default settings):
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
         silent CTest
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (CTest check target):
@@ -141,8 +135,6 @@ Execute (CTest check target):
         else
             AssertEqual g:cmake_build_target, 'ALL_BUILD'
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (CTest with custom settings):
@@ -164,8 +156,6 @@ Execute (CTest with custom settings):
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
         silent CTest
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (CTest with custom args):

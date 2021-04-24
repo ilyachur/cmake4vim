@@ -17,7 +17,7 @@ endfunction
 
 " Collect information from CMake reply and cache
 function! utils#cmake#common#collectCMakeInfo(build_dir) abort
-    let s:cmake_cache_info = utils#cmake#fileapi#parceReply(a:build_dir)
+    let s:cmake_cache_info = utils#cmake#fileapi#parseReply(a:build_dir)
     if empty(s:cmake_cache_info)
         let s:cmake_cache_info = utils#cmake#cache#collectInfo(a:build_dir)
     endif

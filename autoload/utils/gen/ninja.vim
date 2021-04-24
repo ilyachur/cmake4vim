@@ -2,7 +2,7 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 function! s:skipTarget(line) abort
-    if stridx(a:line, 'ninja: warning:') != -1 || stridx(a:line, '[') == 0
+    if stridx(a:line, 'ninja: warning:') != -1 || stridx(a:line, '[') == 0 || a:line =~# 'All primary targets'
         return 1
     endif
     return 0

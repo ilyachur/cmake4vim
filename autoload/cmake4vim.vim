@@ -37,6 +37,10 @@ function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
     return join( sort( keys( utils#cmake#getCMakeVariants() ), 'i' ), "\n")
 endfunction
 
+function! cmake4vim#CompleteKit(arg_lead, cmd_line, cursor_pos) abort
+    return join(sort(keys(g:cmake_kits), 'i'), "\n")
+endfunction
+
 " Method remove build directory and reset the cmake cache
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#findBuildDir()
@@ -176,14 +180,24 @@ endfunction
 " Functions allows to switch between build types
 function! cmake4vim#SelectBuildType(buildType) abort
     let g:cmake_build_type = a:buildType
-    let g:cmake_usr_args   = utils#cmake#getCMakeVariants()[ a:buildType ][ 'cmake_usr_args' ]
-
     call cmake4vim#GenerateCMake()
+endfunction
+
+" Functions allows to switch between cmake kits
+function! cmake4vim#SelectKit(name) abort
+    if !has_key( g:cmake_kits, a:name )
+        call utils#common#Warning(printf("CMake kit '%s' not found", a:name))
+        return
+    endif
+
+    call utils#cmake#unsetEnv(g:cmake_selected_kit)
+    call utils#cmake#setEnv(a:name)
+    let g:cmake_selected_kit = a:name
 endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
     if !exists('g:cmake_build_target') || g:cmake_build_target ==# ''
-        echom 'Please select target first!'
+        call utils#common#Warning('Please select target first!')
         return
     endif
 

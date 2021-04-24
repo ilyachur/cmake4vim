@@ -1,3 +1,4 @@
 **/tags
 test/tmp
 .DS_Store
+*.swp

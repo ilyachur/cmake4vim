@@ -36,6 +36,11 @@ Before:
     let g:cmake_reload_after_save=0
     let g:cmake_build_executor = 'system'
     let g:cmake_variants = {}
+    let g:cmake_kits = {}
+    let g:cmake_selected_kit = ''
+    let g:cmake_toolchain_file = ''
+    let g:cmake_build_path_pattern = ''
+    let g:cmake_build_dir_prefix = 'cmake-build-'
     silent on
 
 After:
