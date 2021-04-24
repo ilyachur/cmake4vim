@@ -227,4 +227,39 @@ function! cmake4vim#RunTarget(bang, ...) abort
         call utils#common#Warning(v:errmsg)
     endif
 endfunction
+
+" Complete CCMake window modes
+function! cmake4vim#CompleteCCMakeModes(arg_lead, cmd_line, cursor_pos) abort
+    let l:modes = ['', 'h', 'v', 't']
+    return join(l:modes, "\n")
+endfunction
+
+" Open CCMake window
+function! cmake4vim#CCMake(...) abort
+    " Supported modes:
+    " * empty, h - Open ccmake in horizontal split
+    " * v - Open ccmake in vertical split
+    " * t - Open ccmake in new tab
+    let l:mode = ''
+    if exists('a:1') && a:1 !=# ''
+        let l:mode = a:1
+    endif
+    if has('nvim')
+        if l:mode ==# 'v'
+            exec 'vsp | terminal ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        elseif l:mode ==# 't'
+            exec 'tabnew | terminal ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        else
+            exec 'sp | terminal ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        endif
+    else
+        if l:mode ==# 'v'
+            exec 'vertical terminal ++close ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        elseif l:mode ==# 't'
+            exec 'tab terminal ++close ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        else
+            exec 'terminal ++close ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        endif
+    endif
+endfunction
 " }}} Public functions "

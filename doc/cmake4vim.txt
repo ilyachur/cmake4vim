@@ -63,6 +63,13 @@ COMMANDS                                                        *cmake-commands*
     Run the current target if it is runnable and compiled.
     Command allows to reset arguments from vimspector config
 
+:CCMake!                                                          *:CCMake!*
+    Allows to use *ccmake* command inside vim.
+    The command supports next open modes (by default the horizontal mode is used):
+        * 'v' - vertical mode
+        * 'h' - horizontal mode
+        * 't' - open ccmake in the new tab
+
 VARIABLES                                                      *cmake-variables*
 
 *g:cmake_reload_after_save*           if this variable is not equal 0, plugin
@@ -145,6 +152,6 @@ g:cmake_ctest_args                  enables arguments for `ctest`,
                                     If the user calls `:CTest <some arguments>`,
                                     the `g:cmake_ctest_args` are inserted directly
                                     after `ctest`, before the `<some arguments>` parameter.
-                                    Default is empty. 
+                                    Default is empty.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help
