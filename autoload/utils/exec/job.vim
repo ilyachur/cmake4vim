@@ -106,10 +106,11 @@ function! s:createJobBuf() abort
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
     nmap <buffer> <C-c> :call utils#exec#job#stop()<CR>
+    let l:bufnum = winbufnr(0)
     if !l:cursor_was_in_quickfix
         wincmd p
     endif
-    return winbufnr(0)
+    return l:bufnum
 endfunction
 " }}} Private functions "
 
@@ -129,12 +130,12 @@ function! utils#exec#job#stop() abort
     call s:createQuickFix()
     call s:closeBuffer()
     copen
-    echom 'Job is canceled!'
+    call utils#common#Warning('Job is cancelled!')
 endfunction
 
 function! utils#exec#job#run(cmd, err_fmt) abort
-    let l:openbufnr = bufnr(s:cmake4vim_buf)
-    if !empty(s:cmake4vim_job) || l:openbufnr != -1
+    " if there is a job or if the buffer is open, abort
+    if !empty(s:cmake4vim_job) || bufnr(s:cmake4vim_buf) != -1
         call utils#common#Warning('Async execute is already running')
         return -1
     endif
