@@ -132,9 +132,7 @@ function! utils#exec#job#stop() abort
     echom 'Job is canceled!'
 endfunction
 
-" Use job
 function! utils#exec#job#run(cmd, err_fmt) abort
-    " Create a new quickfix
     let l:openbufnr = bufnr(s:cmake4vim_buf)
     if !empty(s:cmake4vim_job) || l:openbufnr != -1
         call utils#common#Warning('Async execute is already running')
