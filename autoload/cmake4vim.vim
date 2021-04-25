@@ -244,7 +244,7 @@ function! cmake4vim#CCMake(...) abort
     let l:supported_modes = split(cmake4vim#CompleteCCMakeModes(0, 0, 0), '\n')
 
     if index(l:supported_modes, l:mode) == -1
-        call utils#common#Warning("Unsupported window mode: " . l:mode)
+        call utils#common#Warning('Unsupported window mode: ' . l:mode)
         return
     endif
 
