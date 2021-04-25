@@ -6,7 +6,7 @@ coverage:
         gitter:
             default:
                 url: "https://webhooks.gitter.im/e/f66477d0c9bc4f975169"
-                threshold: 0%
+                threshold: 1%
     precision: 2
     round: down
     range: "70...100"
