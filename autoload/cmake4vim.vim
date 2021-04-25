@@ -230,7 +230,7 @@ endfunction
 
 " Complete CCMake window modes
 function! cmake4vim#CompleteCCMakeModes(arg_lead, cmd_line, cursor_pos) abort
-    let l:modes = ['h', 'v', 't']
+    let l:modes = ['hsplit', 'vsplit', 'tab']
     return join(l:modes, "\n")
 endfunction
 
@@ -240,25 +240,34 @@ function! cmake4vim#CCMake(...) abort
     " * empty, h - Open ccmake in horizontal split
     " * v - Open ccmake in vertical split
     " * t - Open ccmake in new tab
-    let l:mode = ''
-    if exists('a:1') && a:1 !=# ''
-        let l:mode = a:1
+    let l:mode = a:0 ? a:1 : 'hsplit'
+    let l:supported_modes = split(cmake4vim#CompleteCCMakeModes(0, 0, 0), '\n')
+
+    if index(l:supported_modes, l:mode) == -1
+        call utils#common#Warning("Unsupported window mode: " . l:mode)
+        return
     endif
+
+    let l:cmd = 'terminal '
+    if !has('nvim')
+        let l:cmd .= '++close '
+    endif
+    let l:cmd .= 'ccmake ' . utils#fs#fnameescape(utils#cmake#getBuildDir())
     if has('nvim')
-        if l:mode ==# 'v'
-            exec 'vsp | terminal ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
-        elseif l:mode ==# 't'
-            exec 'tabnew | terminal ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        if l:mode ==# 'vsplit'
+            exec 'vsp | ' l:cmd
+        elseif l:mode ==# 'tab'
+            exec 'tabnew | ' l:cmd
         else
-            exec 'sp | terminal ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+            exec 'sp | ' l:cmd
         endif
     else
-        if l:mode ==# 'v'
-            exec 'vertical terminal ++close ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
-        elseif l:mode ==# 't'
-            exec 'tab terminal ++close ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+        if l:mode ==# 'vsplit'
+            exec 'vertical ' l:cmd
+        elseif l:mode ==# 'tab'
+            exec 'tab ' l:cmd
         else
-            exec 'terminal ++close ccmake ' utils#fs#fnameescape(utils#cmake#getBuildDir())
+            exec l:cmd
         endif
     endif
 endfunction

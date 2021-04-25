@@ -46,9 +46,9 @@ After:
     cd ..
 
 Execute (Get ccmake modes):
-    let ref_modes = ['h', 'v', 't']
+    let ref_modes = ['hsplit', 'vsplit', 'tab']
     let modes = split(cmake4vim#CompleteCCMakeModes(0,0,0), "\n")
-    Assert len(modes) >= 3, "Number of targets: " . len(modes) . " List: " . join(modes, " ")
+    AssertEqual len(modes), len(ref_modes), printf("Number of targets: %d List: %s", len(modes), join(modes))
     AssertEqual ref_modes, modes
 
 # TODO: I don't know how I can check ccmake results in vader, but these tests should check at least that terminal with command can be opened
@@ -61,17 +61,23 @@ Execute (Run ccmake in default mode):
 Execute (Run ccmake in horizontal mode):
     if !has('win32')
         silent CMake
-        CCMake h
+        CCMake hsplit
     endif
 
 Execute (Run ccmake in vertical mode):
     if !has('win32')
         silent CMake
-        CCMake v
+        CCMake vsplit
     endif
 
 Execute (Run ccmake in tab mode):
     if !has('win32')
         silent CMake
-        CCMake t
+        CCMake tab
+    endif
+
+Execute (Run ccmake with unsuported Window mode):
+    if !has('win32')
+        silent CMake
+        CCMake unknown
     endif
