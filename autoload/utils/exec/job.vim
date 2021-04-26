@@ -51,14 +51,12 @@ function! s:createQuickFix() abort
     if l:bufnr == -1
         return
     endif
-    cexpr ''
     let l:old_error = &errorformat
     if s:err_fmt !=# ''
         let &errorformat = s:err_fmt
     endif
     execute 'cgetbuffer ' . l:bufnr
     call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
-    call s:closeBuffer()
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
@@ -66,21 +64,13 @@ function! s:createQuickFix() abort
     let s:cmake4vim_job = {}
 endfunction
 
-function! s:vimOut(channel, message) abort
-    if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['channel']
-        return
-    endif
-    call s:appendLine(a:message)
-endfunction
-
-function! s:vimExit(channel, message) abort
-    if empty(s:cmake4vim_job) || a:channel != s:cmake4vim_job['job']
-        return
-    endif
+function! s:vimClose(channel) abort
     call s:createQuickFix()
-    if a:message != 0
-        copen
-    endif
+    call s:closeBuffer()
+    let s:cmake4vim_job = {}
+
+    cwindow
+    cbottom
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
@@ -97,18 +87,29 @@ function! s:nVimExit(job_id, data, event) abort
         return
     endif
     call s:createQuickFix()
+    call s:closeBuffer()
     if a:data != 0
         copen
     endif
 endfunction
 
 function! s:createJobBuf() abort
-    silent execute 'belowright 10split ' . s:cmake4vim_buf
+    let l:cursor_was_in_quickfix = getwininfo(win_getid())[0]['quickfix']
+    " qflist is open somewhere
+    if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
+        " move the cursor there
+        copen
+        silent execute 'edit ' . s:cmake4vim_buf
+    else
+        silent execute 'belowright 10split ' . s:cmake4vim_buf
+    endif
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
     nmap <buffer> <C-c> :call utils#exec#job#stop()<CR>
     let l:bufnum = winbufnr(0)
-    wincmd p
+    if !l:cursor_was_in_quickfix
+        wincmd p
+    endif
     return l:bufnum
 endfunction
 " }}} Private functions "
@@ -127,15 +128,14 @@ function! utils#exec#job#stop() abort
     catch
     endtry
     call s:createQuickFix()
+    call s:closeBuffer()
     copen
-    echom 'Job is canceled!'
+    call utils#common#Warning('Job is cancelled!')
 endfunction
 
-" Use job
 function! utils#exec#job#run(cmd, err_fmt) abort
-    " Create a new quickfix
-    let l:openbufnr = bufnr(s:cmake4vim_buf)
-    if l:openbufnr != -1
+    " if there is a job or if the buffer is open, abort
+    if !empty(s:cmake4vim_job) || bufnr(s:cmake4vim_buf) != -1
         call utils#common#Warning('Async execute is already running')
         return -1
     endif
@@ -153,9 +153,11 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ }
     else
         let l:job = job_start(a:cmd, {
-                    \ 'out_cb': function('s:vimOut'),
-                    \ 'err_cb': function('s:vimOut'),
-                    \ 'exit_cb': function('s:vimExit'),
+                    \ 'close_cb': function('s:vimClose'),
+                    \ 'out_io' : 'buffer', 'out_buf' : l:outbufnr,
+                    \ 'err_io' : 'buffer', 'err_buf' : l:outbufnr,
+                    \ 'out_modifiable' : 0,
+                    \ 'err_modifiable' : 0,
                     \ })
         let s:cmake4vim_job = {
                     \ 'job': l:job,

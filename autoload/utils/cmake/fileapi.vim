@@ -16,11 +16,7 @@ function! s:getReplyFolder(build_dir) abort
 endfunction
 
 function! s:createFile(filename, content) abort
-    new
-    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-    put=a:content
-    execute 'w! ' a:filename
-    q
+    silent call writefile( [ a:content ], a:filename )
 endfunction
 
 function! s:createQuery() abort
