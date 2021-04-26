@@ -41,6 +41,7 @@ Before:
     silent on
 
 After:
+    silent cclose
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
     cd ..
