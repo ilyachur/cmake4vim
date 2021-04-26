@@ -254,21 +254,10 @@ function! cmake4vim#CCMake(...) abort
     endif
     let l:cmd .= 'ccmake ' . utils#fs#fnameescape(utils#cmake#getBuildDir())
     if has('nvim')
-        if l:mode ==# 'vsplit'
-            exec 'vsp | ' l:cmd
-        elseif l:mode ==# 'tab'
-            exec 'tabnew | ' l:cmd
-        else
-            exec 'sp | ' l:cmd
-        endif
+        let l:modes = { 'hsplit': 'vsp | ', 'vsplit': 'sp ', 'tab': 'tabnew | ' }
     else
-        if l:mode ==# 'vsplit'
-            exec 'vertical ' l:cmd
-        elseif l:mode ==# 'tab'
-            exec 'tab ' l:cmd
-        else
-            exec l:cmd
-        endif
+        let l:modes = { 'hsplit': '', 'vsplit': 'vertical ', 'tab': 'tab ' }
     endif
+    exec l:modes[l:mode] l:cmd
 endfunction
 " }}} Public functions "
