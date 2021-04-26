@@ -69,7 +69,7 @@ function! s:vimClose(channel) abort
     call s:closeBuffer()
     let s:cmake4vim_job = {}
 
-    cwindow
+    copen
     cbottom
 endfunction
 
