@@ -1,0 +1,83 @@
+Before:
+    function! RemoveFile(file)
+        if has('win32')
+            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+        else
+            silent echo system("rm -rf '".a:file."'")
+        endif
+    endfunction
+
+    function! RemoveCMakeDirs()
+        if has('win32')
+            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
+                silent echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
+            endfor
+        else
+            silent echo system("rm -rf cmake-build*")
+        endif
+    endfunction
+    cd test\ proj
+    silent call RemoveFile(".vimspector.json")
+    silent call RemoveCMakeDirs()
+    silent CMakeReset
+
+    let g:cmake_compile_commands_link=""
+    let g:cmake_compile_commands=0
+    let g:cmake_usr_args=""
+    let g:cmake_cxx_compiler=""
+    let g:cmake_c_compiler=""
+    let g:cmake_build_type=""
+    let g:cmake_install_prefix=""
+    let g:cmake_project_generator=""
+    let g:make_arguments=""
+    let g:cmake_build_target="all"
+    let g:cmake_build_dir=""
+    let g:cmake_change_build_command=1
+    let g:cmake_reload_after_save=0
+    let g:cmake_build_dir_prefix="cmake-build-"
+    let g:cmake_build_executor = 'system'
+    let g:cmake_vimspector_support = 1
+    " Use on in order to close all windows and avoid E36 error
+    silent on
+
+After:
+    silent call RemoveFile(".vimspector.json")
+    silent call RemoveCMakeDirs()
+    cd ..
+
+Execute (Get ccmake modes):
+    let ref_modes = ['hsplit', 'vsplit', 'tab']
+    let modes = split(cmake4vim#CompleteCCMakeModes(0,0,0), "\n")
+    AssertEqual len(modes), len(ref_modes), printf("Number of targets: %d List: %s", len(modes), join(modes))
+    AssertEqual ref_modes, modes
+
+# TODO: I don't know how I can check ccmake results in vader, but these tests should check at least that terminal with command can be opened
+Execute (Run ccmake in default mode):
+    if !has('win32')
+        silent CMake
+        CCMake
+    endif
+
+Execute (Run ccmake in horizontal mode):
+    if !has('win32')
+        silent CMake
+        CCMake hsplit
+    endif
+
+Execute (Run ccmake in vertical mode):
+    if !has('win32')
+        silent CMake
+        CCMake vsplit
+    endif
+
+Execute (Run ccmake in tab mode):
+    if !has('win32')
+        silent CMake
+        CCMake tab
+    endif
+
+Execute (Run ccmake with unsuported Window mode):
+    if !has('win32')
+        silent CMake
+        CCMake unknown
+    endif

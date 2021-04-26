@@ -60,6 +60,7 @@ The current version of the plugin supports next commands:
  - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is an experimental feature.**
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'v' - vertical mode, 'h' - horizontal mode, 't' - open ccmake in the new tab (by default the horizontal mode is used).
 
 ### **Variables**
 
@@ -140,14 +141,8 @@ create a feature request, submit a pull request or post an issue.
 
 ## **Tips and tricks**
 
-### ccmake
+### Open shell in the build directory
 
-If you want to run `ccmake` in the build directory, you can do something like this:
-```
-nnoremap <expr> <leader>cc ":tab terminal ++close ccmake " . utils#cmake#getBuildDir() . "\<CR>"
-```
-
-Or if you want to open a shell in the build directory:
 ```
 nnoremap <expr> <leader>db printf(":bo new\<CR>:lcd %s\<CR>:res 15\<CR>:term ++curwin\<CR>", utils#cmake#getBuildDir() )
 ```

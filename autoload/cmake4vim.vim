@@ -227,4 +227,37 @@ function! cmake4vim#RunTarget(bang, ...) abort
         call utils#common#Warning(v:errmsg)
     endif
 endfunction
+
+" Complete CCMake window modes
+function! cmake4vim#CompleteCCMakeModes(arg_lead, cmd_line, cursor_pos) abort
+    let l:modes = ['hsplit', 'vsplit', 'tab']
+    return join(l:modes, "\n")
+endfunction
+
+" Open CCMake window
+function! cmake4vim#CCMake(...) abort
+    " Supported modes:
+    " * empty, h - Open ccmake in horizontal split
+    " * v - Open ccmake in vertical split
+    " * t - Open ccmake in new tab
+    let l:mode = a:0 ? a:1 : 'hsplit'
+    let l:supported_modes = split(cmake4vim#CompleteCCMakeModes(0, 0, 0), '\n')
+
+    if index(l:supported_modes, l:mode) == -1
+        call utils#common#Warning('Unsupported window mode: ' . l:mode)
+        return
+    endif
+
+    let l:cmd = 'terminal '
+    if !has('nvim')
+        let l:cmd .= '++close '
+    endif
+    let l:cmd .= 'ccmake ' . utils#fs#fnameescape(utils#cmake#getBuildDir())
+    if has('nvim')
+        let l:modes = { 'hsplit': 'vsp | ', 'vsplit': 'sp ', 'tab': 'tabnew | ' }
+    else
+        let l:modes = { 'hsplit': '', 'vsplit': 'vertical ', 'tab': 'tab ' }
+    endif
+    exec l:modes[l:mode] l:cmd
+endfunction
 " }}} Public functions "
