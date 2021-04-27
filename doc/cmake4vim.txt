@@ -66,9 +66,9 @@ COMMANDS                                                        *cmake-commands*
 :CCMake                                                          *:CCMake*
     Allows to use *ccmake* command inside vim.
     The command supports next open modes (by default the horizontal mode is used):
-        * 'v' - vertical mode
-        * 'h' - horizontal mode
-        * 't' - open ccmake in the new tab
+        * 'vsplit' - vertical mode
+        * 'hsplit' - horizontal mode
+        * 'tab' - open ccmake in the new tab
 
 VARIABLES                                                      *cmake-variables*
 
