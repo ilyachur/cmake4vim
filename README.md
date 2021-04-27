@@ -60,7 +60,7 @@ The current version of the plugin supports next commands:
  - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is an experimental feature.**
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is an experimental feature.**
- - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'v' - vertical mode, 'h' - horizontal mode, 't' - open ccmake in the new tab (by default the horizontal mode is used).
+ - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'vsplit' - vertical mode, 'hsplit' - horizontal mode, 'tab' - open ccmake in the new tab (by default the horizontal mode is used).
 
 ### **Variables**
 
