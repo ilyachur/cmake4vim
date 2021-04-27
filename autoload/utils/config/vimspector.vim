@@ -15,36 +15,22 @@ function! s:readVimspectorConfig() abort
     endtry
 endfunction
 
-function! s:writeVimspectorConfig(content) abort
-    let l:config = s:getVimspectorConfig()
-    new setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-    put=a:content
-    execute 'w! ' l:config
-    q!
-endfunction
-
 function! s:writeJson(json_content) abort
-    let l:result = json_encode(a:json_content)
     " Apply pretty format if vim supports python3 (vimspector requires py3)
     if has('python3')
 py3 << EOF
-import vim
 import json
-try:
-    json_content = vim.eval("l:result")
-    content = json.loads(json_content)
-    sorted_content = json.dumps(content, indent=4, sort_keys=True)
-    sorted_content = sorted_content.split('\n')
-    vim.command("let l:result = " + str(sorted_content))
-except Exception as e:
-    print(e)
+with open( vim.eval('s:getVimspectorConfig()'), 'w' ) as vimspector_json:
+    sorted_content = json.dump(vim.eval('a:json_content'), vimspector_json, indent=4, sort_keys=True)
 EOF
-        if type(l:result) == type([])
-            let l:result = join(l:result, "\n")
-        endif
+    else
+        silent call writefile( [ json_encode( a:json_content ) ], s:getVimspectorConfig() )
     endif
 
-    call s:writeVimspectorConfig(l:result)
+    let l:bufnr = bufnr('.vimspector.json')
+    if  l:bufnr != -1
+        execute 'checktime ' . l:bufnr
+    endif
 endfunction
 
 function! s:generateEmptyVimspectorConfig() abort
@@ -122,12 +108,8 @@ function! utils#config#vimspector#getTargetConfig(target) abort
         if !empty(l:config)
             let l:conf = l:config['configurations']
             if has_key(l:conf, a:target) && has_key(l:conf[a:target], 'configuration')
-                if has_key(l:conf[a:target]['configuration'], 'program')
-                    let l:result['app'] = l:conf[a:target]['configuration']['program']
-                endif
-                if has_key(l:conf[a:target]['configuration'], 'args')
-                    let l:result['args'] = l:conf[a:target]['configuration']['args']
-                endif
+                let l:result['app' ] = get( l:conf[a:target]['configuration'], 'program', l:result['app' ] )
+                let l:result['args'] = get( l:conf[a:target]['configuration'], 'args'   , l:result['args'] )
             endif
         endif
     endif
