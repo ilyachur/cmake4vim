@@ -23,7 +23,7 @@ import json
 with open( vim.eval('s:getVimspectorConfig()'), 'w' ) as vimspector_json:
     sorted_content = json.dump(vim.eval('a:json_content'), vimspector_json, indent=4, sort_keys=True)
 EOF
-    else
+    else " nvim doesn't have python3
         silent call writefile( [ json_encode( a:json_content ) ], s:getVimspectorConfig() )
     endif
 
