@@ -40,10 +40,9 @@ function! utils#gen#common#getDefaultTarget() abort
         return utils#gen#vs#getDefaultTarget()
     elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
         return utils#gen#ninja#getDefaultTarget()
-    elseif l:cmake_gen ==# '' || stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
+    elseif stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
         return utils#gen#make#getDefaultTarget()
     endif
-    return ''
 endfunction
 
 " Returns the clean target for CMake generator
@@ -85,5 +84,4 @@ function! utils#gen#common#getBuildCommand(build_dir, target, make_arguments) ab
     elseif stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
         return utils#gen#make#getBuildCommand(a:build_dir, a:target, a:make_arguments)
     endif
-    return ''
 endfunction
