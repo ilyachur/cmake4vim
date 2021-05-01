@@ -127,7 +127,7 @@ Execute (Run test_app target with runtime output and open quickfix):
         " WA to skip test
         call utils#common#executeCommand('echo 123 F1')
     endif
-    cope
+    copen
 
 Expect (See '123 F1' result in quickfix):
   || 123 F1

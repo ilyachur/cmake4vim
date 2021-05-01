@@ -110,7 +110,7 @@ Execute (Check job cancel command):
     silent call utils#exec#job#run('sleep 10', '')
     silent call utils#exec#job#stop()
 
-Execute (Generate cmake project with default settings 2 times):
+Execute (Run 2 jobs at once):
     silent call utils#exec#job#run('sleep 10', '')
     let ret_code = utils#exec#job#run('sleep 10', '')
     AssertEqual ret_code, -1
