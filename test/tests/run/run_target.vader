@@ -146,3 +146,29 @@ Execute (Run test_app target with mask arguments):
 
 Expect (See 'F1' result in quickfix):
   || --gtest_filter=Test* F1
+
+Execute (Run test_app target with mask arguments with job executor):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        let g:cmake_build_executor='job'
+        silent CMakeRun --gtest_filter=Test*
+        sleep 2
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1')
+    endif
+    copen
+
+# The test is disabled because output for job executor can contain different number of empty lines
+#      - Expected:
+#          || --gtest_filter=Test* F1
+#      - Got:
+#          ||
+#          || --gtest_filter=Test* F1
+#          ||
+#          ||
+#          ||
+# Expect (See 'F1' result in quickfix):
+#   || --gtest_filter=Test* F1

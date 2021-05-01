@@ -209,17 +209,7 @@ function! cmake4vim#RunTarget(bang, ...) abort
     let l:conf = { g:cmake_build_target : { 'app': l:exec_path, 'args': l:args } }
     call utils#config#vimspector#updateConfig(l:conf)
     if strlen(l:exec_path)
-        if has('win32')
-            let l:status = ''
-        else
-            silent! let l:status = system('command -v noglob')
-        endif
-        if l:status !~# '\w\+'
-            let l:noglob = ''
-        else
-            let l:noglob = 'noglob'
-        endif
-        call utils#common#executeCommand(join([l:noglob, utils#fs#fnameescape(l:exec_path)] + l:args))
+        call utils#common#executeCommand(join([utils#fs#fnameescape(l:exec_path)] + l:args, ' '))
     else
         let v:errmsg = 'Executable "' . g:cmake_build_target . '" was not found'
         call utils#common#Warning(v:errmsg)
