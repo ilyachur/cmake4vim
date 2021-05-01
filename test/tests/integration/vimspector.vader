@@ -60,12 +60,8 @@ Execute (Create default vimspector config):
 Execute (Avoid incorrect vimspector configs):
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     " Create incorrect config
-    new
-    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-    let text = "{  }"
-    put=text
-    execute 'w! .vimspector.json'
-    q
+    silent call writefile( ['{  }'], '.vimspector.json' )
+
     Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
     let config = utils#config#vimspector#updateConfig({})
     Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
@@ -75,12 +71,8 @@ Execute (Read incorrect vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        new
-        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-        let text = join(readfile('../tests/integration/vimspector.vader'), '')
-        put=text
-        execute 'w! .vimspector.json'
-        q
+        silent call writefile( readfile( '../tests/integration/vimspector.vader' ), '.vimspector.json' )
+
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({})
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
@@ -91,12 +83,8 @@ Execute (Read correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        new
-        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-        let text = join(readfile('../tests/integration/.vimspector.json'), '')
-        put=text
-        execute 'w! .vimspector.json'
-        q
+        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({})
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
@@ -114,12 +102,8 @@ Execute (Change correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        new
-        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-        let text = join(readfile('../tests/integration/.vimspector.json'), '')
-        put=text
-        execute 'w! .vimspector.json'
-        q
+        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({'test_app': {'app': 'new_bin/test_app', 'args': []}})
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
@@ -137,12 +121,8 @@ Execute (Change correct vimspector config to incorrect data):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        new
-        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-        let text = join(readfile('../tests/integration/.vimspector.json'), '')
-        put=text
-        execute 'w! .vimspector.json'
-        q
+        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({'test_app': {}})
         Assert empty(config), "Config should be empty!"
@@ -180,12 +160,8 @@ Execute (Run test_app target with vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        new
-        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-        let text = join(readfile('../tests/integration/.vimspector.json'), '')
-        put=text
-        execute 'w! .vimspector.json'
-        q
+        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         silent CMake
         silent CMakeSelectTarget test_app
@@ -215,12 +191,8 @@ Execute (Run test_app target with reset vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        new
-        setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-        let text = join(readfile('../tests/integration/.vimspector.json'), '')
-        put=text
-        execute 'w! .vimspector.json'
-        q
+        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         silent CMake
         silent CMakeSelectTarget test_app
@@ -245,3 +217,25 @@ Execute (Run test_app target with reset vimspector args):
 
 Expect (See 'F1' result in quickfix):
   || F1
+
+Execute (Read vimspector config containing backslashes):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create config
+        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        silent CMakeRun!
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'with_backslashes' ), 'Config should have the target with_backslashes'
+        AssertEqual config['configurations']['with_backslashes']['configuration']['args'], ["--gtest_filter=\"Hello\""]
+
+        if !has('nvim')
+            AssertEqual trim(readfile('.vimspector.json')[32]), '"--gtest_filter=\"Hello\""'
+        endif
+    endif

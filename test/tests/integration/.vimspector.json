@@ -24,6 +24,19 @@
                 "stopAtEntry": true,
                 "MImode": "lldb"
             }
+        },
+        "with_backslashes": {
+            "adapter": "CodeLLDB",
+            "configuration": {
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/test_app",
+                "args": ["--gtest_filter=\"Hello\""],
+                "cwd": "${workspaceRoot}",
+                "externalConsole": false,
+                "stopAtEntry": true,
+                "MImode": "lldb"
+            }
         }
     }
 }
