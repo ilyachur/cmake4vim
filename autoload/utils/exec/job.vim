@@ -38,9 +38,10 @@ function! s:closeBuffer() abort
     if l:oldnr != l:winnr && l:winnr != -1
         exec l:winnr.'wincmd c'
     endif
+
     if l:bufnr != -1
         try
-            silent exec 'bwipeout ' . escape(bufname(l:bufnr), ' \')
+            silent exec 'bwipeout ' . l:bufnr
         catch
         endtry
     endif
@@ -141,8 +142,17 @@ function! utils#exec#job#run(cmd, err_fmt) abort
     endif
     let l:outbufnr = s:createJobBuf()
     let s:err_fmt = a:err_fmt
+    let l:cmd = a:cmd
+    if !has('win32')
+        if has('nvim')
+            let l:cmd = [ a:cmd ]
+        else
+            let l:cmd = ['/bin/sh', '-c',  a:cmd] 
+        endif
+    endif
+
     if has('nvim')
-        let l:job = jobstart(a:cmd, {
+        let l:job = jobstart(l:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
                     \ 'on_stderr': function('s:nVimOut'),
                     \ 'on_exit': function('s:nVimExit'),
@@ -152,7 +162,7 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'cmd': a:cmd
                     \ }
     else
-        let l:job = job_start(a:cmd, {
+        let l:job = job_start(l:cmd, {
                     \ 'close_cb': function('s:vimClose'),
                     \ 'out_io' : 'buffer', 'out_buf' : l:outbufnr,
                     \ 'err_io' : 'buffer', 'err_buf' : l:outbufnr,
