@@ -57,7 +57,7 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Generate cmake project with default settings):
+Execute ([CMake targets] Generate cmake project with default settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -75,7 +75,7 @@ Execute (Generate cmake project with default settings):
         endif
     endif
 
-Execute (Generate cmake project with custom options):
+Execute ([CMake targets] Generate cmake project with custom options):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -96,7 +96,7 @@ Execute (Generate cmake project with custom options):
         endif
     endif
 
-Execute (Generate cmake project with custom options as argument):
+Execute ([CMake targets] Generate cmake project with custom options as argument):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -116,7 +116,7 @@ Execute (Generate cmake project with custom options as argument):
         endif
     endif
 
-Execute (Check CMake generator):
+Execute ([CMake targets] Check CMake generator):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -132,7 +132,7 @@ Execute (Check CMake generator):
         echo cmake_gen
     endif
 
-Execute (Check CMakeClean):
+Execute ([CMake targets] Check CMakeClean):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -156,7 +156,7 @@ Execute (Check CMakeClean):
         endif
     endif
 
-Execute (Build only library with arguments):
+Execute ([CMake targets] Build only library with arguments):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -173,7 +173,7 @@ Execute (Build only library with arguments):
         endif
     endif
 
-Execute (CMakeBuild for test library):
+Execute ([CMake targets] CMakeBuild for test library):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         " Check that make command works with changed build command
@@ -191,7 +191,7 @@ Execute (CMakeBuild for test library):
         endif
     endif
 
-Execute (Check all targets):
+Execute ([CMake targets] Check all targets):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
@@ -200,7 +200,7 @@ Execute (Check all targets):
         Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
     endif
 
-Execute (Get cmake targets):
+Execute ([CMake targets] Get cmake targets):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -210,85 +210,48 @@ Execute (Get cmake targets):
         Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
     endif
 
-Execute (Check cmake_usr_args conversion from string to dictionary):
-    if !has('win32')
-        let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
-        let split_args = utils#cmake#splitUserArgs( cmake_usr_args )
-        AssertEqual sort( items( split_args ) ), [ ['COMPILER_PATH', 'this/is/a/compiler/path'], ['MOUNT_PATH', './mount/disk15' ], ['MY_CUSTOM_OP', 'ON'] ]
-    endif
+Execute ([CMake targets] Get custom build types):
+    let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CUSTOM_OP':'ON' } } }
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+    AssertEqual len(result), 5
 
-Execute (Check cmake_usr_args conversion from dictionary to string):
-    if !has('win32')
-        let cmake_usr_args = {'MY_CUSTOM_OP' : 'ON', 'COMPILER_PATH' : 'this/is/a/compiler/path', 'MOUNT_PATH' : './mount/disk15' }
-        let joined_args = utils#cmake#joinUserArgs( cmake_usr_args )
-        Assert joined_args =~# '-DMY_CUSTOM_OP=ON'
-        Assert joined_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
-        Assert joined_args =~# '-DMOUNT_PATH=./mount/disk15'
-    endif
+Execute ([CMake targets] Override default build types):
+    let g:cmake_variants = { 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CUSTOM_OP' : 'ON' } } }
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+    AssertEqual len(result), 4
+    AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
 
-Execute (Check cmake_usr_args conversion from string to dictionary to string):
-    if !has('win32')
-        let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
-        let new_cmake_usr_args = utils#cmake#joinUserArgs( utils#cmake#splitUserArgs( cmake_usr_args ) )
-        Assert new_cmake_usr_args =~# '-DMY_CUSTOM_OP=ON'
-        Assert new_cmake_usr_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
-        Assert new_cmake_usr_args =~# '-DMOUNT_PATH=./mount/disk15'
-    endif
+Execute ([CMake targets] Store g:cmake_usr_args with default build types):
+    let g:cmake_usr_args = '-DCUSTOM_OP=ON'
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+    AssertEqual len(result), 4
+    for build_type in keys( g:cmake_variants )
+        AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
+    endfor
 
-" Disable tests for windows because they hang for some reason ( mark2185 @ 2021-04-09 )
-Execute (Get custom build types):
-    " enable tests for windows with last cmake
-    if !has('win32')
-        let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CUSTOM_OP':'ON' } } }
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
-        AssertEqual len(result), 5
-    endif
+Execute ([CMake targets] Only default build types have default values):
+    let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : {'CUSTOM_OP' : 'ON'} } }
+    let g:cmake_usr_args = '-DDEFAULT_OP=ON'
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+    AssertEqual len(result), 5
+    for build_type in filter( keys( g:cmake_variants ), "v:val !=# 'custom-build'" )
+        AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'DEFAULT_OP':'ON'}
+    endfor
+    AssertEqual g:cmake_variants[ 'custom-build' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
 
-Execute (Override default build types):
-    " enable tests for windows with last cmake
-    if !has('win32')
-        let g:cmake_variants = { 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CUSTOM_OP' : 'ON' } } }
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
-        AssertEqual len(result), 4
-        AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
-    endif
-
-Execute (Store g:cmake_usr_args with default build types):
-    " enable tests for windows with last cmake
-    if !has('win32')
-        let g:cmake_usr_args = '-DCUSTOM_OP=ON'
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
-        AssertEqual len(result), 4
-        for build_type in keys( g:cmake_variants )
-            AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
-        endfor
-    endif
-
-Execute (Only default build types have default values):
-    if !has('win32')
-        let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : {'CUSTOM_OP' : 'ON'} } }
-        let g:cmake_usr_args = '-DDEFAULT_OP=ON'
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
-        AssertEqual len(result), 5
-        for build_type in filter( keys( g:cmake_variants ), "v:val !=# 'custom-build'" )
-            AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'DEFAULT_OP':'ON'}
-        endfor
-        AssertEqual g:cmake_variants[ 'custom-build' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
-    endif
-
-Execute (Get default build types):
+Execute ([CMake targets] Get default build types):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
@@ -298,7 +261,7 @@ Execute (Get default build types):
         AssertEqual len(result), 4
     endif
 
-Execute (Check all targets for empty project):
+Execute ([CMake targets] Check all targets for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
@@ -306,7 +269,7 @@ Execute (Check all targets for empty project):
         AssertEqual len(targets), 0
     endif
 
-Execute (Check clean target for empty project):
+Execute ([CMake targets] Check clean target for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
@@ -314,7 +277,7 @@ Execute (Check clean target for empty project):
         AssertEqual default, ''
     endif
 
-Execute (Check default target for empty project):
+Execute ([CMake targets] Check default target for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
@@ -322,7 +285,7 @@ Execute (Check default target for empty project):
         AssertNotEqual default, ''
     endif
 
-Execute (Select all targets for empty project):
+Execute ([CMake targets] Select all targets for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
@@ -331,7 +294,7 @@ Execute (Select all targets for empty project):
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
     endif
 
-Execute (Call CMakeBuild for empty project):
+Execute ([CMake targets] Call CMakeBuild for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
@@ -339,7 +302,7 @@ Execute (Call CMakeBuild for empty project):
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
     endif
 
-Execute (Check CMakeClean for empty project):
+Execute ([CMake targets] Check CMakeClean for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"

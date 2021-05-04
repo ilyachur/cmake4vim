@@ -12,13 +12,13 @@ Include (Get CMake Info):                                   ./tests/basic/change
 
 Include (Build CMake targets by default Generator):         ./tests/build/build_cmake_targets.vader
 Include (Build with Ninja generator):                       ./tests/build/ninja_generator.vader
-Include (Check CTest support):                              ./tests/build/ctest_run.vader
-Include (Build with job):                                   ./tests/build/job_run.vader
-Include (Build with Dispatch plugin):                       ./tests/build/check_dispatch.vader
+Include (Build with job):                                   ./tests/build/job.vader
+Include (Build with Dispatch plugin):                       ./tests/build/dispatch.vader
 Include (Build with CMakeKits):                             ./tests/build/cmake_kits.vader
 
 # Run targets
 Include (Check run target support):                         ./tests/run/run_target.vader
+Include (Check CTest support):                              ./tests/run/ctest.vader
 
 # Integration
 Include (Check ccmake):                                     ./tests/integration/ccmake.vader

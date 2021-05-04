@@ -44,7 +44,7 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Generate cmake project with default settings):
+Execute ([Dispatch executor] Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
         let old_rtp = &rtp
         set rtp+=$HOME/.vim/plugged/vim-dispatch

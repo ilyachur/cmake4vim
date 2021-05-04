@@ -46,7 +46,7 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Generate cmake project with default settings):
+Execute ([Job executor] Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -59,7 +59,7 @@ Execute (Generate cmake project with default settings):
         silent call utils#exec#job#stop()
     endif
 
-Execute (Generate cmake project with default settings and build error target):
+Execute ([Job executor] Generate cmake project with default settings and build error target):
     if !has('win32')    " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -85,7 +85,7 @@ Execute (Generate cmake project with default settings and build error target):
         silent call utils#exec#job#stop()
     endif
 
-Execute (Generate cmake project with default settings in template buffer):
+Execute ([Job executor] Generate cmake project with default settings in template buffer):
     if utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -103,14 +103,14 @@ Execute (Generate cmake project with default settings in template buffer):
         Assert filereadable("cmake-build-Release/CMakeCache.txt") || iter < 40, "CMakeCache.txt should be generated"
     endif
 
-Execute (Check job cancel command without run):
+Execute ([Job executor] Check job cancel command without run):
     silent call utils#exec#job#stop()
 
-Execute (Check job cancel command):
+Execute ([Job executor] Check job cancel command):
     silent call utils#exec#job#run('sleep 10', '')
     silent call utils#exec#job#stop()
 
-Execute (Run 2 jobs at once):
+Execute ([Job executor] Run 2 jobs at once):
     silent call utils#exec#job#run('sleep 10', '')
     let ret_code = utils#exec#job#run('sleep 10', '')
     AssertEqual ret_code, -1

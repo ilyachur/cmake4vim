@@ -45,19 +45,19 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Don't create default vimspector config):
+Execute ([Vimspector] Don't create default vimspector config):
     let g:cmake_vimspector_support=0
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     let config = utils#config#vimspector#updateConfig({})
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
 
-Execute (Create default vimspector config):
+Execute ([Vimspector] Create default vimspector config):
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     let config = utils#config#vimspector#updateConfig({})
     Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
     Assert has_key(config, 'configurations'), "Config should have configurations"
 
-Execute (Avoid incorrect vimspector configs):
+Execute ([Vimspector] Avoid incorrect vimspector configs):
     Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
     " Create incorrect config
     silent call writefile( ['{  }'], '.vimspector.json' )
@@ -67,7 +67,7 @@ Execute (Avoid incorrect vimspector configs):
     Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
     Assert empty(config), "Config should be empty!"
 
-Execute (Read incorrect vimspector config):
+Execute ([Vimspector] Read incorrect vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
@@ -79,7 +79,7 @@ Execute (Read incorrect vimspector config):
         Assert empty(config), "Config should be empty!"
     endif
 
-Execute (Read correct vimspector config):
+Execute ([Vimspector] Read correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
@@ -98,7 +98,7 @@ Execute (Read correct vimspector config):
         Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
     endif
 
-Execute (Change correct vimspector config):
+Execute ([Vimspector] Change correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
@@ -117,7 +117,7 @@ Execute (Change correct vimspector config):
         Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
     endif
 
-Execute (Change correct vimspector config to incorrect data):
+Execute ([Vimspector] Change correct vimspector config to incorrect data):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
@@ -128,7 +128,7 @@ Execute (Change correct vimspector config to incorrect data):
         Assert empty(config), "Config should be empty!"
     endif
 
-Execute (Run test_app target and change vimspector config):
+Execute ([Vimspector] Run test_app target and change vimspector config):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget test_app
@@ -153,10 +153,10 @@ Execute (Run test_app target and change vimspector config):
         call utils#common#executeCommand('echo 1 2 3 F1')
     endif
 
-Expect (See '1 2 3 F1' result in quickfix):
+Expect ([Vimspector] See '1 2 3 F1' result in quickfix):
   || 1 2 3 F1
 
-Execute (Run test_app target with vimspector args):
+Execute ([Vimspector] Run test_app target with vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
@@ -184,10 +184,10 @@ Execute (Run test_app target with vimspector args):
         call utils#common#executeCommand('echo 1 2 3* 4 F1')
     endif
 
-Expect (See '1 2 3* 4 F1' result in quickfix):
+Expect ([Vimspector] See '1 2 3* 4 F1' result in quickfix):
   || 1 2 3* 4 F1
 
-Execute (Run test_app target with reset vimspector args):
+Execute ([Vimspector] Run test_app target with reset vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
@@ -215,10 +215,10 @@ Execute (Run test_app target with reset vimspector args):
         call utils#common#executeCommand('echo F1')
     endif
 
-Expect (See 'F1' result in quickfix):
+Expect ([Vimspector] See 'F1' result in quickfix):
   || F1
 
-Execute (Read vimspector config containing backslashes):
+Execute ([Vimspector] Read vimspector config containing backslashes):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create config

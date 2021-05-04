@@ -46,21 +46,21 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Get cmake info):
+Execute ([CMake info] Get CMake info):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = utils#window#PrepareInfo(utils#cmake#common#getInfo())
     Assert len(result) == 10, "test project should contain 10 lines with cmake info"
 
-Execute (Get cmake info for empty project):
+Execute ([CMake info] Get CMake info for empty project):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMakeInfo
 
-Expect text:
+Expect text ([CMake info] check CMake info for empty project):
   CMake project was not found!
 
-Execute (Close CMakeInfo Window):
+Execute ([CMake info] Close CMakeInfo Window):
     let window_counter = 0
     windo let window_counter = window_counter + 1
     AssertEqual window_counter, 1
@@ -73,7 +73,7 @@ Execute (Close CMakeInfo Window):
     windo let window_counter = window_counter + 1
     AssertEqual window_counter, 1
 
-Execute (Get cmake info 2 times):
+Execute ([CMake info] Get cmake info 2 times):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMakeInfo
     silent CMakeInfo

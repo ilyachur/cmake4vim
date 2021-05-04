@@ -1,13 +1,6 @@
 " autoload/gen/vs.vim - contains helpers for Ninja generator
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
-function! s:skipTarget(line) abort
-    if stridx(a:line, 'ninja: warning:') != -1 || stridx(a:line, '[') == 0 || a:line =~# 'All primary targets'
-        return 1
-    endif
-    return 0
-endfunction
-
 " Returns the name of CMake generator
 function! utils#gen#ninja#getGeneratorName() abort
     return 'Ninja'
@@ -27,8 +20,16 @@ endfunction
 function! utils#gen#ninja#getTargets(build_dir) abort
     let l:res = split(system('cmake --build ' . utils#fs#fnameescape(a:build_dir) . ' --target help'), "\n")
     let l:list_targets = []
+    let l:targets_found = 0
     for l:value in l:res
-        if l:value !=# '' && s:skipTarget(l:value) == 0
+        if l:targets_found == 0
+            if l:value =~# 'All primary targets'
+                let l:targets_found = 1
+            endif
+            continue
+        endif
+
+        if l:value !=# ''
             let l:target = split(l:value, ':')[0]
             let l:list_targets += [l:target]
         endif

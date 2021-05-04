@@ -45,38 +45,38 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Get ccmake modes):
+Execute ([CCMake] Get ccmake modes):
     let ref_modes = ['hsplit', 'vsplit', 'tab']
     let modes = split(cmake4vim#CompleteCCMakeModes(0,0,0), "\n")
     AssertEqual len(modes), len(ref_modes), printf("Number of targets: %d List: %s", len(modes), join(modes))
     AssertEqual ref_modes, modes
 
 # TODO: I don't know how I can check ccmake results in vader, but these tests should check at least that terminal with command can be opened
-Execute (Run ccmake in default mode):
+Execute ([CCMake] Run ccmake in default mode):
     if !has('win32')
         silent CMake
         CCMake
     endif
 
-Execute (Run ccmake in horizontal mode):
+Execute ([CCMake] Run ccmake in horizontal mode):
     if !has('win32')
         silent CMake
         CCMake hsplit
     endif
 
-Execute (Run ccmake in vertical mode):
+Execute ([CCMake] Run ccmake in vertical mode):
     if !has('win32')
         silent CMake
         CCMake vsplit
     endif
 
-Execute (Run ccmake in tab mode):
+Execute ([CCMake] Run ccmake in tab mode):
     if !has('win32')
         silent CMake
         CCMake tab
     endif
 
-Execute (Run ccmake with unsuported Window mode):
+Execute ([CCMake] Run ccmake with unsuported Window mode):
     if !has('win32')
         silent CMake
         CCMake unknown

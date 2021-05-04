@@ -29,7 +29,7 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Check default initialization):
+Execute ([Plugin Initialization] Check default initialization):
     silent CMake
     AssertEqual g:cmake_compile_commands_link, ""
     AssertEqual g:cmake_compile_commands, 0
@@ -60,3 +60,23 @@ Execute (Check default initialization):
     AssertEqual g:cmake_kits, {}
     AssertEqual g:cmake_toolchain_file, ''
     AssertEqual g:cmake_selected_kit, ''
+
+Execute ([Plugin Initialization] Check cmake_usr_args conversion from string to dictionary):
+    let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
+    let split_args = utils#cmake#splitUserArgs( cmake_usr_args )
+    AssertEqual sort( items( split_args ) ), [ ['COMPILER_PATH', 'this/is/a/compiler/path'], ['MOUNT_PATH', './mount/disk15' ], ['MY_CUSTOM_OP', 'ON'] ]
+
+Execute ([Plugin initialization] Check cmake_usr_args conversion from dictionary to string):
+    let cmake_usr_args = {'MY_CUSTOM_OP' : 'ON', 'COMPILER_PATH' : 'this/is/a/compiler/path', 'MOUNT_PATH' : './mount/disk15' }
+    let joined_args = utils#cmake#joinUserArgs( cmake_usr_args )
+    Assert joined_args =~# '-DMY_CUSTOM_OP=ON'
+    Assert joined_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
+    Assert joined_args =~# '-DMOUNT_PATH=./mount/disk15'
+
+Execute ([Plugin Initialization] Check cmake_usr_args conversion from string to dictionary to string):
+    let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
+    let new_cmake_usr_args = utils#cmake#joinUserArgs( utils#cmake#splitUserArgs( cmake_usr_args ) )
+    Assert new_cmake_usr_args =~# '-DMY_CUSTOM_OP=ON'
+    Assert new_cmake_usr_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
+    Assert new_cmake_usr_args =~# '-DMOUNT_PATH=./mount/disk15'
+
