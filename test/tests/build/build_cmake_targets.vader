@@ -269,6 +269,22 @@ Execute ([CMake targets] Check all targets for empty project):
         AssertEqual len(targets), 0
     endif
 
+Execute ([CMake targets] Check clean target for empty project):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
+        let default = utils#gen#common#getCleanTarget()
+        AssertEqual default, ''
+    endif
+
+Execute ([CMake targets] Check default target for empty project):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
+        let default = utils#gen#common#getDefaultTarget()
+        AssertNotEqual default, ''
+    endif
+
 Execute ([CMake targets] Select all targets for empty project):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
