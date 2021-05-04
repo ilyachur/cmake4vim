@@ -46,13 +46,13 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Check CTest for empty project):
+Execute ([CTest] Check CTest for empty project):
     " enable tests for windows with last cmake
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     CTest
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
-Execute (Run tests with default settings):
+Execute ([CTest] Run tests with default settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -72,7 +72,7 @@ Execute (Run tests with default settings):
         endif
     endif
 
-Execute (Run tests with custom settings):
+Execute ([CTest] Run tests with custom settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -92,7 +92,7 @@ Execute (Run tests with custom settings):
         endif
     endif
 
-Execute (CTest with default settings):
+Execute ([CTest] CTest with default settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -111,7 +111,7 @@ Execute (CTest with default settings):
         silent CTest
     endif
 
-Execute (CTest check target):
+Execute ([CTest] CTest check target):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -137,7 +137,7 @@ Execute (CTest check target):
         endif
     endif
 
-Execute (CTest with custom settings):
+Execute ([CTest] CTest with custom settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -158,7 +158,7 @@ Execute (CTest with custom settings):
         silent CTest
     endif
 
-Execute (CTest with custom args):
+Execute ([CTest] CTest with custom args):
     if !has('win32')
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake -DCUSTOM_OP=ON
@@ -174,7 +174,7 @@ Execute (CTest with custom args):
         silent cclose
     endif
 
-Execute (CTest with custom args and a bang):
+Execute ([CTest] CTest with custom args and a bang):
     if !has('win32')
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake -DCUSTOM_OP=ON

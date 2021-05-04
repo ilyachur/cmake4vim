@@ -48,12 +48,12 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Find Ninja generator):
+Execute ([Ninja] Find Ninja generator):
     if !has('win32') " Skip for Windows
         Assert executable('ninja'), "Ninja is not found!"
     endif
 
-Execute (Check CMake generator name):
+Execute ([Ninja] Check CMake generator name):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -62,7 +62,7 @@ Execute (Check CMake generator name):
         AssertEqual 'Ninja', gen_name
     endif
 
-Execute (Generate cmake project with Ninja generator):
+Execute ([Ninja] Generate cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -70,7 +70,7 @@ Execute (Generate cmake project with Ninja generator):
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
     endif
 
-Execute (Build cmake project with Ninja generator):
+Execute ([Ninja] Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -81,7 +81,7 @@ Execute (Build cmake project with Ninja generator):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
 
-Execute (Build cmake project with Ninja generator):
+Execute ([Ninja] Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -95,7 +95,7 @@ Execute (Build cmake project with Ninja generator):
         Assert !filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should not be built"
     endif
 
-Execute (Build cmake project with Ninja generator and tests):
+Execute ([Ninja] Build cmake project with Ninja generator and tests):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake -DENABLE_TESTS=ON
@@ -107,7 +107,7 @@ Execute (Build cmake project with Ninja generator and tests):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
 
-Execute (Build cmake project with -C param):
+Execute ([Ninja] Build cmake project with -C param):
     if !has('win32') " Skip for Windows
         let g:make_arguments="-C ."
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
@@ -119,7 +119,7 @@ Execute (Build cmake project with -C param):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
 
-Execute (Get all Ninja targets):
+Execute ([Ninja] Get all Ninja targets):
     if !has('win32') " Skip for Windows
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
