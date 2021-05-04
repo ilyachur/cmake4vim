@@ -18,57 +18,74 @@ COMMANDS                                                        *cmake-commands*
     Creates a build directory (if it is necessary) and generates cmake
     project.  All arguments are directly passed on to CMake.
 
-:CMakeBuild[{Args}]                                                *:CMakeBuild*
-    Builds cmake project. You can specify the cmake target using the command
-    line argument.
-
-:CTest[{Args}]                                                     *:CTest*
-    Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest arguments.
-
-:CTest![{Args}]                                                     *:CTest*
-    Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest arguments.
-
-:CMakeInfo                                                         *:CMakeInfo*
-    Creates a window with some CMake parameters
-
-:CMakeResetAndReload[{Args}]                                       *:CMakeResetAndReload*
+:CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
     Removes cmake cache and re-generates cmake project.  All arguments are
     directly passed on to CMake.
 
 :CMakeReset                                                        *:CMakeReset*
     Removes cmake cache (this command removes the cmake build directory).
 
-:CMakeClean                                                        *:CMakeClean*
-    Cleans the project (it is equal of the execution make clean).
+:CMakeBuild[{Args}]                                                *:CMakeBuild*
+    Builds cmake project. You can specify the cmake target using the command
+    line argument.
 
 :CMakeSelectTarget[{Args}]                                  *:CMakeSelectTarget*
-    Selects a target for project. You should put target name as a parameter for
-    the command.
-
-:CtrlPCMakeTarget                                            *:CtrlPCMakeTarget*
-    You can use CtrlP in order to select a target for project.
-
-:FZFCMakeSelectTarget                                    *:FZFCMakeSelectTarget*
-    You can use FZF in order to select a target for project.
+    Selects a target for project. You should put target name as a parameter
+    for the command.
 
 :CMakeSelectBuildType[{Args}]                            *:CMakeSelectBuildType*
     Change to the CMakeBuildType with the argument passed,
     and will call :CMake after.
 
-:CMakeRun                                                           *:CMakeRun*
+:CMakeInfo                                                         *:CMakeInfo*
+    Creates a window with some CMake parameters
+
+:CMakeClean                                                        *:CMakeClean*
+    Cleans the project (it is equal of the execution make clean).
+
+:CMakeRun[{Args}]                                                    *:CMakeRun*
     Run the current target if it is runnable and compiled.
     Command supports reading arguments from the vimspector config
+    You can pass additional arguments.
 
-:CMakeRun!                                                          *:CMakeRun!*
+:CMakeRun![{Args}]                                                  *:CMakeRun!*
     Run the current target if it is runnable and compiled.
     Command allows to reset arguments from vimspector config
+    You can pass additional arguments.
 
-:CCMake                                                          *:CCMake*
+:CTest[{Args}]                                                         *:CTest*
+    Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest
+    arguments.
+
+:CTest![{Args}]                                                         *:CTest*
+    Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest
+    arguments.
+
+:CCMake                                                                *:CCMake*
     Allows to use *ccmake* command inside vim.
-    The command supports next open modes (by default the horizontal mode is used):
+    The command supports next open modes (by default the horizontal mode
+                                          is used):
         * 'vsplit' - vertical mode
         * 'hsplit' - horizontal mode
         * 'tab' - open ccmake in the new tab
+
+:CtrlPCMakeTarget                                            *:CtrlPCMakeTarget*
+    You can use CtrlP in order to select a target for project.
+
+:CtrlPCMakeBuildType                                      *:CtrlPCMakeBuildType*
+    You can use CtrlP in order to select a project build type.
+
+:CtrlPCMakeKit                                                  *:CtrlPCMakeKit*
+    You can use CtrlP in order to select a CMake kit for project.
+
+:FZFCMakeSelectTarget                                    *:FZFCMakeSelectTarget*
+    You can use FZF in order to select a target for project.
+
+:FZFCMakeSelectBuildType                              *:FZFCMakeSelectBuildType*
+    You can use FZF in order to select a project build type.
+
+:FZFCMakeSelectKit                                          *:FZFCMakeSelectKit*
+    You can use FZF in order to select a CMake kit for project.
 
 VARIABLES                                                      *cmake-variables*
 
