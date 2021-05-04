@@ -2,6 +2,9 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 " Private functions {{{ "
+let s:populated_build_types = []
+let s:cached_usr_args = ''
+
 function! s:detectCMakeBuildType() abort
     if g:cmake_build_type !=# ''
         return g:cmake_build_type
@@ -68,6 +71,7 @@ endfunction
 function! s:populateDefaultCMakeVariants() abort
     for build_type in filter( utils#cmake#getDefaultBuildTypes(), "v:val !=# ''" )
         if ( !has_key( g:cmake_variants, build_type ) )
+            let s:populated_build_types += [build_type]
             let g:cmake_variants[ build_type ] =
                 \ {
                 \   'cmake_build_type' : build_type,
@@ -75,6 +79,13 @@ function! s:populateDefaultCMakeVariants() abort
                 \ }
         endif
     endfor
+    " Change usr_arguments if global usr_args
+    if g:cmake_usr_args !=# s:cached_usr_args
+        let s:cached_usr_args = g:cmake_usr_args
+        for l:populated_type in s:populated_build_types
+            let g:cmake_variants[l:populated_type]['cmake_usr_args'] = utils#cmake#splitUserArgs(g:cmake_usr_args)
+        endfor
+    endif
 endfunction
 " }}} Private functions "
 
