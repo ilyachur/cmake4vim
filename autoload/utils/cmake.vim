@@ -3,7 +3,7 @@
 
 " Private functions {{{ "
 let s:populated_build_types = []
-let s:cached_usr_args = ''
+let s:cached_usr_args = {}
 
 function! s:detectCMakeBuildType() abort
     if g:cmake_build_type !=# ''
@@ -80,8 +80,8 @@ function! s:populateDefaultCMakeVariants() abort
         endif
     endfor
     " Change usr_arguments if global usr_args
-    if g:cmake_usr_args !=# s:cached_usr_args
-        let s:cached_usr_args = g:cmake_usr_args
+    if utils#cmake#splitUserArgs(g:cmake_usr_args) !=# s:cached_usr_args
+        let s:cached_usr_args = utils#cmake#splitUserArgs(g:cmake_usr_args)
         for l:populated_type in s:populated_build_types
             let g:cmake_variants[l:populated_type]['cmake_usr_args'] = utils#cmake#splitUserArgs(g:cmake_usr_args)
         endfor
@@ -121,8 +121,8 @@ function! utils#cmake#splitUserArgs(cmakeArguments) abort
     endif
 
     let l:ret = {}
-    for cmake_arg in split( g:cmake_usr_args )
-        let [ key, val ] = split( cmake_arg[ 2: ], '=' )
+    for cmake_arg in split(a:cmakeArguments)
+        let [ key, val ] = split(cmake_arg[ 2: ], '=')
         let l:ret[ key ] = val
     endfor
     return l:ret
