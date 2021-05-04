@@ -104,20 +104,22 @@ Execute ([CMake kits] Check CMakeKit compilers setting):
     Assert generation_command =~# '-DCMAKE_CXX_COMPILER=clang++'
 
 Execute ([CMake kits] Check CMakeKit generator setting):
-    silent call remove( g:cmake_kits["First"], "toolchain_file" )
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-    silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-    Assert filereadable('cmake-build-Release/build.ninja'), 'build.ninja should exist'
+    if !has('win32')
+        silent call remove( g:cmake_kits["First"], "toolchain_file" )
+        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
+        silent CMakeSelectKit First
+        silent CMake
+        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
+        Assert filereadable('cmake-build-Release/build.ninja'), 'build.ninja should exist'
 
-    let g:cmake_kits['First']['generator'] = ''
-    silent call RemoveDirectory('cmake-build-Release')
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-    silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-    Assert filereadable('cmake-build-Release/Makefile'), 'Makefile should exist'
+        let g:cmake_kits['First']['generator'] = ''
+        silent call RemoveDirectory('cmake-build-Release')
+        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
+        silent CMakeSelectKit First
+        silent CMake
+        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
+        Assert filereadable('cmake-build-Release/Makefile'), 'Makefile should exist'
+    endif
 
 Execute ([CMake kits] Check CMakeKit cmake_usr_args setting):
     Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
