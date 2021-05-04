@@ -238,6 +238,16 @@ Execute ([CMake targets] Store g:cmake_usr_args with default build types):
         AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
     endfor
 
+Execute ([CMake targets] Update g:cmake_usr_args for default build types):
+    let g:cmake_usr_args = '-DCUSTOM_OP=ON'
+    let genCommand = utils#cmake#getCMakeGenerationCommand()
+    AssertNotEqual stridx(genCommand, '-DCUSTOM_OP=ON'), -1
+
+    let g:cmake_usr_args = '-DCUSTOM_TEST=OFF'
+    let genCommand = utils#cmake#getCMakeGenerationCommand()
+    AssertEqual stridx(genCommand, '-DCUSTOM_OP=ON'), -1, genCommand
+    AssertNotEqual stridx(genCommand, '-DCUSTOM_TEST=OFF'), -1
+
 Execute ([CMake targets] Only default build types have default values):
     let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : {'CUSTOM_OP' : 'ON'} } }
     let g:cmake_usr_args = '-DDEFAULT_OP=ON'
