@@ -46,21 +46,50 @@ git clone https://github.com/ilyachur/cmake4vim
 
 The current version of the plugin supports next commands:
 
+#### Basic
+
  - **`:CMake`** creates a build directory (if it is necessary) and generates cmake project.
- - **`:CMakeBuild`** builds current cmake project. The command allows to specify cmake target.
- - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
- - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
- - **`:CMakeInfo`** creates a window with CMake information.
  - **`:CMakeResetAndReload`** removes cmake cache and re-generates cmake project.
  - **`:CMakeReset`** removes cmake cache (this command removes the cmake build directory).
- - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
+ - **`:CMakeBuild`** builds current cmake project. The command allows to specify cmake target.
  - **`:CMakeSelectTarget`** selects a target for project. You should put target name as a command line argument.
- - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
- - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
- - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
+ - **`:CMakeSelectBuildType`** changes the cmake build type with argument passed and call **`:CMake`**.
+ - **`:CMakeInfo`** creates a window with CMake information.
+ - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
+
+#### Execute
+
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is an experimental feature.**
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
+ - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
+
+#### Integration
+
  - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'vsplit' - vertical mode, 'hsplit' - horizontal mode, 'tab' - open ccmake in the new tab (by default the horizontal mode is used).
+
+#### FZF plugins
+
+ - **`:CtrlPCMakeTarget`** you can use CtrlP in order to select a target for project.
+ - **`:CtrlPCMakeBuildType`** allows to use CtrlP in order to select a project build type.
+ - **`:CtrlPCMakeKit`** uses CtrlP to select a CMake kit for project.
+ - **`:FZFCMakeSelectTarget`** you can use FZF in order to select a target for project.
+ - **`:FZFCMakeSelectBuildType`** allows to use FZF in order to select a project build type.
+ - **`:FZFCMakeSelectKit`** uses FZF to select a CMake kit for project.
+
+## `<Plug>` mappings
+
+| `<Plug>` mapping          | Command                   |
+|:--------------------------|:--------------------------|
+| `(CMake)`                 | `:CMake`                  |
+| `(CMakeResetAndReload)`   | `:CMakeResetAndReload`    |
+| `(CMakeReset)`            | `:CMakeReset`             |
+| `(CMakeBuild)`            | `:CMakeBuild`             |
+| `(CMakeClean)`            | `:CMakeClean`             |
+| `(CMakeInfo)`             | `:CMakeInfo`              |
+| `(CMakeRun)`              | `:CMakeRun`               |
+| `(CTest)`                 | `:CTest`                  |
+| `(CCMake)`                | `:CCMake`                 |
 
 ### **Variables**
 

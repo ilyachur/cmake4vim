@@ -56,3 +56,15 @@ command!                 CMakeClean call cmake4vim#CleanCMake()
 command!                 CMakeInfo  call utils#window#OpenCMakeInfo()
 command! -bang -nargs=*  CMakeRun   call cmake4vim#RunTarget(<bang>0, <f-args>)
 " }}} Commands "
+
+" Mappings {{{
+nnoremap <silent> <Plug>(CMake)                     :call cmake4vim#GenerateCMake()<CR>
+nnoremap <silent> <Plug>(CMakeResetAndReload)       :call cmake4vim#ResetAndReloadCMake()<CR>
+nnoremap <silent> <Plug>(CMakeReset)                :call cmake4vim#ResetCMakeCache()<CR>
+nnoremap <silent> <Plug>(CMakeBuild)                :call cmake4vim#CMakeBuild()<CR>
+nnoremap <silent> <Plug>(CMakeClean)                :call cmake4vim#CleanCMake()<CR>
+nnoremap <silent> <Plug>(CMakeInfo)                 :call utils#window#OpenCMakeInfo()<CR>
+nnoremap <silent> <Plug>(CMakeRun)                  :call cmake4vim#RunTarget(0)<CR>
+nnoremap <silent> <Plug>(CTest)                     :call cmake4vim#CTest(0)<CR>
+nnoremap <silent> <Plug>(CCMake)                    :call cmake4vim#CCMake()<CR>
+" }}} Mappings
