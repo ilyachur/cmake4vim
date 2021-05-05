@@ -57,7 +57,7 @@ COMMANDS                                                        *cmake-commands*
     Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest
     arguments.
 
-:CTest![{Args}]                                                         *:CTest*
+:CTest![{Args}]                                                         *:CTest!*
     Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest
     arguments.
 
