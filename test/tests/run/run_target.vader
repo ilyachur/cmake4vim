@@ -138,6 +138,7 @@ Execute (Run test_app target with mask arguments):
         silent CMakeSelectTarget test_app
         silent CMakeBuild
         silent CMakeRun --gtest_filter=Test*
+        sleep 5
     else
         " WA to skip test
         call utils#common#executeCommand('echo --gtest_filter=Test* F1')
