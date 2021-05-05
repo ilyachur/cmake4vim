@@ -7,27 +7,10 @@ let s:cmake4vim_buf = 'cmake4vim_execute'
 let s:err_fmt = ''
 
 function! s:appendLine(text) abort
-    let l:oldnr = winnr()
-    let l:winnr = bufwinnr(s:cmake4vim_buf)
-
-    if l:oldnr != l:winnr
-        if l:winnr == -1
-            silent exec 'sp ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
-            setlocal modifiable
-            silent call append('$', a:text)
-            silent hide
-        else
-            exec l:winnr.'wincmd w'
-            setlocal modifiable
-            silent call append('$', a:text)
-        endif
-    else
-        setlocal modifiable
-        silent call append('$', a:text)
-    endif
-    $
-    setlocal nomodifiable
-    exec l:oldnr.'wincmd w'
+    let l:bufnr = bufnr(s:cmake4vim_buf)
+    call setbufvar(l:bufnr, '&modifiable', 1)
+    silent call appendbufline(bufnr(s:cmake4vim_buf), '$', a:text)
+    call setbufvar(l:bufnr, '&modifiable', 0)
 endfunction
 
 function! s:closeBuffer() abort
@@ -70,15 +53,12 @@ function! s:vimClose(channel) abort
     call s:closeBuffer()
     let s:cmake4vim_job = {}
 
-    cwindow
+    silent cwindow
     cbottom
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
-    if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
-        return
-    endif
-    for val in a:data
+    for val in filter(a:data, '!empty(v:val)')
         call s:appendLine(val)
     endfor
 endfunction
@@ -87,6 +67,13 @@ function! s:nVimExit(job_id, data, event) abort
     if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
         return
     endif
+    
+    " using only appendbufline results in an empty first line
+    let l:bufnr = bufnr(s:cmake4vim_buf)
+    call setbufvar(l:bufnr, '&modifiable', 1)
+    call deletebufline( l:bufnr, 1 )
+    call setbufvar(l:bufnr, '&modifiable', 0)
+
     call s:createQuickFix()
     call s:closeBuffer()
     if a:data != 0
@@ -142,17 +129,8 @@ function! utils#exec#job#run(cmd, err_fmt) abort
     endif
     let l:outbufnr = s:createJobBuf()
     let s:err_fmt = a:err_fmt
-    let l:cmd = a:cmd
-    if !has('win32')
-        if has('nvim')
-            let l:cmd = [ a:cmd ]
-        else
-            let l:cmd = ['/bin/sh', '-c',  a:cmd] 
-        endif
-    endif
-
     if has('nvim')
-        let l:job = jobstart(l:cmd, {
+        let l:job = jobstart(a:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
                     \ 'on_stderr': function('s:nVimOut'),
                     \ 'on_exit': function('s:nVimExit'),
@@ -162,6 +140,8 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'cmd': a:cmd
                     \ }
     else
+        let l:cmd = has('win32') ? a:cmd : [&shell, '-c', a:cmd]
+
         let l:job = job_start(l:cmd, {
                     \ 'close_cb': function('s:vimClose'),
                     \ 'out_io' : 'buffer', 'out_buf' : l:outbufnr,
