@@ -49,6 +49,7 @@ After:
 Execute ([Job executor] Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        AssertEqual bufnr('cmake4vim_execute'), -1
         silent CMake
         let iter = 0
         while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
@@ -57,18 +58,20 @@ Execute ([Job executor] Generate cmake project with default settings):
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent call utils#exec#job#stop()
+        AssertEqual bufnr('cmake4vim_execute'), -1
     endif
 
 Execute ([Job executor] Generate cmake project with default settings and build error target):
     if !has('win32')    " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        AssertEqual bufnr('cmake4vim_execute'), -1
         silent CMake
         let iter = 0
         while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
             sleep 1
             let iter += 1
         endwhile
-        Assert filereadable("cmake-build-Release/CMakeCache.txt") || iter < 40, "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild incorrect_lib
         silent on
         let iter = 0
@@ -83,36 +86,24 @@ Execute ([Job executor] Generate cmake project with default settings and build e
         endwhile
         Assert window_counter > 1
         silent call utils#exec#job#stop()
-    endif
-
-Execute ([Job executor] Generate cmake project with default settings in template buffer):
-    if utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake
-        let winnr = bufwinnr('cmake4vim_execute')
-        if winnr == -1
-            silent exec 'sp ' . escape(bufname(bufnr('cmake4vim_execute')), ' \')
-        else
-            exec winnr.'wincmd w'
-        endif
-        let iter = 0
-        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 1
-            let iter += 1
-        endwhile
-        Assert filereadable("cmake-build-Release/CMakeCache.txt") || iter < 40, "CMakeCache.txt should be generated"
+        AssertEqual bufnr('cmake4vim_execute'), -1
     endif
 
 Execute ([Job executor] Check job cancel command without run):
+    AssertEqual bufnr('cmake4vim_execute'), -1
     silent call utils#exec#job#stop()
+    AssertEqual bufnr('cmake4vim_execute'), -1
 
 Execute ([Job executor] Check job cancel command):
+    AssertEqual bufnr('cmake4vim_execute'), -1
     silent call utils#exec#job#run('sleep 10', '')
     silent call utils#exec#job#stop()
+    AssertEqual bufnr('cmake4vim_execute'), -1
 
 Execute ([Job executor] Run 2 jobs at once):
     silent call utils#exec#job#run('sleep 10', '')
     let ret_code = utils#exec#job#run('sleep 10', '')
     AssertEqual ret_code, -1
     silent call utils#exec#job#stop()
+    AssertEqual bufnr('cmake4vim_execute'), -1
 
