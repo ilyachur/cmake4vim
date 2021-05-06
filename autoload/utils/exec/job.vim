@@ -6,26 +6,20 @@ let s:cmake4vim_job = {}
 let s:cmake4vim_buf = 'cmake4vim_execute'
 let s:err_fmt = ''
 
-function! s:appendLine(text) abort
-    let l:bufnr = bufnr(s:cmake4vim_buf)
-    call setbufvar(l:bufnr, '&modifiable', 1)
-    silent call appendbufline(bufnr(s:cmake4vim_buf), '$', a:text)
-    call setbufvar(l:bufnr, '&modifiable', 0)
-endfunction
-
 function! s:closeBuffer() abort
-    let l:oldnr = winnr()
     let l:winnr = bufwinnr(s:cmake4vim_buf)
-    let l:bufnr = bufnr(s:cmake4vim_buf)
-
-    if l:oldnr != l:winnr && l:winnr != -1
+    if l:winnr != -1
         exec l:winnr.'wincmd c'
     endif
 
+    let l:bufnr = bufnr(s:cmake4vim_buf)
     if l:bufnr != -1
         try
             silent exec 'bwipeout ' . l:bufnr
         catch
+            " This should never happen, we shouldn't need this catch
+            let v:errmsg = 'There are multiple "cmake4vim_execute" buffers, please report an issue at github'
+            call utils#common#Warning(v:errmsg)
         endtry
     endif
 endfunction
@@ -58,9 +52,12 @@ function! s:vimClose(channel) abort
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
+    let l:bufnr = bufnr(s:cmake4vim_buf)
+    call setbufvar(l:bufnr, '&modifiable', 1)
     for val in filter(a:data, '!empty(v:val)')
-        call s:appendLine(val)
+        silent call appendbufline(l:bufnr, '$', val)
     endfor
+    call setbufvar(l:bufnr, '&modifiable', 0)
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
@@ -68,6 +65,7 @@ function! s:nVimExit(job_id, data, event) abort
         return
     endif
     
+    sleep 2
     " using only appendbufline results in an empty first line
     let l:bufnr = bufnr(s:cmake4vim_buf)
     call setbufvar(l:bufnr, '&modifiable', 1)
@@ -94,11 +92,10 @@ function! s:createJobBuf() abort
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
     nmap <buffer> <C-c> :call utils#exec#job#stop()<CR>
-    let l:bufnum = winbufnr(0)
     if !l:cursor_was_in_quickfix
         wincmd p
     endif
-    return l:bufnum
+    return bufnr(s:cmake4vim_buf)
 endfunction
 " }}} Private functions "
 
