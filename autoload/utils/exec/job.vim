@@ -17,13 +17,7 @@ function! s:closeBuffer() abort
         exec l:winnr.'wincmd c'
     endif
 
-    try
-        silent exec 'bwipeout ' . l:bufnr
-    catch
-        " This should never happen, we shouldn't need this catch
-        let v:errmsg = 'There are multiple "cmake4vim_execute" buffers, please report an issue at github'
-        call utils#common#Warning(v:errmsg)
-    endtry
+    silent exec 'bwipeout ' . l:bufnr
 endfunction
 
 function! s:createQuickFix() abort
@@ -66,7 +60,7 @@ function! s:nVimExit(job_id, data, event) abort
     if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
         return
     endif
-    
+
     " just to be sure all messages were processed
     sleep 100m
 
