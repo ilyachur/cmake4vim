@@ -67,7 +67,9 @@ function! s:nVimExit(job_id, data, event) abort
         return
     endif
     
-    sleep 2
+    " just to be sure all messages were processed
+    sleep 100m
+
     " using only appendbufline results in an empty first line
     let l:bufnr = bufnr(s:cmake4vim_buf)
     call setbufvar(l:bufnr, '&modifiable', 1)

@@ -9,11 +9,11 @@ function! s:add_noglob(cmd) abort
 
     silent! let l:status = system('command -v noglob')
 
-    if l:status !~# '\w\+'
-        return a:cmd
-    else
+    if l:status =~# '\w\+'
         return 'noglob ' . a:cmd
     endif
+
+    return a:cmd
 endfunction
 " }}} Private functions "
 
