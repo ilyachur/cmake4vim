@@ -57,7 +57,7 @@ function! s:nVimOut(job_id, data, event) abort
     let l:bufnr = bufnr(s:cmake4vim_buf)
     call setbufvar(l:bufnr, '&modifiable', 1)
     for val in filter(a:data, '!empty(v:val)')
-        silent call appendbufline(l:bufnr, '$', trim(val, "\n\r"))
+        silent call appendbufline(l:bufnr, '$', trim(val, "\r\n"))
     endfor
     call setbufvar(l:bufnr, '&modifiable', 0)
 endfunction
@@ -105,6 +105,7 @@ endfunction
 
 function! utils#exec#job#stop() abort
     if empty(s:cmake4vim_job)
+        call s:closeBuffer()
         return
     endif
     let l:job = s:cmake4vim_job['job']

@@ -4,16 +4,16 @@
 " Private functions {{{ "
 function! s:add_noglob(cmd) abort
     if has('win32')
-        let l:status = ''
-    else
-        silent! let l:status = system('command -v noglob')
+        return a:cmd
     endif
+
+    silent! let l:status = system('command -v noglob')
+
     if l:status !~# '\w\+'
-        let l:noglob = ''
+        return a:cmd
     else
-        let l:noglob = 'noglob '
+        return 'noglob ' . a:cmd
     endif
-    return l:noglob . a:cmd
 endfunction
 " }}} Private functions "
 
