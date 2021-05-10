@@ -105,10 +105,10 @@ Execute ([CMakeRun] Run test_app target and open quickfix):
         " WA to skip test
         call utils#common#executeCommand('echo F1')
     endif
-    cope
-
-Expect ([CMakeRun] See 'F1' result in quickfix):
-  || F1
+    copen
+    let output = getqflist()
+    AssertEqual 'F1', output[0]['text']
+    AssertEqual    1, len(output)
 
 Execute ([CMakeRun] Run non-binary target and open quickfix):
     silent CMake
@@ -127,12 +127,11 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
         " WA to skip test
         call utils#common#executeCommand('echo 123 F1')
     endif
-    copen
+    let output = getqflist()
+    AssertEqual        1, len(output)
+    AssertEqual '123 F1', output[0]['text']
 
-Expect ([CMakeRun] See '123 F1' result in quickfix):
-  || 123 F1
-
-Execute (Run test_app target with mask arguments):
+Execute ([CMakeRun] Run test_app target with mask arguments):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget test_app
@@ -142,33 +141,26 @@ Execute (Run test_app target with mask arguments):
         " WA to skip test
         call utils#common#executeCommand('echo --gtest_filter=Test* F1')
     endif
-    cope
+    let output = getqflist()
+    AssertEqual 1, len(output)
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
 
-Expect ([CMakeRun] See '--gtest_filter=Test* F1' result in quickfix):
-  || --gtest_filter=Test* F1
-
+" This test fails on CI, but works locally
+" needs to be investigated when someone stumbles upon it ( @mark2185 )
 Execute ([CMakeRun] Run test_app target with mask arguments with job executor):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32')
         silent CMake
         silent CMakeSelectTarget test_app
         silent CMakeBuild
         let g:cmake_build_executor='job'
+        AssertEqual bufnr('cmake4vim_execute'), -1
         silent CMakeRun --gtest_filter=Test*
-        sleep 2
+        sleep 10
+        AssertEqual bufnr('cmake4vim_execute'), -1
     else
         " WA to skip test
         call utils#common#executeCommand('echo --gtest_filter=Test* F1')
     endif
-    copen
-
-# The test is disabled because output for job executor can contain different number of empty lines
-#      - Expected:
-#          || --gtest_filter=Test* F1
-#      - Got:
-#          ||
-#          || --gtest_filter=Test* F1
-#          ||
-#          ||
-#          ||
-# Expect ([CMakeRun] See '--gtest_filter=Test* F1' result in quickfix):
-#   || --gtest_filter=Test* F1
+    let output = getqflist()
+    Assert 1 == len(output), output
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']

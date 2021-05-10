@@ -6,44 +6,18 @@ let s:cmake4vim_job = {}
 let s:cmake4vim_buf = 'cmake4vim_execute'
 let s:err_fmt = ''
 
-function! s:appendLine(text) abort
-    let l:oldnr = winnr()
-    let l:winnr = bufwinnr(s:cmake4vim_buf)
-
-    if l:oldnr != l:winnr
-        if l:winnr == -1
-            silent exec 'sp ' . escape(bufname(bufnr(s:cmake4vim_buf)), ' \')
-            setlocal modifiable
-            silent call append('$', a:text)
-            silent hide
-        else
-            exec l:winnr.'wincmd w'
-            setlocal modifiable
-            silent call append('$', a:text)
-        endif
-    else
-        setlocal modifiable
-        silent call append('$', a:text)
-    endif
-    $
-    setlocal nomodifiable
-    exec l:oldnr.'wincmd w'
-endfunction
-
 function! s:closeBuffer() abort
-    let l:oldnr = winnr()
-    let l:winnr = bufwinnr(s:cmake4vim_buf)
     let l:bufnr = bufnr(s:cmake4vim_buf)
+    if l:bufnr == -1
+        return
+    endif
 
-    if l:oldnr != l:winnr && l:winnr != -1
+    let l:winnr = bufwinnr(l:bufnr)
+    if l:winnr != -1
         exec l:winnr.'wincmd c'
     endif
-    if l:bufnr != -1
-        try
-            silent exec 'bwipeout ' . escape(bufname(l:bufnr), ' \')
-        catch
-        endtry
-    endif
+
+    silent exec 'bwipeout ' . l:bufnr
 endfunction
 
 function! s:createQuickFix() abort
@@ -69,23 +43,33 @@ function! s:vimClose(channel) abort
     call s:closeBuffer()
     let s:cmake4vim_job = {}
 
-    cwindow
+    silent cwindow
     cbottom
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
-    if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
-        return
-    endif
-    for val in a:data
-        call s:appendLine(val)
+    let l:bufnr = bufnr(s:cmake4vim_buf)
+    call setbufvar(l:bufnr, '&modifiable', 1)
+    for val in filter(a:data, '!empty(v:val)')
+        silent call appendbufline(l:bufnr, '$', trim(val, "\r\n"))
     endfor
+    call setbufvar(l:bufnr, '&modifiable', 0)
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
     if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
         return
     endif
+
+    " just to be sure all messages were processed
+    sleep 100m
+
+    " using only appendbufline results in an empty first line
+    let l:bufnr = bufnr(s:cmake4vim_buf)
+    call setbufvar(l:bufnr, '&modifiable', 1)
+    call deletebufline( l:bufnr, 1 )
+    call setbufvar(l:bufnr, '&modifiable', 0)
+
     call s:createQuickFix()
     call s:closeBuffer()
     if a:data != 0
@@ -95,6 +79,8 @@ endfunction
 
 function! s:createJobBuf() abort
     let l:cursor_was_in_quickfix = getwininfo(win_getid())[0]['quickfix']
+
+    call s:closeBuffer()
     " qflist is open somewhere
     if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
         " move the cursor there
@@ -106,16 +92,16 @@ function! s:createJobBuf() abort
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
     nmap <buffer> <C-c> :call utils#exec#job#stop()<CR>
-    let l:bufnum = winbufnr(0)
     if !l:cursor_was_in_quickfix
         wincmd p
     endif
-    return l:bufnum
+    return bufnr(s:cmake4vim_buf)
 endfunction
 " }}} Private functions "
 
 function! utils#exec#job#stop() abort
     if empty(s:cmake4vim_job)
+        call s:closeBuffer()
         return
     endif
     let l:job = s:cmake4vim_job['job']
@@ -147,23 +133,19 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'on_stderr': function('s:nVimOut'),
                     \ 'on_exit': function('s:nVimExit'),
                     \ })
-        let s:cmake4vim_job = {
-                    \ 'job': l:job,
-                    \ 'cmd': a:cmd
-                    \ }
     else
-        let l:job = job_start(a:cmd, {
+        let l:cmd = has('win32') ? a:cmd : [&shell, '-c', a:cmd]
+        let l:job = job_start(l:cmd, {
                     \ 'close_cb': function('s:vimClose'),
                     \ 'out_io' : 'buffer', 'out_buf' : l:outbufnr,
                     \ 'err_io' : 'buffer', 'err_buf' : l:outbufnr,
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
                     \ })
-        let s:cmake4vim_job = {
-                    \ 'job': l:job,
-                    \ 'channel': job_getchannel(l:job),
-                    \ 'cmd': a:cmd
-                    \ }
+    endif
+    let s:cmake4vim_job = { 'job': l:job, 'cmd': a:cmd }
+    if !has('nvim')
+       let s:cmake4vim_job['channel'] = job_getchannel(l:job)
     endif
     return l:job
 endfunction
