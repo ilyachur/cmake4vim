@@ -89,6 +89,8 @@ COMMANDS                                                        *cmake-commands*
 
 VARIABLES                                                      *cmake-variables*
 
+*g:cmake_executable*                  Path to CMake. Default is 'cmake'
+
 *g:cmake_reload_after_save*           if this variable is not equal 0, plugin
                                     will reload CMake project after saving
                                     CMake files. Default is 0.

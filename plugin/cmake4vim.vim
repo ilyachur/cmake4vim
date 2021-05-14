@@ -14,6 +14,7 @@ augroup END
 " }}} Initialization "
 
 " Options {{{ "
+let g:cmake_executable            = get(g:, 'cmake_executable'           , 'cmake'       )
 let g:make_arguments              = get(g:, 'make_arguments'             , ''            )
 let g:cmake_build_target          = get(g:, 'cmake_build_target'         , ''            )
 let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )

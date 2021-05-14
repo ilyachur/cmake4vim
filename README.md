@@ -95,6 +95,7 @@ The current version of the plugin supports next commands:
 
 Plugin supports special global variables which are allow to change behaviour of commands (you can change them in your **.vimrc**):
 
+ - **`g:cmake_executable`** the path to CMake. Default is 'cmake'.
  - **`g:cmake_reload_after_save`** if this variable is not equal 0, plugin will reload CMake project after saving CMake files. Default is 0.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
  - **`g:cmake_build_dir`** allows to set cmake build directory.  Default is ''. If variable is empty the plugin will use the prefix plus build type.

@@ -41,6 +41,7 @@ Before:
     let g:cmake_toolchain_file = ''
     let g:cmake_build_path_pattern = ''
     let g:cmake_build_dir_prefix = 'cmake-build-'
+    let g:cmake_executable = 'cmake'
     silent on
 
 After:
@@ -121,8 +122,24 @@ Execute ([Ninja] Build cmake project with -C param):
 
 Execute ([Ninja] Get all Ninja targets):
     if !has('win32') " Skip for Windows
-    silent CMake
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let targets = cmake4vim#GetAllTargets()
-    Assert len(targets) > 10
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let targets = cmake4vim#GetAllTargets()
+        Assert len(targets) > 10
+    endif
+
+Execute ([Ninja] Update g:cmake_executable option):
+    if !has('win32') " Skip for Windows
+        let genCommand = utils#cmake#getCMakeGenerationCommand()
+        let buildCommand = utils#cmake#getBuildCommand('build_dir', 'all_target')
+        AssertNotEqual stridx(genCommand, 'cmake'), -1
+        AssertNotEqual stridx(buildCommand, 'cmake'), -1
+        AssertEqual stridx(genCommand, 'custom_make'), -1, genCommand
+        AssertEqual stridx(buildCommand, 'custom_make'), -1, buildCommand
+
+        let g:cmake_executable = 'custom_make'
+        let genCommand = utils#cmake#getCMakeGenerationCommand()
+        let buildCommand = utils#cmake#getBuildCommand('build_dir', 'all_target')
+        AssertNotEqual stridx(genCommand, 'custom_make'), -1, genCommand
+        AssertNotEqual stridx(buildCommand, 'custom_make'), -1, buildCommand
     endif
