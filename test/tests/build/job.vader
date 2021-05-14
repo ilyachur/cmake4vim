@@ -37,6 +37,7 @@ Before:
     let g:cmake_build_executor = 'job'
     let g:cmake_variants = {}
     let g:cmake_ctest_args = ''
+    let g:cmake_executable = 'cmake'
     " Use on in order to close all windows and avoid E36 error
     silent on
 
