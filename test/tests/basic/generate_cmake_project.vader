@@ -46,6 +46,7 @@ Before:
     let g:cmake_build_dir_prefix="cmake-build-"
     let g:cmake_build_executor = 'system'
     let g:cmake_variants = {}
+    let g:cmake_executable = 'cmake'
     " Use on in order to close all windows and avoid E36 error
     silent on
 
@@ -208,3 +209,17 @@ Execute ([CMake generate] Generate cmake project in custom source folder):
         silent call RemoveCMakeDirs()
         cd test\ proj
     endif
+
+Execute ([CMake generate] Update g:cmake_executable option):
+    let genCommand = utils#cmake#getCMakeGenerationCommand()
+    let buildCommand = utils#cmake#getBuildCommand('build_dir', 'all_target')
+    AssertNotEqual stridx(genCommand, 'cmake'), -1
+    AssertNotEqual stridx(buildCommand, 'cmake'), -1
+    AssertEqual stridx(genCommand, 'custom_make'), -1, genCommand
+    AssertEqual stridx(buildCommand, 'custom_make'), -1, buildCommand
+
+    let g:cmake_executable = 'custom_make'
+    let genCommand = utils#cmake#getCMakeGenerationCommand()
+    let buildCommand = utils#cmake#getBuildCommand('build_dir', 'all_target')
+    AssertNotEqual stridx(genCommand, 'custom_make'), -1, genCommand
+    AssertNotEqual stridx(buildCommand, 'custom_make'), -1, buildCommand

@@ -1,3 +1,9 @@
+Before:
+    let g:cmake_executable = 'cmake'
+
+After:
+    silent on
+
 Execute ([CMake version] Check older cmake version):
     let cur_version = utils#cmake#getVersion()
     AssertEqual len(cur_version), 3

@@ -142,7 +142,7 @@ endfunction
 " Gets CMake version
 " Returns array [major, minor, patch]
 function! utils#cmake#getVersion() abort
-    let l:version_out = system('cmake --version')
+    let l:version_out = system(g:cmake_executable . ' --version')
     let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
     let l:version_exp = split(l:version_str, '\.')
     let l:version = []
@@ -255,7 +255,7 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:cmake_args += l:cmake_variant_usr_args + get( l:, 'cmake_kit_usr_args', [] )
 
     " Generates the command line
-    let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)
+    let l:cmake_cmd = g:cmake_executable . ' ' . join(l:cmake_args) . ' ' . join(a:000)
     " CMake -B option was introduced in the 3.13 version
     if utils#cmake#verNewerOrEq([3, 13])
         let l:cmake_cmd .= ' -B ' . utils#fs#fnameescape(l:build_dir)

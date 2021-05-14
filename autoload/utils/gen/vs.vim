@@ -40,6 +40,6 @@ endfunction
 
 " Returns the cmake build command for CMake generator
 function! utils#gen#vs#getBuildCommand(build_dir, target, make_arguments) abort
-    let l:cmd = 'cmake --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' -- ' . a:make_arguments
+    let l:cmd = g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' -- ' . a:make_arguments
     return l:cmd
 endfunction

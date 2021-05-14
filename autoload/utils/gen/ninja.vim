@@ -18,7 +18,7 @@ endfunction
 
 " Returns the list of targets for CMake generator
 function! utils#gen#ninja#getTargets(build_dir) abort
-    let l:res = split(system('cmake --build ' . utils#fs#fnameescape(a:build_dir) . ' --target help'), "\n")
+    let l:res = split(system(g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target help'), "\n")
     let l:list_targets = []
     let l:targets_found = 0
     for l:value in l:res
@@ -39,7 +39,7 @@ endfunction
 
 " Returns the cmake build command for CMake generator
 function! utils#gen#ninja#getBuildCommand(build_dir, target, make_arguments) abort
-    let l:cmd = 'cmake --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' -- '
+    let l:cmd = g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' -- '
     if stridx(a:make_arguments, '-C ') == -1 && a:target !=# utils#gen#ninja#getCleanTarget()
         let l:cmd .= '-C ' . utils#fs#fnameescape(fnamemodify(a:build_dir, ':p:h')) . ' '
     endif
