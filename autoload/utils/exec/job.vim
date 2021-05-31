@@ -85,9 +85,9 @@ function! s:createJobBuf() abort
     if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
         " move the cursor there
         copen
-        silent execute 'edit ' . s:cmake4vim_buf
+        silent execute 'keepalt edit ' . s:cmake4vim_buf
     else
-        silent execute 'belowright 10split ' . s:cmake4vim_buf
+        silent execute 'keepalt belowright 10split ' . s:cmake4vim_buf
     endif
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
