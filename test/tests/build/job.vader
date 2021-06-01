@@ -108,3 +108,13 @@ Execute ([Job executor] Run 2 jobs at once):
     silent call utils#exec#job#stop()
     AssertEqual bufnr('cmake4vim_execute'), -1
 
+Execute ([Job executor] Run job and don't mess up the alternate file):
+    silent edit first.txt
+    silent edit second.txt
+    AssertEqual bufname("#"), "first.txt"
+    silent call utils#exec#job#run('sleep 1', '')
+    AssertEqual bufname("#"), "first.txt"
+    sleep 2
+    copen
+    cclose
+    AssertEqual bufname("#"), "first.txt"
