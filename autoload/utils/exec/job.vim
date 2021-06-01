@@ -52,6 +52,7 @@ function! s:nVimOut(job_id, data, event) abort
     call setbufvar(l:bufnr, '&modifiable', 1)
     for val in filter(a:data, '!empty(v:val)')
         silent call appendbufline(l:bufnr, '$', trim(val, "\r\n"))
+        normal! G
     endfor
     call setbufvar(l:bufnr, '&modifiable', 0)
 endfunction
