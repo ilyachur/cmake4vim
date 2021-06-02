@@ -29,7 +29,7 @@ endfunction
 function! fzf#cmake4vim#SelectKit() abort
     if exists(':FZF')
         return fzf#run({
-                    \ 'source': sort( keys( g:cmake_kits ), 'i' ),
+                    \ 'source': sort( keys( utils#cmake#getLoadedCMakeKits() ), 'i' ),
                     \ 'options': '+m -n 1 --prompt CMakeKit\>\ ',
                     \ 'down':    '30%',
                     \ 'sink':    function('cmake4vim#SelectKit')})
