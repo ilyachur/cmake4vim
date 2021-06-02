@@ -1,5 +1,8 @@
 " Helpers {{{
 function! RemoveFile(file)
+    if empty(a:file) || !filewritable(fnameescape(a:file))
+        return
+    endif
     if has('win32')
         silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
     else
@@ -8,6 +11,9 @@ function! RemoveFile(file)
 endfunction
 
 function! RemoveDirectory(folder)
+    if empty(a:folder) || !filewritable(fnameescape(a:folder))
+        return
+    endif
     if has('win32')
         silent echo system(printf('rd /S /Q "%s" >nul 2>&1', a:folder))
     else
