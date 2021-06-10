@@ -110,7 +110,11 @@ function! utils#cmake#joinUserArgs(cmakeArguments) abort
 
     let l:ret = []
     for [ key, val ] in items(a:cmakeArguments)
-        let l:ret += [ printf('-D%s=%s', key, val ) ]
+        if val !=# ''
+            let l:ret += [ printf('-D%s=%s', key, val ) ]
+        else
+            let l:ret += [ key ]
+        endif
     endfor
     return join(l:ret)
 endfunction
@@ -122,8 +126,12 @@ function! utils#cmake#splitUserArgs(cmakeArguments) abort
 
     let l:ret = {}
     for cmake_arg in split(a:cmakeArguments)
-        let [ key, val ] = split(cmake_arg[ 2: ], '=')
-        let l:ret[ key ] = val
+        if stridx(cmake_arg, '=') != -1
+            let [ key, val ] = split(cmake_arg[ 2: ], '=')
+            let l:ret[ key ] = val
+        else
+            let l:ret[cmake_arg] = ''
+        endif
     endfor
     return l:ret
 endfunction
