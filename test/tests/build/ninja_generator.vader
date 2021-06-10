@@ -120,6 +120,19 @@ Execute ([Ninja] Build cmake project with -C param):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
 
+Execute ([Ninja] Build cmake project with generator from usr args):
+    if !has('win32') " Skip for Windows
+        let g:cmake_project_generator=""
+        let g:cmake_usr_args="-GNinja"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        silent CMakeBuild
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+    endif
+
 Execute ([Ninja] Get all Ninja targets):
     if !has('win32') " Skip for Windows
         silent CMake
