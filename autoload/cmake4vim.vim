@@ -73,7 +73,7 @@ function! cmake4vim#GenerateCMake(...) abort
         silent exec 'cd' l:build_dir
     endif
     " Generates CMake project
-    call utils#common#executeCommand(l:cmake_cmd, s:getCMakeErrorFormat())
+    call utils#common#executeCommand(l:cmake_cmd, 0, s:getCMakeErrorFormat())
     if !utils#cmake#verNewerOrEq([3, 13])
         " Change work directory to old work directory
         silent exec 'cd' l:cw_dir
@@ -155,7 +155,7 @@ function! cmake4vim#CMakeBuild(...) abort
     " Select target
     let l:result = cmake4vim#SelectTarget(l:cmake_target)
     " Build
-    call utils#common#executeCommand(l:result)
+    call utils#common#executeCommand(l:result, 0)
 endfunction
 
 " Run Ctest
@@ -170,7 +170,7 @@ function! cmake4vim#CTest(bang, ...) abort
     silent exec 'cd' l:build_dir
     let l:cmd = printf('ctest %s %s', a:bang ? '' : g:cmake_ctest_args, join( a:000 ) )
     " Run
-    call utils#common#executeCommand(l:cmd)
+    call utils#common#executeCommand(l:cmd, 1)
     " Change work directory to old work directory
     silent exec 'cd' l:cw_dir
 endfunction
@@ -209,7 +209,7 @@ function! cmake4vim#RunTarget(bang, ...) abort
     let l:conf = { g:cmake_build_target : { 'app': l:exec_path, 'args': l:args } }
     call utils#config#vimspector#updateConfig(l:conf)
     if strlen(l:exec_path)
-        call utils#common#executeCommand(join([utils#fs#fnameescape(l:exec_path)] + l:args, ' '))
+        call utils#common#executeCommand(join([utils#fs#fnameescape(l:exec_path)] + l:args, ' '), 1)
     else
         let v:errmsg = 'Executable "' . g:cmake_build_target . '" was not found'
         call utils#common#Warning(v:errmsg)

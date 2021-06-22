@@ -2,7 +2,7 @@
 " Maintainer:   Ilya Churaev <https://github.com/ilyachur>
 
 " Use dispatch to make command
-function! utils#exec#dispatch#run(cmd, errFormat) abort
+function! utils#exec#dispatch#run(cmd, open_qf, errFormat) abort
     let l:old_error = &l:errorformat
     if a:errFormat !=# ''
         let &l:errorformat = a:errFormat

@@ -39,11 +39,15 @@ function! s:createQuickFix() abort
 endfunction
 
 function! s:vimClose(channel) abort
+    let l:open_qf = s:cmake4vim_job['open_qf']
     call s:createQuickFix()
     call s:closeBuffer()
-    let s:cmake4vim_job = {}
 
-    silent cwindow
+    if l:open_qf == 0
+        silent cwindow
+    else
+        copen
+    endif
     cbottom
 endfunction
 
@@ -62,6 +66,8 @@ function! s:nVimExit(job_id, data, event) abort
         return
     endif
 
+    let l:open_qf = s:cmake4vim_job['open_qf']
+
     " just to be sure all messages were processed
     sleep 100m
 
@@ -73,7 +79,7 @@ function! s:nVimExit(job_id, data, event) abort
 
     call s:createQuickFix()
     call s:closeBuffer()
-    if a:data != 0
+    if a:data != 0 || l:open_qf != 0
         copen
     endif
 endfunction
@@ -120,7 +126,7 @@ function! utils#exec#job#stop() abort
     call utils#common#Warning('Job is cancelled!')
 endfunction
 
-function! utils#exec#job#run(cmd, err_fmt) abort
+function! utils#exec#job#run(cmd, open_qf, err_fmt) abort
     " if there is a job or if the buffer is open, abort
     if !empty(s:cmake4vim_job) || bufnr(s:cmake4vim_buf) != -1
         call utils#common#Warning('Async execute is already running')
@@ -144,7 +150,7 @@ function! utils#exec#job#run(cmd, err_fmt) abort
                     \ 'err_modifiable' : 0,
                     \ })
     endif
-    let s:cmake4vim_job = { 'job': l:job, 'cmd': a:cmd }
+    let s:cmake4vim_job = { 'job': l:job, 'cmd': a:cmd, 'open_qf': a:open_qf }
     if !has('nvim')
        let s:cmake4vim_job['channel'] = job_getchannel(l:job)
     endif

@@ -18,21 +18,22 @@ endfunction
 " }}} Private functions "
 
 " Executes the command
-function! utils#common#executeCommand(cmd, ...) abort
+function! utils#common#executeCommand(cmd, open_result, ...) abort
     let l:errFormat = get(a:, 1, '')
+    call utils#common#Warning(l:errFormat)
 
     let l:cmd = s:add_noglob(a:cmd)
     if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
         " Close quickfix list to discard custom error format
         silent! cclose
-        call utils#exec#dispatch#run(l:cmd, l:errFormat)
+        call utils#exec#dispatch#run(l:cmd, a:open_result, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
-        call utils#exec#job#run(l:cmd, l:errFormat)
+        call utils#exec#job#run(l:cmd, a:open_result, l:errFormat)
     else
         " Close quickfix list to discard custom error format
         silent! cclose
-        call utils#exec#system#run(l:cmd, l:errFormat)
+        call utils#exec#system#run(l:cmd, a:open_result, l:errFormat)
     endif
 endfunction
 
