@@ -104,9 +104,8 @@ Execute ([CMakeRun] Run test_app target and open quickfix):
         silent CMakeRun
     else
         " WA to skip test
-        call utils#common#executeCommand('echo F1')
+        call utils#common#executeCommand('echo F1', 1)
     endif
-    copen
     let output = getqflist()
     AssertEqual 'F1', output[0]['text']
     AssertEqual    1, len(output)
@@ -126,7 +125,7 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
         silent CMakeRun 123
     else
         " WA to skip test
-        call utils#common#executeCommand('echo 123 F1')
+        call utils#common#executeCommand('echo 123 F1', 1)
     endif
     let output = getqflist()
     AssertEqual        1, len(output)
@@ -140,7 +139,7 @@ Execute ([CMakeRun] Run test_app target with mask arguments):
         silent CMakeRun --gtest_filter=Test*
     else
         " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1')
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
     endif
     let output = getqflist()
     AssertEqual 1, len(output)
@@ -160,7 +159,7 @@ Execute ([CMakeRun] Run test_app target with mask arguments with job executor):
         AssertEqual bufnr('cmake4vim_execute'), -1
     else
         " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1')
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
     endif
     let output = getqflist()
     Assert 1 == len(output), output
