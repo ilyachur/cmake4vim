@@ -39,7 +39,11 @@ function! s:createQuickFix() abort
 endfunction
 
 function! s:vimClose(channel) abort
-    let l:open_qf = s:cmake4vim_job['open_qf']
+    let l:open_qf = 0
+    if has_key(s:cmake4vim_job, 'open_qf')
+        let l:open_qf = s:cmake4vim_job['open_qf']
+    endif
+
     call s:createQuickFix()
     call s:closeBuffer()
 
