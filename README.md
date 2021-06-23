@@ -95,31 +95,53 @@ The current version of the plugin supports next commands:
 
 Plugin supports special global variables which are allow to change behaviour of commands (you can change them in your **.vimrc**):
 
+#### Common
+
+The options below allow to change plugin behavior.
+
  - **`g:cmake_executable`** the path to CMake. Default is 'cmake'.
  - **`g:cmake_reload_after_save`** if this variable is not equal 0, plugin will reload CMake project after saving CMake files. Default is 0.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
- - **`g:cmake_build_dir`** allows to set cmake build directory.  Default is ''. If variable is empty the plugin will use the prefix plus build type.
- - **`g:cmake_src_dir`** allows to set cmake source directory.  Default is '' which evaluates to the current working directory.
- - **`g:cmake_build_dir_prefix`** allows to set cmake build directory prefix. Default is 'cmake-build-'.
- - **`g:cmake_build_target`** set the target name for build. Default is empty and default value depends on CMake Generator
- - **`g:make_arguments`** allows to set custom parameters for make command. Default is empty. If variable is empty, plugin launches `make` without arguments.
- - **`g:cmake_project_generator`** allows to set the project generator for build scripts. Default is empty.
- - **`g:cmake_install_prefix`** allows to change **`-DCMAKE_INSTALL_PREFIX`**. Default is empty.
- - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty. If variable is empty, plugin tries to detect cached build type. And selects 'Release' type if cmake cache doesn't exist.
- - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
- - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
- - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty. It can be either a string or a dictionary.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
- - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
- - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
+ - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
+
+#### Build path
+
+Below the list of options which allow to customize the path to CMake build directory. The list order is from higher to lower priority (it means if you initialize several options plugin will use the first initialized option from the list):
+
+ - **`g:cmake_build_dir`** allows to set cmake build directory.  Default is ''. If variable is empty the plugin will use the prefix plus build type.
+ - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf`. e.g.:
+     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`
+ - **`g:cmake_build_dir_prefix`** allows to set cmake build directory prefix, in this case the plugin uses the next rule to generate build directory name: `g:cmake_build_dir_prefix` + `g:cmake_build_type`. This option is used by default, the default prefix is 'cmake-build-'.
+
+#### CMake build options
+
+The list contains variables which allow to configure CMake build.
+
+ - **`g:cmake_src_dir`** allows to set cmake source directory.  Default is '' which evaluates to the current working directory.
+ - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty. If variable is empty, plugin tries to detect cached build type. And selects 'Release' type if cmake cache doesn't exist.
  - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CONAN_PATH' : '~/.conan' } }`
+ - **`g:cmake_build_target`** set the target name for build. Default is empty and default value depends on CMake Generator
+ - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty. It can be either a string or a dictionary.
+ - **`g:make_arguments`** allows to set custom parameters for make command. Default is empty. If variable is empty, plugin launches `make` without arguments.
+ - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
  - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
  - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
  - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
- - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf`. e.g.:
-     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`, **Note:** it takes precedence over `g:cmake_build_dir_prefix`
+
+
+#### Deprecated options
+
+**These options were deprecated and will be removed at the beginning of 2022 year.**
+
+ - **`g:cmake_project_generator`** allows to set the project generator for build scripts. **The option was deprecated, please use `let g:cmake_usr_args='-G<Generator>'` instead.** Default is empty.
+ - **`g:cmake_install_prefix`** allows to change **`-DCMAKE_INSTALL_PREFIX`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_INSTALL_PREFIX=<prefix>'` instead.** Default is empty.
+ - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_C_COMPILER=<compiler>'` instead.** Default is empty.
+ - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_CXX_COMPILER=<compiler>'` instead.** Default is empty.
+
+#### Examples
 
 Example of supported functions in `g:cmake_kits`:
 ```

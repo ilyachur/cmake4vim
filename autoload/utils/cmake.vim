@@ -214,6 +214,25 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:cmake_c_compiler        = g:cmake_c_compiler
     let l:cmake_cxx_compiler      = g:cmake_cxx_compiler
 
+    " Print warnings about deprecated variables
+    if g:cmake_project_generator !=# ''
+        call utils#common#Warning('g:cmake_project_generator option is deprecated and will be removed at the beginning of 2022 year!' .
+                    \ ' Please use `let g:cmake_usr_args="-G<Generator>"` instead.')
+    endif
+    if g:cmake_install_prefix !=# ''
+        call utils#common#Warning('g:cmake_install_prefix option is deprecated and will be removed at the beginning of 2022 year!' .
+                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_INSTALL_PREFIX=<prefix>"` instead.')
+    endif
+    if g:cmake_c_compiler !=# ''
+        call utils#common#Warning('g:cmake_c_compiler option is deprecated and will be removed at the beginning of 2022 year!' .
+                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_C_COMPILER=<compiler>"` instead.')
+    endif
+    if g:cmake_cxx_compiler !=# ''
+        call utils#common#Warning('g:cmake_cxx_compiler option is deprecated and will be removed at the beginning of 2022 year!' .
+                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_CXX_COMPILER=<compiler>"` instead.')
+    endif
+
+
     " CMakeKit can contain:
     " * additional user arguments
     " * project generator

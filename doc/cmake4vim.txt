@@ -119,12 +119,6 @@ VARIABLES                                                      *cmake-variables*
                                     If variable is empty, plugin launches make
                                     without arguments.
 
-*g:cmake_project_generator*           allows to set the project generator for
-                                    build scripts. Default is empty.
-
-*g:cmake_install_prefix*              allows to change -DCMAKE_INSTALL_PREFIX.
-                                    Default is empty.
-
 *g:cmake_build_type*                  allows to change -DCMAKE_BUILD_TYPE
                                     through the g:cmake_variants variable.
                                     Default is empty.
@@ -132,12 +126,6 @@ VARIABLES                                                      *cmake-variables*
                                     detect cached build type.
                                     And selects 'Release' type if cmake cache
                                     doesn't exist.
-
-*g:cmake_c_compiler*                  allows to change -DCMAKE_C_COMPILER.
-                                    Default is empty.
-
-*g:cmake_cxx_compiler*                allows to change -DCMAKE_CXX_COMPILER.
-                                    Default is empty.
 
 *g:cmake_usr_args*                    allows to set user arguments for cmake
                                     Default is empty.
@@ -172,5 +160,26 @@ g:cmake_ctest_args                  enables arguments for `ctest`,
                                     the `g:cmake_ctest_args` are inserted directly
                                     after `ctest`, before the `<some arguments>` parameter.
                                     Default is empty.
+DEPRECATED VARIABLES                                                  *cmake-deprecated-variables*
+
+*g:cmake_project_generator*           allows to set the project generator for
+                                    build scripts. Default is empty.
+                                    Will be removed at the beginning of 2022.
+                                    Please use `let g:cmake_usr_args='-G<Generator>'` instead.
+
+*g:cmake_install_prefix*              allows to change -DCMAKE_INSTALL_PREFIX.
+                                    Default is empty.
+                                    Will be removed at the beginning of 2022.
+                                    Please use `let g:cmake_usr_args='-DCMAKE_INSTALL_PREFIX=<prefix>'` instead.
+
+*g:cmake_c_compiler*                  allows to change -DCMAKE_C_COMPILER.
+                                    Default is empty.
+                                    Will be removed at the beginning of 2022.
+                                    Please use `let g:cmake_usr_args='-DCMAKE_C_COMPILER=<compiler>'` instead.
+
+*g:cmake_cxx_compiler*                allows to change -DCMAKE_CXX_COMPILER.
+                                    Default is empty.
+                                    Will be removed at the beginning of 2022.
+                                    Please use `let g:cmake_usr_args='-DCMAKE_CXX_COMPILER=<compiler>'` instead.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help
