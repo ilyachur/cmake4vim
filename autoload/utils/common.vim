@@ -20,7 +20,6 @@ endfunction
 " Executes the command
 function! utils#common#executeCommand(cmd, open_result, ...) abort
     let l:errFormat = get(a:, 1, '')
-    call utils#common#Warning(l:errFormat)
 
     let l:cmd = s:add_noglob(a:cmd)
     if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
