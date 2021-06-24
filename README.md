@@ -129,7 +129,6 @@ The list contains variables which allow to configure CMake build.
  - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
  - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
  - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
- - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
 
 
 #### Deprecated options
@@ -140,6 +139,7 @@ The list contains variables which allow to configure CMake build.
  - **`g:cmake_install_prefix`** allows to change **`-DCMAKE_INSTALL_PREFIX`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_INSTALL_PREFIX=<prefix>'` instead.** Default is empty.
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_C_COMPILER=<compiler>'` instead.** Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_CXX_COMPILER=<compiler>'` instead.** Default is empty.
+ - **`g:cmake_toolchain_file`** currently selected toolchain file. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_TOOLCHAIN_FILE=<file>'` instead.** Default is empty.
 
 #### Examples
 

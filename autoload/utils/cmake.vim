@@ -231,6 +231,10 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
         call utils#common#Warning('g:cmake_cxx_compiler option is deprecated and will be removed at the beginning of 2022 year!' .
                     \ ' Please use `let g:cmake_usr_args="-DCMAKE_CXX_COMPILER=<compiler>"` instead.')
     endif
+    if g:cmake_toolchain_file !=# ''
+        call utils#common#Warning('g:cmake_toolchain_file option is deprecated and will be removed at the beginning of 2022 year!' .
+                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_TOOLCHAIN_FILE=<file>"` instead.')
+    endif
 
 
     " CMakeKit can contain:
