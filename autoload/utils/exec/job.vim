@@ -29,8 +29,8 @@ function! s:createQuickFix() abort
     if s:err_fmt !=# ''
         let &errorformat = s:err_fmt
     endif
-    execute 'cgetbuffer ' . l:bufnr
-    call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
+    silent execute 'cgetbuffer ' . l:bufnr
+    silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
@@ -41,13 +41,21 @@ endfunction
 function! s:vimClose(channel) abort
     let l:open_qf = get(s:cmake4vim_job, 'open_qf', 0)
 
+    if has_key( s:cmake4vim_job, 'job' )
+        if job_info(s:cmake4vim_job['job'])['exitval'] == 0
+            echon 'Success! ' . s:cmake4vim_job['cmd']
+        else
+            echon 'Failure! ' . s:cmake4vim_job['cmd']
+        endif
+    endif
+
     call s:createQuickFix()
     call s:closeBuffer()
 
     if l:open_qf == 0
         silent cwindow
     else
-        copen
+        silent copen
     endif
     cbottom
 endfunction
