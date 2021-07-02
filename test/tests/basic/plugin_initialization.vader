@@ -61,6 +61,7 @@ Execute ([Plugin Initialization] Check default initialization):
     AssertEqual g:cmake_kits, {}
     AssertEqual g:cmake_toolchain_file, ''
     AssertEqual g:cmake_selected_kit, ''
+    AssertEqual g:cmake_kits_global_path, ''
 
 Execute ([Plugin Initialization] Check cmake_usr_args conversion from string to dictionary):
     let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
