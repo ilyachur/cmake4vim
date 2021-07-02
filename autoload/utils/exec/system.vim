@@ -9,6 +9,13 @@ function! utils#exec#system#run(cmd, open_qf, errFormat) abort
     endif
     let l:s_out = system(a:cmd)
     let l:ret_code = v:shell_error
+
+    if l:ret_code == 0
+        echon 'Success! ' . a:cmd
+    else
+        echon 'Failure! ' . a:cmd
+    endif
+
     cgetexpr l:s_out
     call setqflist( [], 'a', { 'title' : a:cmd } )
     if a:open_qf == 1 || l:ret_code != 0
