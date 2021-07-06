@@ -73,7 +73,8 @@ function! WaitForJob() abort
         endif
         let max_wait -= 1
         if max_wait == 0
-            throw json_encode(l:job) . ' job did not finish.'
+            call utils#exec#job#stop()
+            throw 'Job did not finish: ' . string(l:job)
         endif
         1sleep
     endwhile

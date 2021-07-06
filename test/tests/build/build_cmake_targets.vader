@@ -36,12 +36,12 @@ Execute ([CMake targets] Generate cmake project with custom options):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
-            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
             silent call system("cmake-build-Release/app/test_app")
             AssertEqual 1, v:shell_error
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app shouldn be built"
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
             silent call system("cmake-build-Release/app/Debug/test_app.exe")
             AssertEqual 1, v:shell_error
@@ -56,7 +56,7 @@ Execute ([CMake targets] Generate cmake project with custom options as argument)
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
-            Assert filereadable("cmake-build-Release/app/test_app"), "app shouldn be built"
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
             silent call system("cmake-build-Release/app/test_app")
             AssertEqual 1, v:shell_error
@@ -265,3 +265,94 @@ Execute ([CMake targets] Check CMakeClean for empty project):
         CMakeClean
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
     endif
+
+Execute ([Unix Makefiles] Build single unit with build in source):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-G "Unix Makefiles"'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/Makefile"), "Makefile should be generated"
+        CMakeCompileSource makefile_main.cpp
+        Assert filereadable("cmake-build-Release/CMakeFiles/MakefileDemo.dir/makefile_main.cpp.o"), "Object file is not created"
+    endif
+
+Execute ([Unix Makefiles] Build single unit with build in source, with spaces):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/Makefile"), "Makefile should be generated"
+        CMakeCompileSource folder with spaces/test.cpp
+        Assert filereadable("cmake-build-Release/CMakeFiles/MakefilePathWithSpaces.dir/folder_with_spaces/test.cpp.o"), "Object file is not created"
+    endif
+
+Execute ([Unix Makefiles] Build single unit with build out of source):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        " this is only tested on UNIX so /tmp/ certainly exists
+        let g:cmake_build_path_pattern = [ '/tmp/Release', '' ]
+        Assert !isdirectory("/tmp/Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("/tmp/Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("/tmp/Release/Makefile"), "Makefile should be generated"
+        CMakeCompileSource makefile_main.cpp
+        Assert filereadable("/tmp/Release/CMakeFiles/MakefileDemo.dir/makefile_main.cpp.o"), "Object file is not created"
+        call RemoveDirectory("/tmp/Release")
+    endif
+
+Execute ([Unix Makefiles] Build single unit without build folder):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        redir => error_message
+        CMakeCompileSource app/main.cpp
+        redir END
+        AssertEqual "\nCMake project was not found!", error_message
+    endif
+
+Execute ([Unix Makefiles] Build single unit without CMake info):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/Makefile"), "Makefile should be generated"
+        call RemoveFile("cmake-build-Release/CMakeCache.txt")
+        redir => error_message
+        CMakeCompileSource app/main.cpp
+        redir END
+        AssertEqual "\nCMake cache was not found!", error_message
+    endif
+
+Execute ([Unix Makefiles] Build non-existant source file):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/Makefile"), "Makefile should be generated"
+        redir => error_message
+        CMakeCompileSource nonexistant-filename
+        redir END
+        AssertEqual "\nGiven file is not a source file!", error_message
+    endif
+
+Execute ([Unix Makefiles] Build file which has no target):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/Makefile"), "Makefile should be generated"
+        silent CMakeCompileSource tests/src/test_class.cpp
+        Assert getqflist()[-1].text =~# 'No rule to make target'
+    endif
+
+Execute ([Compile source] Build file with unknown generator):
+    redir => error_message
+    call utils#gen#common#getSingleUnitTargetName( 'fake generator', 'main.cpp' )
+    redir END
+    AssertEqual "\nGenerator not supported for building single unit!", error_message

@@ -85,3 +85,16 @@ function! utils#gen#common#getBuildCommand(build_dir, target, make_arguments) ab
         return utils#gen#make#getBuildCommand(a:build_dir, a:target, a:make_arguments)
     endif
 endfunction
+
+" Returns the cmake target for a single source file
+function! utils#gen#common#getSingleUnitTargetName( generator, filename ) abort
+    if a:generator ==# 'Unix Makefiles'
+        " make replaces all spaces with underscores in filepaths when creating build targets
+        return fnameescape( substitute( fnamemodify( a:filename, ':r' ) . '.o', ' ', '_', 'g' ) )
+    elseif a:generator ==# 'Ninja'
+        return fnameescape( fnamemodify( a:filename, ':p' ) . '^' )
+    endif
+
+    call utils#common#Warning('Generator not supported for building single unit!')
+    return ''
+endfunction

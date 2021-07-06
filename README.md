@@ -56,6 +56,7 @@ The current version of the plugin supports next commands:
  - **`:CMakeSelectBuildType`** changes the cmake build type with argument passed and call **`:CMake`**.
  - **`:CMakeInfo`** creates a window with CMake information.
  - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
+ - **`:CMakeCompileSource`** compiles source file in current buffer.
 
 #### Execute
 
@@ -90,6 +91,7 @@ The current version of the plugin supports next commands:
 | `(CMakeRun)`              | `:CMakeRun`               |
 | `(CTest)`                 | `:CTest`                  |
 | `(CCMake)`                | `:CCMake`                 |
+| `(CMakeCompileSource)`    | `:CMakeCompileSource`     |
 
 ### **Variables**
 

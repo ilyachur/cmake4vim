@@ -158,6 +158,59 @@ function! cmake4vim#CMakeBuild(...) abort
     call utils#common#executeCommand(l:result, 0)
 endfunction
 
+" Builds current source
+function! cmake4vim#CompileSource( ... ) abort
+    let l:source_name = get( a:, 1, expand('%') )
+    let l:extension = fnamemodify( l:source_name, ':e' )
+    if empty( l:extension ) || index( [ 'h', 'hpp' ], tolower( l:extension ) ) >= 0
+        call utils#common#Warning( 'Given file is not a source file!' )
+        return
+    endif
+
+    let l:build_dir = utils#cmake#findBuildDir()
+    if empty( l:build_dir )
+        call utils#common#Warning( 'CMake project was not found!' )
+        return
+    endif
+
+    " needed to detect the generator
+    let l:cache_info = utils#cmake#cache#collectInfo( l:build_dir )
+    if empty( l:cache_info )
+        call utils#common#Warning( 'CMake cache was not found!' )
+        return
+    endif
+
+    " it seems ninja doesn't work with relative paths with newest cmake
+    " and with cmake v2.8.12.2 it doesn't work with absolute paths
+    " TODO: find the middle point
+
+    let l:generator = l:cache_info[ 'cmake' ][ 'generator' ]
+
+    let l:prefix = ''
+    if l:generator =~# 'Ninja' && !utils#cmake#verNewerOrEq( [ 3, 14 ] )
+        let l:build_dir = l:cache_info[ 'cmake' ][ 'build_dir' ]
+
+        " build folder is below getcwd()
+        if stridx( l:build_dir, getcwd() ) == 0
+            let l:subfolders = split(trim( split( l:build_dir, getcwd() )[0], '/'), '/')
+            for i in range( len( l:subfolders ) )
+                let l:prefix .= '../'
+            endfor
+
+        endif
+    endif
+
+    let l:target_name = utils#gen#common#getSingleUnitTargetName( l:generator, l:prefix . l:source_name )
+
+    " TODO: find the middle point
+    if !utils#cmake#verNewerOrEq( [ 3, 13 ] )
+        let l:target_name = printf( '"%s"', l:target_name )
+    endif
+
+    let l:cmd = utils#cmake#getBuildCommand( l:build_dir, l:target_name )
+    call utils#common#executeCommand( l:cmd, 1 )
+endfunction
+
 " Run Ctest
 function! cmake4vim#CTest(bang, ...) abort
     let l:build_dir = utils#cmake#findBuildDir()
