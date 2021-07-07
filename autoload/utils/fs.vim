@@ -6,7 +6,7 @@ function! utils#fs#makeDir(dir) abort
     let l:directory = finddir(a:dir, getcwd().';.')
     if l:directory ==# ''
         silent call mkdir(a:dir, 'p')
-        let l:directory = finddir(a:dir, getcwd().';.')
+        let l:directory = finddir(a:dir)
     endif
     if l:directory !=# ''
         return fnamemodify(l:directory, ':p:h')

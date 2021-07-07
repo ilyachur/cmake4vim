@@ -24,7 +24,7 @@ Before:
             silent echo system("rm -rf build_test cmake-*")
         endif
     endfunction
-    cd test\ proj
+    cd cmake\ projects/test\ proj
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
     silent CMakeReset
@@ -53,7 +53,7 @@ Before:
 After:
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
-    cd ..
+    cd ../..
 
 Execute ([CMake generate] Generate cmake project with default settings):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
