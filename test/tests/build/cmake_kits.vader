@@ -67,6 +67,15 @@ After:
     silent call RemoveCMakeDirs()
     cd ../..
 
+Execute ([CMake kits] Check CMakeKit autocomplete):
+    let kits = split(cmake4vim#CompleteKit(0,0,0))
+    AssertEqual len(kits), 2
+    AssertEqual kits, [ "First", "Second" ]
+    let g:cmake_kits[ "Third" ] = { "toolchain_file" : "random_third.txt" }
+    let kits = split(cmake4vim#CompleteKit(0,0,0))
+    AssertEqual len(kits), 3
+    AssertEqual kits, [ "First", "Second", "Third" ]
+
 Execute ([CMake kits] Check toolchain file):
     let g:cmake_kits = {}
     let g:cmake_toolchain_file = 'android.toolchain.cmake'
@@ -76,15 +85,6 @@ Execute ([CMake kits] Check toolchain file):
     Assert isdirectory("cmake-build-Release"), "Build directory should exist"
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake', generation_command
-
-Execute ([CMake kits] Check CMakeKit autocomplete):
-    let kits = split(cmake4vim#CompleteKit(0,0,0))
-    AssertEqual len(kits), 2
-    AssertEqual kits, [ "First", "Second" ]
-    let g:cmake_kits[ "Third" ] = { "toolchain_file" : "random_third.txt" }
-    let kits = split(cmake4vim#CompleteKit(0,0,0))
-    AssertEqual len(kits), 3
-    AssertEqual kits, [ "First", "Second", "Third" ]
 
 Execute ([CMake kits] Check CMakeKit toolchain file):
     Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"

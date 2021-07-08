@@ -3,15 +3,17 @@
 
 " Create directory
 function! utils#fs#makeDir(dir) abort
-    let l:directory = finddir(a:dir, getcwd().';.')
-    if l:directory ==# ''
-        silent call mkdir(a:dir, 'p')
-        let l:directory = finddir(a:dir)
+    let l:directory = finddir( a:dir, fnameescape(getcwd()) )
+    if !empty( l:directory )
+        return fnamemodify( l:directory, ':p:h' )
     endif
-    if l:directory !=# ''
-        return fnamemodify(l:directory, ':p:h')
+
+    if mkdir( a:dir, 'p' ) == 0
+        call utils#common#Warning( 'Cannot create a build directory: '.a:dir )
+        return ''
     endif
-    call utils#common#Warning('Cannot create a build directory: '.a:dir)
+
+    return fnamemodify( a:dir, ':p:h' )
 endfunction
 
 " Remove directory
@@ -48,6 +50,7 @@ endfunction
 
 " Extends default fnameescape, adds double quotes for Windows
 function! utils#fs#fnameescape(file) abort
+    " TODO: could this be replaced with shellescape()?
     if has('win32')
         let l:path = substitute(a:file, '\/', '\\', 'g')
         if l:path !=# ''
