@@ -1,51 +1,12 @@
 Before:
-    function! RemoveFile(file)
-        if has('win32')
-            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
-        else
-            silent echo system("rm -rf '".a:file."'")
-        endif
-    endfunction
-
-    function! RemoveCMakeDirs()
-        if has('win32')
-            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
-                silent echo system("rd /S /Q \"".l:value."\" >nul 2>&1")
-            endfor
-        else
-            echo system("rm -rf cmake-build*")
-        endif
-    endfunction
-    cd cmake\ projects/test\ proj
+    silent call OpenTestProject()
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
     silent CMakeReset
 
-    let g:cmake_compile_commands_link=""
-    let g:cmake_compile_commands=0
-    let g:cmake_usr_args=""
-    let g:cmake_cxx_compiler=""
-    let g:cmake_c_compiler=""
-    let g:cmake_build_type=""
-    let g:cmake_install_prefix=""
-    let g:cmake_project_generator=""
-    let g:make_arguments=""
-    let g:cmake_build_target="all"
-    let g:cmake_build_dir=""
-    let g:cmake_src_dir=""
-    let g:cmake_change_build_command=1
-    let g:cmake_reload_after_save=0
-    let g:cmake_build_dir_prefix="cmake-build-"
-    let g:cmake_build_executor = 'system'
-    let g:cmake_variants = {}
-    let g:cmake_executable = 'cmake'
+    silent call ResetPluginOptions()
     " Use on in order to close all windows and avoid E36 error
     silent on
-
-After:
-    silent call RemoveFile("compile_commands.json")
-    silent call RemoveCMakeDirs()
-    cd ../..
 
 Execute ([CMake info] Get CMake info):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"

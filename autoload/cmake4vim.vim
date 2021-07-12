@@ -124,7 +124,7 @@ endfunction
 function! cmake4vim#GetAllTargets() abort
     let l:build_dir = utils#cmake#findBuildDir()
     if l:build_dir ==# ''
-        call utils#common#Warning('Cmake targets were not found!')
+        call utils#common#Warning('CMake targets were not found!')
     endif
     return utils#gen#common#getTargets(l:build_dir)
 endfunction
