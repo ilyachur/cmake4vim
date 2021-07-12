@@ -14,7 +14,7 @@ Include (Build CMake targets by default Generator):         ./tests/build/build_
 Include (Build with Ninja generator):                       ./tests/build/ninja_generator.vader
 Include (Build with job):                                   ./tests/build/job.vader
 Include (Build with Dispatch plugin):                       ./tests/build/dispatch.vader
-# Include (Build with CMakeKits):                             ./tests/build/cmake_kits.vader
+Include (Build with CMakeKits):                             ./tests/build/cmake_kits.vader
 
 # Run targets
 Include (Check run target support):                         ./tests/run/run_target.vader
