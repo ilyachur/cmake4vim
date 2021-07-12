@@ -89,7 +89,13 @@ function! s:populateDefaultCMakeVariants() abort
     endif
 endfunction
 " }}} Private functions "
-"
+
+function! utils#cmake#resetCMake() abort
+    silent call utils#cmake#common#resetCache()
+    let s:populated_build_types = []
+    let s:cached_usr_args       = {}
+    let s:loaded_cmake_kits     = {}
+endfunction
 function! utils#cmake#getLoadedCMakeKits() abort
     if empty(s:loaded_cmake_kits)
         return utils#cmake#kits#getCMakeKits()

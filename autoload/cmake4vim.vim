@@ -47,7 +47,7 @@ function! cmake4vim#ResetCMakeCache() abort
     if l:build_dir !=# ''
         call utils#fs#removeDirectory(l:build_dir)
     endif
-    call utils#cmake#common#resetCache()
+    call utils#cmake#resetCMake()
     echon 'Cmake cache was removed!'
 endfunction
 
