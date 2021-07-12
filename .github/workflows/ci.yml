@@ -104,28 +104,54 @@ jobs:
         popd
     - name: Run tests
       run: |
-        pushd test
         # Basic test cases
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/basic/plugin_initialization.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/basic/cmake_version.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/basic/generate_cmake_project.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/basic/change_cmake_file.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/basic/cmake_info.vader
+        popd
 
         # Build test cases
 
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/build/build_cmake_targets.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/build/ninja_generator.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/build/job.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/build/dispatch.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/build/cmake_kits.vader
+        popd
 
         # Run targets
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/run/run_target.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/run/ctest.vader
+        popd
 
         # Integration
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/integration/ccmake.vader
+        popd
+        pushd test
         ${{ matrix.vim_executable }} -Nu vimrc +Vader! tests/integration/vimspector.vader
         popd
     - name: Generate report
