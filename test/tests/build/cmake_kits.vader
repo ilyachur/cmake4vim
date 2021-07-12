@@ -14,14 +14,13 @@ Before:
                 \    "environment_variables" : { "MY_CUSTOM_VARIABLE" : "15", "MY_OTHER_CUSTOM_VARIABLE" : "YES" }
                 \},
                 \ "Second" : { "compilers" : { "C": "", "CXX": "" }, "cmake_usr_args" : { 'Flag' : 'ON' } } }
-    silent call utils#cmake#reloadCMakeKits()
+    let g:cmake_build_path_pattern = []
+    let g:cmake_executable = 'cmake'
     " Use on in order to close all windows and avoid E36 error
     silent on
 
 After:
     silent call RemoveFile("compile_commands.json")
-    silent call RemoveFile(".cmake-kits.json")
-    silent call RemoveFile(g:cmake_kits_global_path)
     silent call RemoveCMakeDirs()
 
 Execute ([CMake kits] Check CMakeKit autocomplete):
@@ -90,17 +89,15 @@ Execute ([CMake kits] Check CMakeKit generator setting):
     endif
 
 Execute ([CMake kits] Check CMakeKit cmake_usr_args setting):
-    if !has('win32')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        Assert filereadable('cmake-build-Release/CMakeCache.txt'), 'CMakeCache.txt should be generated'
-        let generation_command = utils#cmake#getCMakeGenerationCommand()
-        Assert generation_command =~# '-DANDROID_STL=c++_static'
-        Assert generation_command =~# '-DANDROID_TOOLCHAIN=clang'
-        Assert generation_command =~# '-DANDROID_ABI=arm64-v8a'
-    endif
+    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
+    silent CMakeSelectKit First
+    silent CMake
+    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
+    Assert filereadable('cmake-build-Release/CMakeCache.txt'), 'CMakeCache.txt should be generated'
+    let generation_command = utils#cmake#getCMakeGenerationCommand()
+    Assert generation_command =~# '-DANDROID_STL=c++_static'
+    Assert generation_command =~# '-DANDROID_TOOLCHAIN=clang'
+    Assert generation_command =~# '-DANDROID_ABI=arm64-v8a'
 
 Execute ([CMake kits] Check CMakeKit environment variables):
     Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
@@ -178,92 +175,3 @@ Execute ([CMake kits] Call splitUserArgs with a dict):
 Execute ([CMake kits] Select a non-existing kit):
     call cmake4vim#SelectKit('nonexistant_key')
     Assert g:cmake_selected_kit ==# ''
-
-Execute ([CMake Kits] Find CMakeKit config in current folder):
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
-    Assert filereadable('.cmake-kits.json'), 'File was not created'
-    let config = utils#cmake#kits#findCMakeKitsConfig()
-    Assert !empty(config), 'Config file not found'
-    silent call RemoveFile(g:cmake_kits_global_path)
-
-Execute ([CMake Kits] Find CMakeKit specified by g:cmake_kits_global_path):
-    let g:cmake_kits_global_path = '.global-cmake-kits.json'
-    Assert !filereadable(g:cmake_kits_global_path), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], g:cmake_kits_global_path)
-    Assert filereadable(g:cmake_kits_global_path), 'File was not created'
-    Assert !empty(utils#cmake#kits#findCMakeKitsConfig()), 'Config file not found'
-    silent call RemoveFile(g:cmake_kits_global_path)
-
-Execute ([CMake Kits] CMakeKit config in current folder has priority over g:cmake_kits_global_path):
-    let g:cmake_kits_global_path = '.global-cmake-kits.json'
-    Assert !filereadable(g:cmake_kits_global_path), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 10 })], g:cmake_kits_global_path)
-    Assert filereadable(g:cmake_kits_global_path), 'File was not created'
-
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
-    Assert filereadable('.cmake-kits.json'), 'File was not created'
-
-    let config = utils#cmake#kits#getCMakeKits()
-    Assert !empty(config), 'Config is empty'
-    AssertEqual config['randomKey'], 5
-    silent call RemoveFile(g:cmake_kits_global_path)
-
-Execute ([CMake Kits] Fail to find CMakeKit):
-    Assert !filereadable('.cmake-kits.json')
-    AssertEqual g:cmake_kits_global_path, ''
-    Assert empty(utils#cmake#kits#findCMakeKitsConfig()), 'Found config file'
-
-Execute ([CMake Kits] Read empty path):
-    Assert empty(utils#cmake#kits#readCMakeKits(''))
-
-Execute ([CMake Kits] Read valid CMakeKit config without predefined kits):
-    unlet g:cmake_kits
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
-    Assert filereadable('.cmake-kits.json'), 'File was not created'
-    let cmake_kits = utils#cmake#kits#getCMakeKits()
-    Assert !empty(cmake_kits), 'CMakeKits empty'
-    Assert has_key(cmake_kits, 'randomKey'), 'Key missing'
-
-Execute ([CMake Kits] Read valid CMakeKit config with predefined kits):
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
-    Assert filereadable('.cmake-kits.json'), 'File was not created'
-    let cmake_kits_from_config = utils#cmake#kits#getCMakeKits()
-    Assert !empty(cmake_kits_from_config)
-    Assert has_key(cmake_kits_from_config, 'randomKey')
-    Assert !has_key(g:cmake_kits, 'randomKey')
-
-Execute ([CMake Kits] Read non-existant CMakeKit config with predefined kits):
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    let cmake_kits_from_config = utils#cmake#kits#getCMakeKits()
-    Assert !empty(cmake_kits_from_config)
-    Assert has_key(cmake_kits_from_config, 'First')
-    Assert has_key(cmake_kits_from_config, 'Second')
-
-Execute ([CMake Kits] Reload cmake kits):
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
-    " it loaded g:cmake_kits
-    Assert len(keys(loaded_kits)) == 2
-
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
-    Assert filereadable('.cmake-kits.json'), 'File was not created'
-    sleep 2
-
-    silent call utils#cmake#reloadCMakeKits()
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
-    " it loaded .cmake-kits.json
-    Assert len(keys(loaded_kits)) == 1
-    Assert has_key(loaded_kits, 'randomKey'), "Missing key"
-
-    silent call writefile([json_encode({ 'randomKey' : 5 , 'secondKey' : 10})], '.cmake-kits.json')
-    sleep 2
-    silent call utils#cmake#reloadCMakeKits()
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
-    " it loaded .cmake-kits.json
-    Assert len(keys(loaded_kits)) == 2
-    Assert has_key(loaded_kits, 'randomKey')
-    Assert has_key(loaded_kits, 'secondKey')

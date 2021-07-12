@@ -41,7 +41,6 @@ let g:cmake_ctest_args            = get(g:, 'cmake_ctest_args'           , ''   
 let g:cmake_variants              = get(g:, 'cmake_variants'             , {}            )
 let g:cmake_selected_kit          = get(g:, 'cmake_selected_kit'         , ''            )
 let g:cmake_kits                  = get(g:, 'cmake_kits'                 , {}            )
-let g:cmake_kits_global_path      = get(g:, 'cmake_kits_global_path'     , ''            )
 
 " Deprecated
 let g:cmake_project_generator     = get(g:, 'cmake_project_generator'    , ''            )

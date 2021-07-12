@@ -128,7 +128,6 @@ The list contains variables which allow to configure CMake build.
  - **`g:make_arguments`** allows to set custom parameters for make command. Default is empty. If variable is empty, plugin launches `make` without arguments.
  - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
  - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
- - **`g:cmake_kits_global_path`** specifies a path to the JSON containing cmake kits. Default is empty.
  - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
 
 
@@ -144,14 +143,7 @@ The list contains variables which allow to configure CMake build.
 
 #### Examples
 
-CMake kits can be given in the following ways:
- - as a variable `g:cmake_kits`
- - as a JSON file in the current folder named `.cmake-kits.json`
- - as a JSON file specified by `g:cmake_kits_global_path` variable
-
-The variable `g:cmake_kits` has the lowest, and the local `.cmake-kits.json` file has the highest priority.
-
-Example of supported functions in `CMake kits`:
+Example of supported functions in `g:cmake_kits`:
 ```
 let g:cmake_kits = {
             \  "android-ndk-r22": {
@@ -175,15 +167,6 @@ let g:cmake_kits = {
 ```
 
 If you specify both `toolchain_file` and `compilers`, the `toolchain_file` takes precedence and `compilers` are ignored.
-
-Example of a `.cmake-kits.json` file:
-```json
-{ "gcc": {
-  "compilers" : {
-      "C": "/usr/bin/gcc",
-      "CXX": "/usr/bin/g++"
-} } }
-```
 
 ### **Jump to**
 
@@ -227,15 +210,14 @@ You could add such entries to your `g:cmake_kits` and override `CMakeSelectKit` 
 Add this to the `after` directory, e.g. `~/.vim/after/plugin/cmake.vim`:
 ```
 function! s:customSelectKit(name) abort
-    let l:loaded_kits = utils#cmake#getLoadedCMakeKits()
-    if !has_key( l:loaded_kits, a:name )
-        call utils#common#Warning(printf("CMake kit '%s' not found", a:name))
+    if !has_key( g:cmake_kits, a:name )
+        echom printf("CMake kit '%s' not found", a:name)
         return
     endif
 
     call cmake4vim#SelectKit(a:name)
 
-    let l:cmake_kit = l:loaded_kits[ g:cmake_selected_kit ]
+    let l:cmake_kit = g:cmake_kits[ g:cmake_selected_kit ]
     let g:ycm_clangd_args = filter( g:ycm_clangd_args, "v:val !~# 'query-driver'" )
     if has_key( l:cmake_kit, 'query_driver' )
         let g:ycm_clangd_args += [ printf( '-query-driver=%s', l:cmake_kit[ 'query_driver' ] ) ]
@@ -246,7 +228,7 @@ endfunction
 function! s:FZFSelectKit() abort
     if exists(':FZF')
         return fzf#run({
-                    \ 'source': sort( keys( utils#cmake#getLoadedCMakeKits() ), 'i' ),
+                    \ 'source': sort( keys( g:cmake_kits ), 'i' ),
                     \ 'options': '+m -n 1 --prompt CMakeKit\>\ ',
                     \ 'down':    '30%',
                     \ 'sink':    function('s:customSelectKit')})
