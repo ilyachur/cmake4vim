@@ -16,7 +16,7 @@ Before:
             silent echo system("rm -rf cmake-build*")
         endif
     endfunction
-    cd test\ proj
+    cd cmake\ projects/test\ proj
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
 
@@ -45,7 +45,7 @@ After:
     silent cclose
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
-    cd ..
+    cd ../..
 
 Execute ([Job executor] Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows

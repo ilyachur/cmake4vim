@@ -16,7 +16,7 @@ Before:
             silent echo system("rm -rf cmake-build*")
         endif
     endfunction
-    cd test\ proj
+    cd cmake\ projects/test\ proj
     silent call RemoveFile(".vimspector.json")
     silent call RemoveCMakeDirs()
     silent CMakeReset
@@ -44,7 +44,7 @@ Before:
 After:
     silent call RemoveFile(".vimspector.json")
     silent call RemoveCMakeDirs()
-    cd ..
+    cd ../..
 
 Execute ([Vimspector] Don't create default vimspector config):
     let g:cmake_vimspector_support=0
@@ -72,7 +72,7 @@ Execute ([Vimspector] Read incorrect vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        silent call writefile( readfile( '../tests/integration/vimspector.vader' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/vimspector.vader' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({})
@@ -84,7 +84,7 @@ Execute ([Vimspector] Read correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({})
@@ -103,7 +103,7 @@ Execute ([Vimspector] Change correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({'test_app': {'app': 'new_bin/test_app', 'args': []}})
@@ -122,7 +122,7 @@ Execute ([Vimspector] Change correct vimspector config to incorrect data):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         let config = utils#config#vimspector#updateConfig({'test_app': {}})
@@ -161,7 +161,7 @@ Execute ([Vimspector] Run test_app target with vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         silent CMake
@@ -192,7 +192,7 @@ Execute ([Vimspector] Run test_app target with reset vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
-        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         silent CMake
@@ -223,7 +223,7 @@ Execute ([Vimspector] Read vimspector config containing backslashes):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create config
-        silent call writefile( readfile( '../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
 
         Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
         silent CMake

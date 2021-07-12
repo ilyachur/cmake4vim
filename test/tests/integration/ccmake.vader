@@ -16,7 +16,7 @@ Before:
             silent echo system("rm -rf cmake-build*")
         endif
     endfunction
-    cd test\ proj
+    cd cmake\ projects/test\ proj
     silent call RemoveFile(".vimspector.json")
     silent call RemoveCMakeDirs()
     silent CMakeReset
@@ -44,7 +44,7 @@ Before:
 After:
     silent call RemoveFile(".vimspector.json")
     silent call RemoveCMakeDirs()
-    cd ..
+    cd ../..
 
 Execute ([CCMake] Get ccmake modes):
     let ref_modes = ['hsplit', 'vsplit', 'tab']

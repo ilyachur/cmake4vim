@@ -22,7 +22,7 @@ function! s:detectCMakeBuildType() abort
         endif
         for l:type in keys( utils#cmake#getCMakeVariants() )
             let l:build_dir = 'cmake-build-' . l:type
-            let l:build_dir = finddir(l:build_dir, getcwd().';.')
+            let l:build_dir = finddir(l:build_dir, fnameescape(getcwd()))
             if l:build_dir !=# ''
                 break
             endif
@@ -308,7 +308,7 @@ endfunction
 
 " Check that build directory exists
 function! utils#cmake#findBuildDir() abort
-    let l:build_dir = finddir(s:detectCMakeBuildDir(), getcwd().';.')
+    let l:build_dir = finddir(s:detectCMakeBuildDir(), fnameescape(getcwd()))
     if l:build_dir !=# ''
         let l:build_dir = fnamemodify(l:build_dir, ':p:h')
     endif
@@ -319,7 +319,7 @@ endfunction
 
 " Check that src directory exists
 function! utils#cmake#findSrcDir() abort
-    let l:src_dir = finddir(s:detectCMakeSrcDir(), getcwd().';.')
+    let l:src_dir = finddir(s:detectCMakeSrcDir(), fnameescape(getcwd()))
     if l:src_dir !=# ''
         let l:src_dir = fnamemodify(l:src_dir, ':p:h')
     endif

@@ -4,7 +4,7 @@
 " Private functions {{{ "
 function! s:findCacheVar(data, variable) abort
     for l:value in a:data
-        let l:split_res = split(l:value, '=')
+        let l:split_res = split(trim(l:value), '=')
         if len(l:split_res) > 1 && stridx(l:split_res[0], a:variable . ':') != -1
             return l:split_res[1]
         endif
