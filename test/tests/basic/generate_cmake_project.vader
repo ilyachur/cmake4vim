@@ -2,10 +2,19 @@ Before:
     silent call OpenTestProject()
     silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
+    silent call RemoveDirectory('build_test')
+    silent call RemoveDirectory('cmake-vador-Release')
 
     silent call ResetPluginOptions()
     " Use on in order to close all windows and avoid E36 error
     silent on
+
+After:
+    silent call RemoveFile("compile_commands.json")
+    silent call RemoveCMakeDirs()
+    silent call RemoveDirectory('build_test')
+    silent call RemoveDirectory('cmake-vador-Release')
+
 
 Execute ([CMake generate] Generate cmake project with default settings):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"

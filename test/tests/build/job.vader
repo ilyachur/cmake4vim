@@ -1,6 +1,5 @@
 Before:
     silent call OpenTestProject()
-    silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
@@ -10,7 +9,6 @@ Before:
 
 After:
     silent cclose
-    silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
 
 Execute ([Job executor] Generate cmake project with default settings):

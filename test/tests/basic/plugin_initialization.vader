@@ -1,14 +1,17 @@
 Before:
-    silent call OpenTestProject()
+    call OpenTestProject()
+    call RemoveCMakeDirs()
     let g:cmake_build_executor = 'system'
-    silent call RemoveFile("compile_commands.json")
-    silent call RemoveCMakeDirs()
-    silent call ResetPluginOptions()
     " Use on in order to close all windows and avoid E36 error
     silent on
 
+After:
+    silent call RemoveCMakeDirs()
+
 Execute ([Plugin Initialization] Check default initialization):
-    silent CMake
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     AssertEqual g:cmake_compile_commands_link, ""
     AssertEqual g:cmake_compile_commands, 0
     AssertEqual g:cmake_usr_args, ""

@@ -1,11 +1,13 @@
 Before:
     silent call OpenTestProject()
-    silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
     " Use on in order to close all windows and avoid E36 error
     silent on
+
+After:
+    silent call RemoveCMakeDirs()
 
 Execute ([CMake targets] Generate cmake project with default settings):
     " enable tests for windows with last cmake
@@ -226,7 +228,7 @@ Execute ([CMake targets] Check all targets for empty project):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         let targets = cmake4vim#GetAllTargets()
-        AssertEqual len(targets), 0
+        AssertEqual len(targets), 0, 'CMake targets should be empty but: ' . join(targets, ' ')
     endif
 
 Execute ([CMake targets] Check clean target for empty project):

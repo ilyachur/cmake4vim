@@ -31,13 +31,9 @@ function! RemoveDirectory(folder)
 endfunction
 
 function! RemoveCMakeDirs()
-    if has('win32')
-        for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
-            silent call RemoveDirectory(l:value)
-        endfor
-    else
-        silent echo system("rm -rf cmake-build*")
-    endif
+    for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
+        silent call RemoveDirectory(l:value)
+    endfor
 endfunction
 
 function! OpenTestProject()
@@ -74,6 +70,7 @@ function! ResetPluginOptions()
     let g:cmake_cxx_compiler=''
     let g:cmake_c_compiler=''
     let g:cmake_toolchain_file=''
+    call utils#cmake#common#resetCache()
 endfunction
 
 set winminheight=0
