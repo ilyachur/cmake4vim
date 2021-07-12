@@ -105,7 +105,7 @@ jobs:
     - name: Run tests
       run: |
         pushd test
-        ${{ matrix.vim_executable }} -Nu vimrc "+Vader! tests/*.vader tests/*/*.vader"
+        ${{ matrix.vim_executable }} -Nu vimrc "+Vader! main.vader"
         popd
     - name: Generate report
       run: |
