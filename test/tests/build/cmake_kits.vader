@@ -1,6 +1,5 @@
 Before:
     silent call OpenTestProject()
-    silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
@@ -20,7 +19,6 @@ Before:
     silent on
 
 After:
-    silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
 
 Execute ([CMake kits] Check CMakeKit autocomplete):
