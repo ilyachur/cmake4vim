@@ -40,7 +40,6 @@ let g:cmake_usr_args              = get(g:, 'cmake_usr_args'             , ''   
 let g:cmake_ctest_args            = get(g:, 'cmake_ctest_args'           , ''            )
 let g:cmake_variants              = get(g:, 'cmake_variants'             , {}            )
 let g:cmake_selected_kit          = get(g:, 'cmake_selected_kit'         , ''            )
-let g:cmake_toolchain_file        = get(g:, 'cmake_toolchain_file'       , ''            )
 let g:cmake_kits                  = get(g:, 'cmake_kits'                 , {}            )
 
 " Deprecated
@@ -48,6 +47,7 @@ let g:cmake_project_generator     = get(g:, 'cmake_project_generator'    , ''   
 let g:cmake_install_prefix        = get(g:, 'cmake_install_prefix'       , ''            )
 let g:cmake_c_compiler            = get(g:, 'cmake_c_compiler'           , ''            )
 let g:cmake_cxx_compiler          = get(g:, 'cmake_cxx_compiler'         , ''            )
+let g:cmake_toolchain_file        = get(g:, 'cmake_toolchain_file'       , ''            )
 " }}} Options "
 
 " Commands {{{ "

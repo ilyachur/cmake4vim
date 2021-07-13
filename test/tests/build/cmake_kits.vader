@@ -1,52 +1,9 @@
 Before:
-    function! RemoveFile(file)
-        if has('win32')
-            silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
-        else
-            silent echo system("rm -rf '".a:file."'")
-        endif
-    endfunction
-
-    function! RemoveDirectory(folder)
-        if has('win32')
-            silent echo system(printf('rd /S /Q "%s" >nul 2>&1', a:folder))
-        else
-            silent echo system(printf('rm -rf "%s"', a:folder))
-        endif
-    endfunction
-
-    function! RemoveCMakeDirs()
-        if has('win32')
-            for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
-                silent call RemoveDirectory(l:value)
-            endfor
-        else
-            silent echo system("rm -rf cmake-build*")
-        endif
-    endfunction
-    cd cmake\ projects/test\ proj
-    silent call RemoveFile("compile_commands.json")
+    silent call OpenTestProject()
     silent call RemoveCMakeDirs()
-    silent CMakeReset
+    silent call RemoveDirectory('custom-build-name')
 
-    let g:cmake_compile_commands_link=""
-    let g:cmake_compile_commands=0
-    let g:cmake_usr_args=""
-    let g:cmake_cxx_compiler=""
-    let g:cmake_c_compiler=""
-    let g:cmake_build_type=""
-    let g:cmake_install_prefix=""
-    let g:cmake_project_generator=""
-    let g:make_arguments=""
-    let g:cmake_build_target=""
-    let g:cmake_build_dir=""
-    let g:cmake_change_build_command=1
-    let g:cmake_reload_after_save=0
-    let g:cmake_build_dir_prefix="cmake-build-"
-    let g:cmake_build_executor = 'system'
-    let g:cmake_variants = {}
-    let g:cmake_selected_kit = ''
-    let g:cmake_toolchain_file = ''
+    silent call ResetPluginOptions()
     let g:cmake_kits = {
                 \ "First":
                 \ {
@@ -63,9 +20,8 @@ Before:
     silent on
 
 After:
-    silent call RemoveFile("compile_commands.json")
     silent call RemoveCMakeDirs()
-    cd ../..
+    silent call RemoveDirectory('custom-build-name')
 
 Execute ([CMake kits] Check CMakeKit autocomplete):
     let kits = split(cmake4vim#CompleteKit(0,0,0))
@@ -80,25 +36,16 @@ Execute ([CMake kits] Check toolchain file):
     let g:cmake_kits = {}
     let g:cmake_toolchain_file = 'android.toolchain.cmake'
 
-    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-    silent CMake
-    Assert isdirectory("cmake-build-Release"), "Build directory should exist"
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake', generation_command
 
 Execute ([CMake kits] Check CMakeKit toolchain file):
-    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
     silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory("cmake-build-Release"), "Build directory should exist"
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake'
 
 Execute ([CMake kits] Check toolchain file precedence over compilers):
-    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
     silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory("cmake-build-Release"), "Build directory should exist"
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake'
     Assert generation_command !~# '-DCMAKE_C_COMPILER'
@@ -106,10 +53,7 @@ Execute ([CMake kits] Check toolchain file precedence over compilers):
 
 Execute ([CMake kits] Check CMakeKit compilers setting):
     silent call remove( g:cmake_kits["First"], "toolchain_file" )
-    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
     silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory("cmake-build-Release"), "Build directory should exist"
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DCMAKE_C_COMPILER=clang'
     Assert generation_command =~# '-DCMAKE_CXX_COMPILER=clang++'
@@ -117,69 +61,50 @@ Execute ([CMake kits] Check CMakeKit compilers setting):
 Execute ([CMake kits] Check CMakeKit generator setting):
     if !has('win32')
         silent call remove( g:cmake_kits["First"], "toolchain_file" )
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
         silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        Assert filereadable('cmake-build-Release/build.ninja'), 'build.ninja should exist'
+        let generation_command = utils#cmake#getCMakeGenerationCommand()
+        Assert generation_command =~# '-G "Ninja"', 'CMake should use Ninja generator: ' . generation_command
 
         let g:cmake_kits['First']['generator'] = ''
-        silent call RemoveDirectory('cmake-build-Release')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
         silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        Assert filereadable('cmake-build-Release/Makefile'), 'Makefile should exist'
+        let generation_command = utils#cmake#getCMakeGenerationCommand()
+        Assert generation_command !~# '-G', 'CMake should not use Ninja generator: ' . generation_command
+
     endif
 
 Execute ([CMake kits] Check CMakeKit cmake_usr_args setting):
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
     silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-    Assert filereadable('cmake-build-Release/CMakeCache.txt'), 'CMakeCache.txt should be generated'
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DANDROID_STL=c++_static'
     Assert generation_command =~# '-DANDROID_TOOLCHAIN=clang'
     Assert generation_command =~# '-DANDROID_ABI=arm64-v8a'
 
 Execute ([CMake kits] Check CMakeKit environment variables):
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
     silent CMakeSelectKit First
     silent CMakeSelectBuildType Release
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
     AssertEqual $MY_CUSTOM_VARIABLE, '15'
     AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
     unlet $MY_CUSTOM_VARIABLE
     unlet $MY_OTHER_CUSTOM_VARIABLE
 
 Execute ([CMake kits] Check CMakeKit change kit unset environment variables):
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
     silent CMakeSelectKit First
-    silent CMake
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
     AssertEqual $MY_CUSTOM_VARIABLE, '15'
     AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
     silent CMakeSelectKit Second
-    silent CMake
     Assert !exists('$MY_CUSTOM_VARIABLE')
     Assert !exists('$MY_OTHER_CUSTOM_VARIABLE')
 
 Execute ([CMake kits] Check CMakeKit default):
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
     silent CMakeSelectKit First
     silent CMakeSelectBuildType Release
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
     AssertEqual $MY_CUSTOM_VARIABLE, '15'
     AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
     unlet $MY_CUSTOM_VARIABLE
     unlet $MY_OTHER_CUSTOM_VARIABLE
 
 Execute ([CMake kits] Check CMakeKit selected kit without CMakeSelectKit):
-    Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
     let g:cmake_selected_kit = 'Second'
-    silent CMake
-    Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
     let generation_command = utils#cmake#getCMakeGenerationCommand()
     Assert generation_command =~# '-DFlag=ON'
 
@@ -191,7 +116,6 @@ Execute ([CMake kits] Check build path pattern):
     AssertEqual g:cmake_selected_kit, 'First'
     silent CMakeSelectBuildType Release
     Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
-    silent call RemoveDirectory('custom-build-name')
 
 Execute ([CMake kits] Check build path pattern precedence over build_dir_prefix):
     let g:cmake_build_path_pattern = [ "./custom-build-name/%s/%s", "g:cmake_selected_kit, g:cmake_build_type" ]
@@ -202,7 +126,6 @@ Execute ([CMake kits] Check build path pattern precedence over build_dir_prefix)
     silent CMakeSelectBuildType Release
     Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
     Assert !isdirectory('my-custom-prefixRelease'), 'Build directory should not exist'
-    silent call RemoveDirectory('custom-build-name')
 
 Execute ([CMake kits] Call joinUserArgs with a string):
     let usr_args = '-DOPTION=YES -DSETTING=YES'

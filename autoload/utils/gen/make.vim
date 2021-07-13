@@ -23,8 +23,9 @@ function! utils#gen#make#getTargets(build_dir) abort
     " Remove the first line which is not a target
     call remove(l:res, 0)
     for l:value in l:res
-        if l:value !=# ''
-            let l:list_targets += [split(l:value)[1]]
+        let l:parced_target = split(l:value)
+        if l:value !=# '' && len(l:parced_target) > 1
+            let l:list_targets += [l:parced_target[1]]
         endif
     endfor
     return l:list_targets

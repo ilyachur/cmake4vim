@@ -11,7 +11,67 @@ syntax enable
 set runtimepath +=$HOME/.vim/plugged/vader.vim
 " set rtp+=$HOME/.fzf
 " set rtp+=$HOME/.vim/plugged/fzf.vim
+let s:cur_path=expand('%:p:h')
 exe 'set runtimepath +=' . fnameescape(expand('<sfile>:h').'/../')
+
+function! RemoveFile(file)
+    if has('win32')
+        silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
+    else
+        silent echo system("rm -rf '".a:file."'")
+    endif
+endfunction
+
+function! RemoveDirectory(folder)
+    if has('win32')
+        silent echo system(printf('rd /S /Q "%s" >nul 2>&1', a:folder))
+    else
+        silent echo system(printf('rm -rf "%s"', a:folder))
+    endif
+endfunction
+
+function! RemoveCMakeDirs()
+    for l:value in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']
+        silent call RemoveDirectory(l:value)
+    endfor
+endfunction
+
+function! OpenTestProject()
+    let s:path = fnameescape(s:cur_path . '/cmake projects/test proj')
+    execute 'cd ' . s:path
+endfunction
+
+function! ResetPluginOptions()
+    let g:cmake_executable = 'cmake'
+    let g:cmake_reload_after_save=0
+    let g:cmake_change_build_command=1
+    let g:cmake_compile_commands=0
+    let g:cmake_compile_commands_link=''
+    let g:cmake_vimspector_support = 0
+
+    let g:cmake_build_executor = 'system'
+    let g:cmake_build_path_pattern = []
+    let g:cmake_build_dir=''
+    let g:cmake_build_dir_prefix='cmake-build-'
+
+    let g:make_arguments=''
+    let g:cmake_build_target=''
+    let g:cmake_build_type=''
+    let g:cmake_src_dir=''
+    let g:cmake_usr_args=''
+    let g:cmake_ctest_args = ''
+    let g:cmake_variants = {}
+    let g:cmake_selected_kit = ''
+    let g:cmake_kits = {}
+    let g:cmake_kits_global_path = ''
+
+    let g:cmake_project_generator=''
+    let g:cmake_install_prefix=''
+    let g:cmake_cxx_compiler=''
+    let g:cmake_c_compiler=''
+    let g:cmake_toolchain_file=''
+    call utils#cmake#common#resetCache()
+endfunction
 
 set winminheight=0
 set winheight=999
