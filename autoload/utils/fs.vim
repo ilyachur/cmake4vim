@@ -8,7 +8,12 @@ function! utils#fs#makeDir(dir) abort
         return fnamemodify( l:directory, ':p:h' )
     endif
 
-    if mkdir( a:dir, 'p' ) == 0
+    let l:created = 0
+    try
+        let l:created =  mkdir(a:dir, 'p')
+    catch
+    endtry
+    if l:created == 0
         call utils#common#Warning( 'Cannot create a build directory: '.a:dir )
         return ''
     endif

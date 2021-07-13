@@ -4,6 +4,8 @@ Before:
     silent call RemoveCMakeDirs()
     silent call RemoveDirectory('build_test')
     silent call RemoveDirectory('cmake-vador-Release')
+    silent call RemoveFile('custom-folder')
+    silent call RemoveDirectory('custom-folder')
 
     silent call ResetPluginOptions()
     " Use on in order to close all windows and avoid E36 error
@@ -14,6 +16,8 @@ After:
     silent call RemoveCMakeDirs()
     silent call RemoveDirectory('build_test')
     silent call RemoveDirectory('cmake-vador-Release')
+    silent call RemoveFile('custom-folder')
+    silent call RemoveDirectory('custom-folder')
 
 
 Execute ([CMake generate] Generate cmake project with default settings):
@@ -184,3 +188,10 @@ Execute ([CMake generate] Update g:cmake_executable option):
     let buildCommand = utils#cmake#getBuildCommand('build_dir', 'all_target')
     AssertNotEqual stridx(genCommand, 'custom_make'), -1, genCommand
     AssertNotEqual stridx(buildCommand, 'custom_make'), -1, buildCommand
+
+Execute ([CMake generate] Create incorrect folder):
+    Assert !filereadable('custom-folder')
+    call writefile( ['{  }'], 'custom-folder' )
+    Assert !isdirectory("custom-folder"), "Build directory shouldn't exist"
+    call utils#fs#makeDir('custom-folder')
+    Assert !isdirectory("custom-folder"), "Build directory shouldn't exist"
