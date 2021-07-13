@@ -85,3 +85,17 @@ function! utils#gen#common#getBuildCommand(build_dir, target, make_arguments) ab
         return utils#gen#make#getBuildCommand(a:build_dir, a:target, a:make_arguments)
     endif
 endfunction
+
+" Returns the cmake target for a single source file
+" TODO: it's different if the build is out-of-source, the path must be
+" relative
+function! utils#gen#common#getSingleUnitTargetName( generator, filename ) abort
+    if a:generator ==# 'Unix Makefiles'
+        return fnameescape( fnamemodify( a:filename, ':r' ) . '.o' )
+    elseif a:generator ==# 'Ninja'
+        return fnameescape( fnamemodify( a:filename, ':p' ) . '^' )
+    endif
+
+    call utils#common#warning('Generator not supported for building single unit!')
+    return ''
+endfunction

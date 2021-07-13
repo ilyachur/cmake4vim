@@ -116,3 +116,19 @@ Execute ([Ninja] Update g:cmake_executable option):
         AssertNotEqual stridx(genCommand, 'custom_make'), -1, genCommand
         AssertNotEqual stridx(buildCommand, 'custom_make'), -1, buildCommand
     endif
+
+" TODO: add tests for:
+" * build in source
+" * build out of source
+" * missing target
+Execute ([Ninja] Build single source):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator=""
+        let g:cmake_usr_args="-GNinja"
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        silent CMakeCompileSource('../app/main.cpp')
+        Assert filereadable("cmake-build-Release/CMakeFiles/test\ proj.dir/app/main.cpp.o"), "Object file is not created"
+    endif

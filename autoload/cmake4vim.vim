@@ -158,6 +158,38 @@ function! cmake4vim#CMakeBuild(...) abort
     call utils#common#executeCommand(l:result, 0)
 endfunction
 
+" Builds current source
+function! cmake4vim#CompileCurrentSource( ... ) abort
+    let l:source_name = get( a:, '1', expand('%') )
+    if fnamemodify( l:source_name, ':e' ) !=# 'cpp'
+        call utils#common#Warning( 'Current file is not a source file!' )
+        return
+    endif
+
+    let l:build_dir = utils#cmake#findBuildDir()
+    if empty( l:build_dir )
+        call utils#common#Warning( 'CMake project was not found!' )
+        return
+    endif
+
+    let l:cache_info = utils#cmake#cache#collectInfo( l:build_dir )
+    if empty( l:cache_info )
+        call utils#common#warning( 'CMake cache was not found!' )
+        return
+    endif
+
+    let l:generator = l:cache_info[ 'cmake' ][ 'generator' ]
+
+    let l:cmd = utils#cmake#getBuildCommand( l:build_dir,
+                \ utils#gen#common#getSingleUnitTargetName( l:generator, l:source_name ) )
+
+    if empty(l:cmd)
+        return
+    endif
+
+    call utils#common#executeCommand( l:cmd, 1 )
+endfunction
+
 " Run Ctest
 function! cmake4vim#CTest(bang, ...) abort
     let l:build_dir = utils#cmake#findBuildDir()
