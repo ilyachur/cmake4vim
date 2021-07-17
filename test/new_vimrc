@@ -1,0 +1,5 @@
+" Needed for code coverage
+profile start $HOME/vim-profile.txt
+profile! file ../*
+
+execute 'set runtimepath +=' . fnameescape( expand( '<sfile>:h' ) . '/../' )

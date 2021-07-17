@@ -87,9 +87,6 @@ jobs:
       run: |
           which ninja
           ninja --version
-    - name: Clone Vader
-      run: |
-        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
     - name: Clone Dispatch
       run: |
         git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
