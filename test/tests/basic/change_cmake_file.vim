@@ -4,11 +4,6 @@ function! SetUp()
     silent call ResetPluginOptions()
 endfunction
 
-function! TearDown()
-    " TODO: maybe unnecessary if every test has this in SetUp
-    silent call RemoveCMakeDirs()
-endfunction
-
 function! Test_Change_CMake_script_Changes_in_cmake_file_should_not_call_project_generation()
     call assert_false( isdirectory('cmake-build-Release'), 'Build directory shouldn''t exist' )
     edit CMakeLists.txt

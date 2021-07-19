@@ -34,27 +34,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        vim_type: ['Vim', 'Neovim']
+        # vim_type: ['Vim', 'Neovim']
+        vim_type: ['Vim']
         vim_version: ['stable']
-        cmake_version: ['2.8', '3.13', ''] # empty means the latest version
-        platform: ['Linux', 'MacOS', 'Windows']
+        # cmake_version: ['2.8', '3.13', ''] # empty means the latest version
+        cmake_version: [''] # empty means the latest version
+        # platform: ['Linux', 'MacOS', 'Windows']
+        platform: ['Linux']
 
         include:
           - platform: 'Linux'
             os: 'ubuntu-latest'
-          - platform: 'MacOS'
-            os: 'macos-latest'
-          - platform: 'Windows'
-            os: 'windows-latest'
+          # - platform: 'MacOS'
+          #   os: 'macos-latest'
+          # - platform: 'Windows'
+          #   os: 'windows-latest'
           - vim_type: 'Vim'
             nvim: false
             vim_executable: vim
-          - vim_type: 'Neovim'
-            nvim: true
-            vim_executable: nvim
+          # - vim_type: 'Neovim'
+          #   nvim: true
+          #   vim_executable: nvim
 
     runs-on: '${{ matrix.os  }}'
-    timeout-minutes: 25
+    timeout-minutes: 5
 
     steps:
     - name: Clone CMake4Vim
@@ -99,41 +102,52 @@ jobs:
         make -j8
         make install
         popd
-    - name: Run tests
+    - name: Run Test
+    # - if: matrix.os != 'windows-latest'
       run: |
         pushd test
-        ${{ matrix.vim_executable }} -Nu vimrc "+Vader! main.vader"
+        bash run_vim_tests_unix.sh ${{matrix.vim_executable}} tests/basic/*.vim
         popd
-    - name: Generate report
-      run: |
-        python -m covimerage write_coverage ${HOME}/vim-profile.txt
-        python -m coverage xml
-    - if: matrix.os == 'windows-latest'
-      run: |
-        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
-    - if: matrix.os != 'windows-latest'
-      run: |
-        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
-    - name: Upload artifacts
+    # - if: matrix.os == 'windows-latest'
+    #   run: |
+    #     pushd test
+    #     # TODO: write batch script
+    #     popd
+    # - name: Generate report
+    #   run: |
+    #     python -m covimerage write_coverage ${HOME}/vim-profile.txt
+    #     python -m coverage xml
+    # - if: matrix.os == 'windows-latest'
+    #   run: |
+    #     ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+    # - if: matrix.os != 'windows-latest'
+    #   run: |
+    #     mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: coverage
+    #     path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+    #     if-no-files-found: error
+    - name: Upload logs
       uses: actions/upload-artifact@v2
       with:
-        name: coverage
-        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
-        if-no-files-found: error
+        name: logs
+        path: tests/**/*.failed.log
 
-  Report:
-    runs-on: ubuntu-latest
-    needs: [tests]
+  # Report:
+  #   runs-on: ubuntu-latest
+  #   needs: [tests]
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
-      with:
-          name: coverage
-          path: ./cov_report
-    - name: Upload coverage to Codecov
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
-      run: |
-        bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Download artifacts
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #         name: coverage
+  #         path: ./cov_report
+  #   - name: Upload coverage to Codecov
+  #     env:
+  #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
+  #     run: |
+  #       bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
