@@ -59,8 +59,8 @@ The current version of the plugin supports next commands:
 
 #### Execute
 
- - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is an experimental feature.**
- - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file.
+ - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config.
  - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
  - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
 
@@ -105,7 +105,12 @@ The options below allow to change plugin behavior.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
- - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
+ - **`g:cmake_build_executor`** allows to force set the build executor. Default is empty. Available values are:
+    - 'job' uses job to asynchronous build
+    - 'term' uses terminal to asynchronous build
+    - 'dispatch' uses [vim-dispatch](https://github.com/tpope/vim-dispatch) plugin to asynchronous build
+    - 'system' uses synchronous build
+    - '' uses automatic detection of supported modes
 
 #### Build path
 
