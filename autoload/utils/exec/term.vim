@@ -69,10 +69,7 @@ function! s:nVimExit(job_id, data, event) abort
     let l:cmd = s:cmake4vim_term['cmd']
 
     let l:open_qf = get(s:cmake4vim_term, 'open_qf', 0)
-    try
-        silent exec 'bwipeout! ' . s:cmake4vim_term['termbuf']
-    catch
-    endtry
+    silent exec 'bwipeout! ' . s:cmake4vim_term['termbuf']
 
     call s:createQuickFix()
 
