@@ -1,0 +1,56 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
+
+    silent call ResetPluginOptions()
+    let g:cmake_build_executor = 'term'
+    " Use on in order to close all windows and avoid E36 error
+    silent on
+
+After:
+    silent cclose
+    silent call RemoveCMakeDirs()
+
+Execute ([Term executor] Generate cmake project with default settings):
+    if !has('win32')    " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        let iter = 0
+        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    endif
+
+Execute ([Term executor] Generate cmake project with default settings and build error target):
+    if !has('win32')    " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        AssertEqual bufnr('cmake4vim_execute'), -1
+        silent CMake
+        let iter = 0
+        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeBuild incorrect_lib
+        silent on
+        let iter = 0
+        let window_counter = 0
+        while iter < 40
+            windo let window_counter = window_counter + 1
+            if window_counter > 1
+                break
+            endif
+            sleep 1
+            let iter += 1
+        endwhile
+        Assert window_counter > 1
+    endif
+
+Execute ([Term executor] Run 2 terms at once):
+    silent call utils#exec#term#run('sleep 2', 1, '')
+    let ret_code = utils#exec#term#run('sleep 2', 1, '')
+    AssertEqual ret_code, -1
+    sleep 3
