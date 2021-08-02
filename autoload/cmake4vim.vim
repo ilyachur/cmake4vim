@@ -91,7 +91,7 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    call cmake4vim#ResetCMakeCache()
+    silent call cmake4vim#ResetCMakeCache()
     call cmake4vim#GenerateCMake(join(a:000))
 endfunction
 
