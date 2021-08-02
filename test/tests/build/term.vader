@@ -50,7 +50,7 @@ Execute ([Term executor] Generate cmake project with default settings and build 
     endif
 
 Execute ([Term executor] Run 2 terms at once):
-    silent call utils#exec#term#run('sleep 2', 1, '')
-    let ret_code = utils#exec#term#run('sleep 2', 1, '')
+    let ret =  utils#exec#term#run('sleep 10', 1, '')
+    let ret_code = utils#exec#term#run('sleep 10', 1, '')
     AssertEqual ret_code, -1
-    sleep 3
+    term_setkill(ret, "kill")
