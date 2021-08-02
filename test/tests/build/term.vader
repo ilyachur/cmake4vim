@@ -50,7 +50,10 @@ Execute ([Term executor] Generate cmake project with default settings and build 
     endif
 
 Execute ([Term executor] Run 2 terms at once):
-    let ret =  utils#exec#term#run('sleep 10', 1, '')
-    let ret_code = utils#exec#term#run('sleep 10', 1, '')
-    AssertEqual ret_code, -1
-    term_setkill(ret, "kill")
+    if !has('win32')    " Skip for Windows
+        let ret =  utils#exec#term#run('sleep 10', 1, '')
+        let ret_code = utils#exec#term#run('sleep 10', 1, '')
+        AssertEqual ret_code, -1
+
+        sleep 10
+    endif
