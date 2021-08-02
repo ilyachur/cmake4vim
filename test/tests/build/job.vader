@@ -18,7 +18,7 @@ Execute ([Job executor] Generate cmake project with default settings):
         silent CMake
         let iter = 0
         while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -33,7 +33,7 @@ Execute ([Job executor] Generate cmake project with default settings and build e
         silent CMake
         let iter = 0
         while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -46,7 +46,7 @@ Execute ([Job executor] Generate cmake project with default settings and build e
             if window_counter > 1
                 break
             endif
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert window_counter > 1

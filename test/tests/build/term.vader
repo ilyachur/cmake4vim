@@ -17,7 +17,7 @@ Execute ([Term executor] Generate cmake project with default settings):
         silent CMake
         let iter = 0
         while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -26,11 +26,10 @@ Execute ([Term executor] Generate cmake project with default settings):
 Execute ([Term executor] Generate cmake project with default settings and build error target):
     if !has('win32')    " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        AssertEqual bufnr('cmake4vim_execute'), -1
         silent CMake
         let iter = 0
         while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -43,7 +42,7 @@ Execute ([Term executor] Generate cmake project with default settings and build 
             if window_counter > 1
                 break
             endif
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert window_counter > 1
