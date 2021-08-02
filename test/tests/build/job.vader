@@ -16,11 +16,7 @@ Execute ([Job executor] Generate cmake project with default settings):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         AssertEqual bufnr('cmake4vim_execute'), -1
         silent CMake
-        let iter = 0
-        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 2
-            let iter += 1
-        endwhile
+        call WaitForJob()
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent call utils#exec#job#stop()
         AssertEqual bufnr('cmake4vim_execute'), -1
@@ -31,24 +27,13 @@ Execute ([Job executor] Generate cmake project with default settings and build e
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         AssertEqual bufnr('cmake4vim_execute'), -1
         silent CMake
-        let iter = 0
-        while iter < 40 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 2
-            let iter += 1
-        endwhile
+        call WaitForJob()
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild incorrect_lib
         silent on
-        let iter = 0
+        call WaitForJob()
         let window_counter = 0
-        while iter < 40
-            windo let window_counter = window_counter + 1
-            if window_counter > 1
-                break
-            endif
-            sleep 2
-            let iter += 1
-        endwhile
+        windo let window_counter = window_counter + 1
         Assert window_counter > 1
         silent call utils#exec#job#stop()
         AssertEqual bufnr('cmake4vim_execute'), -1
@@ -58,12 +43,14 @@ Execute ([Job executor] Check job cancel command without run):
     AssertEqual bufnr('cmake4vim_execute'), -1
     silent call utils#exec#job#stop()
     AssertEqual bufnr('cmake4vim_execute'), -1
+    call WaitForJob()
 
 Execute ([Job executor] Check job cancel command):
     AssertEqual bufnr('cmake4vim_execute'), -1
     silent call utils#exec#job#run('sleep 10', 1, '')
     silent call utils#exec#job#stop()
     AssertEqual bufnr('cmake4vim_execute'), -1
+    call WaitForJob()
 
 Execute ([Job executor] Run 2 jobs at once):
     silent call utils#exec#job#run('sleep 10', 1, '')
@@ -71,6 +58,7 @@ Execute ([Job executor] Run 2 jobs at once):
     AssertEqual ret_code, -1
     silent call utils#exec#job#stop()
     AssertEqual bufnr('cmake4vim_execute'), -1
+    call WaitForJob()
 
 Execute ([Job executor] Run job and don't mess up the alternate file):
     silent edit first.txt
@@ -82,3 +70,4 @@ Execute ([Job executor] Run job and don't mess up the alternate file):
     copen
     cclose
     AssertEqual bufname("#"), "first.txt"
+    call WaitForJob()

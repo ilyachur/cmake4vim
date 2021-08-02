@@ -133,3 +133,7 @@ function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
     exec l:currentnr.'wincmd w'
     return l:job
 endfunction
+
+function! utils#exec#term#status() abort
+    return s:cmake4vim_term
+endfunction

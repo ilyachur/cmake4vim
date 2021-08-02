@@ -165,3 +165,7 @@ function! utils#exec#job#run(cmd, open_qf, err_fmt) abort
     endif
     return l:job
 endfunction
+
+function! utils#exec#job#status() abort
+    return s:cmake4vim_job
+endfunction

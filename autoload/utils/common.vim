@@ -39,6 +39,16 @@ function! utils#common#executeCommand(cmd, open_result, ...) abort
     endif
 endfunction
 
+function! utils#common#executeStatus() abort
+    let l:status = {}
+    if g:cmake_build_executor ==# 'job'
+        let l:status = utils#exec#job#status()
+    elseif g:cmake_build_executor ==# 'term'
+        let l:status = utils#exec#term#status()
+    endif
+    return l:status
+endfunction
+
 " Prints warning message
 function! utils#common#Warning(msg) abort
     echohl WarningMsg |
