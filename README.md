@@ -107,10 +107,10 @@ The options below allow to change plugin behavior.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
  - **`g:cmake_build_executor`** allows to force set the build executor. Default is empty. Available values are:
     - 'job' uses job to asynchronous build
-    - 'term' uses terminal to asynchronous build
+    - 'term' uses terminal to asynchronous build *Experimental*
     - 'dispatch' uses [vim-dispatch](https://github.com/tpope/vim-dispatch) plugin to asynchronous build
     - 'system' uses synchronous build
-    - '' uses automatic detection of supported modes
+    - '' uses automatic detection of supported modes (the priority is `dispatch`, `job`, `term`, `system`)
 
 #### Build path
 
