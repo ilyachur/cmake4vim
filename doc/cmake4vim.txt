@@ -141,7 +141,7 @@ VARIABLES                                                      *cmake-variables*
                                     Default is empty.
 
 g:cmake_build_executor              allows to force set the build executor.
-                                    Available values are 'job', 'dispatch',
+                                    Available values are 'job', 'term', 'dispatch',
                                     'system' and ''. Default is empty.
 
 g:cmake_vimspector_support          enables support of vimspector config.

@@ -29,11 +29,24 @@ function! utils#common#executeCommand(cmd, open_result, ...) abort
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
         call utils#exec#job#run(l:cmd, a:open_result, l:errFormat)
+    elseif (g:cmake_build_executor ==# 'term') || (g:cmake_build_executor ==# '' && (has('terminal') || has('nvim')))
+        " job#run behaves differently if the qflist is open or closed
+        call utils#exec#term#run(l:cmd, a:open_result, l:errFormat)
     else
         " Close quickfix list to discard custom error format
         silent! cclose
         call utils#exec#system#run(l:cmd, a:open_result, l:errFormat)
     endif
+endfunction
+
+function! utils#common#executeStatus() abort
+    let l:status = {}
+    if g:cmake_build_executor ==# 'job'
+        let l:status = utils#exec#job#status()
+    elseif g:cmake_build_executor ==# 'term'
+        let l:status = utils#exec#term#status()
+    endif
+    return l:status
 endfunction
 
 " Prints warning message

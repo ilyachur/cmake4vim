@@ -21,7 +21,7 @@ Execute ([Dispatch executor] Generate cmake project with default settings):
         silent CMake
         let iter = 0
         while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 1
+            sleep 2
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
