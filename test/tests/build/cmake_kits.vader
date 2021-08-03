@@ -15,6 +15,7 @@ Before:
                 \},
                 \ "Second" : { "compilers" : { "C": "", "CXX": "" }, "cmake_usr_args" : { 'Flag' : 'ON' } } }
     silent call utils#cmake#reloadCMakeKits()
+    let g:cmake_build_path_pattern = []
     " Use on in order to close all windows and avoid E36 error
     silent on
 

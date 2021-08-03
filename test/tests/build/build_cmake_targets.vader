@@ -164,17 +164,26 @@ Execute ([CMake targets] Get cmake targets):
 
 Execute ([CMake targets] Get custom build types):
     let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CUSTOM_OP':'ON' } } }
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
     AssertEqual len(result), 5
 
 Execute ([CMake targets] Override default build types):
     let g:cmake_variants = { 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CUSTOM_OP' : 'ON' } } }
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
     AssertEqual len(result), 4
     AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
 
 Execute ([CMake targets] Store g:cmake_usr_args with default build types):
     let g:cmake_usr_args = '-DCUSTOM_OP=ON'
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
     AssertEqual len(result), 4
     for build_type in keys( g:cmake_variants )
@@ -194,6 +203,9 @@ Execute ([CMake targets] Update g:cmake_usr_args for default build types):
 Execute ([CMake targets] Only default build types have default values):
     let g:cmake_variants = { 'custom-build' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : {'CUSTOM_OP' : 'ON'} } }
     let g:cmake_usr_args = '-DDEFAULT_OP=ON'
+    Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
     AssertEqual len(result), 5
     for build_type in filter( keys( g:cmake_variants ), "v:val !=# 'custom-build'" )
