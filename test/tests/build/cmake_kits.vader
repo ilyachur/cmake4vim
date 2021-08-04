@@ -86,7 +86,7 @@ Execute ([CMake kits] Check CMakeKit cmake_usr_args setting):
 
 Execute ([CMake kits] Check CMakeKit environment variables):
     silent CMakeSelectKit First
-    silent CMakeSelectBuildType Release
+    silent CMakeSelectBuildType Debug
     AssertEqual $MY_CUSTOM_VARIABLE, '15'
     AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
     unlet $MY_CUSTOM_VARIABLE
@@ -102,7 +102,7 @@ Execute ([CMake kits] Check CMakeKit change kit unset environment variables):
 
 Execute ([CMake kits] Check CMakeKit default):
     silent CMakeSelectKit First
-    silent CMakeSelectBuildType Release
+    silent CMakeSelectBuildType Debug
     AssertEqual $MY_CUSTOM_VARIABLE, '15'
     AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
     unlet $MY_CUSTOM_VARIABLE
@@ -115,7 +115,7 @@ Execute ([CMake kits] Check CMakeKit selected kit without CMakeSelectKit):
 
 Execute ([CMake kits] Check build path pattern):
     let g:cmake_build_path_pattern = [ "./custom-build-name/%s/%s", "g:cmake_selected_kit, g:cmake_build_type" ]
-    Assert !isdirectory('custom-build-name/First/Release'), 'Build directory should not exist'
+    Assert !isdirectory('custom-build-name/First/Debug'), 'Build directory should not exist'
     silent CMakeSelectKit First
     AssertEqual g:cmake_selected_kit, 'First'
     " this calls CMake in the background
@@ -125,13 +125,21 @@ Execute ([CMake kits] Check build path pattern):
 Execute ([CMake kits] Check build path pattern precedence over build_dir_prefix):
     let g:cmake_build_path_pattern = [ "./custom-build-name/%s/%s", "g:cmake_selected_kit, g:cmake_build_type" ]
     let g:cmake_build_dir_prefix = 'my-custom-prefix'
-    Assert !isdirectory('custom-build-name/First/Release'), 'Build directory should not exist'
-    Assert !isdirectory('my-custom-prefixRelease'), 'Build directory should not exist'
+    Assert !isdirectory('custom-build-name/First/Debug'), 'Build directory should not exist'
+    Assert !isdirectory('my-custom-prefixDebug'), 'Build directory should not exist'
     silent CMakeSelectKit First
     " this calls CMake in the background
-    silent CMakeSelectBuildType Release
-    Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
-    Assert !isdirectory('my-custom-prefixRelease'), 'Build directory should not exist'
+    silent CMakeSelectBuildType Debug
+    Assert isdirectory('custom-build-name/First/Debug'), 'Build directory should exist'
+    Assert !isdirectory('my-custom-prefixDebug'), 'Build directory should not exist'
+
+Execute ([CMake kits] Check build path pattern when doing a clean build):
+    let g:cmake_build_dir    = ''
+    let g:cmake_build_type   = ''
+    let g:cmake_selected_kit = 'First'
+    let g:cmake_build_path_pattern = [ "./custom-build-name/%s", "g:cmake_selected_kit" ]
+
+    Assert utils#cmake#getBuildDir() =~# 'custom-build-name/First'
 
 Execute ([CMake kits] Call joinUserArgs with a string):
     let usr_args = '-DOPTION=YES -DSETTING=YES'
