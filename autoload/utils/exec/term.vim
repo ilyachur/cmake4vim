@@ -91,6 +91,7 @@ function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
         call utils#common#Warning('Async execute is already running')
         return -1
     endif
+    cclose
     let l:cmake4vim_term = 'cmake4vim_execute'
     let s:err_fmt = a:err_fmt
     let l:currentnr = winnr()
