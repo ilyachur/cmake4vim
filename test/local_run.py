@@ -18,12 +18,12 @@ if __name__ == '__main__':
 
     # prepare environment
     current_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-    test_dir = current_dir + '/tests'
-    home_dir = current_dir + '/tmp'
+    test_dir = os.path.join(current_dir, 'tests')
+    home_dir = os.path.join(current_dir, '/tmp')
     if args.out_dir:
-        out_dir = args.out_dir
+        out_dir = os.path.abspath(args.out_dir)
     else:
-        out_dir = current_dir + '/tmp/out'
+        out_dir = os.path.join(current_dir, 'tmp', 'out')
     if not os.path.exists(out_dir) and args.profile:
         os.makedirs(out_dir)
     os_name = platform.system()
@@ -44,17 +44,17 @@ if __name__ == '__main__':
     for test_path in test_cases:
         test_case = os.path.basename(test_path).split('.')[0]
         if args.profile:
-            os.environ['VIM_PROFILE_FILE'] = home_dir + '/provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.txt'
+            os.environ['VIM_PROFILE_FILE'] = os.path.join(home_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.txt')
         start = time.time()
         res = subprocess.run([args.editor, '-Nu', 'vimrc', '+Vader! ' + test_path])
         end = time.time()
         print(end - start)
 
         if args.profile:
-            os.chdir(current_dir + '/..')
+            os.chdir(os.path.join(current_dir, '..'))
             subprocess.run([sys.executable, '-m', 'covimerage', 'write_coverage', os.environ['VIM_PROFILE_FILE']])
             subprocess.run([sys.executable, '-m', 'coverage', 'xml'])
-            os.rename('coverage.xml', out_dir + '/provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.xml')
+            os.rename('coverage.xml', os.path.join(out_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.xml'))
             os.chdir(current_dir)
 
         if res.returncode != 0:

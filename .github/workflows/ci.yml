@@ -98,12 +98,12 @@ jobs:
         popd
     - name: Run tests
       run: |
-        python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir ${HOME}/out
+        python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
         name: coverage
-        path: ${HOME}/out/*
+        path: ./*.xml
         if-no-files-found: error
 
   Report:
