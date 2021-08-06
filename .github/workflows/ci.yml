@@ -87,12 +87,6 @@ jobs:
       run: |
           which ninja
           ninja --version
-    - name: Clone Vader
-      run: |
-        git clone --depth 1 https://github.com/junegunn/vader.vim.git ${HOME}/.vim/plugged/vader.vim
-    - name: Clone Dispatch
-      run: |
-        git clone --depth 1 https://github.com/tpope/vim-dispatch.git ${HOME}/.vim/plugged/vim-dispatch
     - if: matrix.os == 'macos-latest'  # Install gtest in order to avoid problems with cmake 2.8 on macOS
       run: |
         git clone --depth 1 https://github.com/google/googletest ${HOME}/gtest
@@ -104,24 +98,12 @@ jobs:
         popd
     - name: Run tests
       run: |
-        pushd test
-        ${{ matrix.vim_executable }} -Nu vimrc "+Vader! main.vader"
-        popd
-    - name: Generate report
-      run: |
-        python -m covimerage write_coverage ${HOME}/vim-profile.txt
-        python -m coverage xml
-    - if: matrix.os == 'windows-latest'
-      run: |
-        ren coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
-    - if: matrix.os != 'windows-latest'
-      run: |
-        mv coverage.xml ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+        python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir ${HOME}/out
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
         name: coverage
-        path: ${{matrix.vim_type}}_${{matrix.vim_version}}_${{matrix.platform}}_${{matrix.cmake_version}}_cov.xml
+        path: ${HOME}/out/*
         if-no-files-found: error
 
   Report:

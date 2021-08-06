@@ -1,19 +1,4 @@
-" Needed for a code coverage
-profile start $HOME/vim-profile.txt
-profile! file ../*
-
-execute 'set encoding=utf-8'
-" vint: next-line -ProhibitSetNoCompatible
-set nocompatible
-filetype off
-filetype plugin indent on
-syntax enable
-set runtimepath +=$HOME/.vim/plugged/vader.vim
-" set rtp+=$HOME/.fzf
-" set rtp+=$HOME/.vim/plugged/fzf.vim
-let s:cur_path=expand('%:p:h')
-exe 'set runtimepath +=' . fnameescape(expand('<sfile>:h').'/../')
-
+" Helpers {{{
 function! RemoveFile(file)
     if has('win32')
         silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
@@ -87,6 +72,34 @@ function! WaitForJob()
         execute 'sleep' 100.'m'
     endwhile
 endfunction
+
+function! HasQF()
+    for winnr in range(1, winnr('$'))
+        if getwinvar(winnr, '&syntax') == 'qf'
+            return 1
+        endif
+    endfor
+    return 0
+endfunction
+" }}} Helpers
+" Needed for a code coverage
+let s:profile_out = $VIM_PROFILE_FILE
+if has('profile') && !empty(s:profile_out)
+    profile start $VIM_PROFILE_FILE
+    profile! file ../*
+endif
+
+execute 'set encoding=utf-8'
+" vint: next-line -ProhibitSetNoCompatible
+set nocompatible
+filetype off
+filetype plugin indent on
+syntax enable
+set runtimepath +=$HOME/.vim/plugged/vader.vim
+" set rtp+=$HOME/.fzf
+" set rtp+=$HOME/.vim/plugged/fzf.vim
+let s:cur_path=expand('%:p:h')
+exe 'set runtimepath +=' . fnameescape(expand('<sfile>:h').'/../')
 
 set winminheight=0
 set winheight=999
