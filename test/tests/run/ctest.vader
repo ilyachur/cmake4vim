@@ -1,14 +1,13 @@
 Before:
     silent call OpenTestProject()
-    silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
+    if !has('win32')
+        let g:make_arguments='-j8'
+    endif
     let g:cmake_usr_args="-DENABLE_TESTS=ON"
     " Use on in order to close all windows and avoid E36 error
     silent on
-
-After:
-    silent call RemoveCMakeDirs()
 
 Execute ([CTest] Check CTest for empty project):
     " enable tests for windows with last cmake
@@ -16,13 +15,27 @@ Execute ([CTest] Check CTest for empty project):
     CTest
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
-Execute ([CTest] Run tests with default settings):
+Execute ([CTest] Build project with gtest):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
+    endif
+
+Execute ([CTest] Run tests with default settings):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         if !has('win32')
             Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
             Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
@@ -36,33 +49,9 @@ Execute ([CTest] Run tests with default settings):
         endif
     endif
 
-Execute ([CTest] Run tests with custom settings):
-    " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake -DCUSTOM_OP=ON
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent CMakeBuild
-        if !has('win32')
-            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
-            silent call system("cmake-build-Release/tests/unit_tests")
-            AssertEqual 1, v:shell_error
-        else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
-        endif
-    endif
-
 Execute ([CTest] CTest with default settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent CMakeBuild
         if !has('win32')
             Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
             Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
@@ -78,9 +67,6 @@ Execute ([CTest] CTest with default settings):
 Execute ([CTest] CTest check target):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
         if !has('win32')
             AssertEqual g:cmake_build_target, 'all'
@@ -101,10 +87,10 @@ Execute ([CTest] CTest check target):
         endif
     endif
 
-Execute ([CTest] CTest with custom settings):
+Execute ([CTest] Run tests with custom settings):
     " enable tests for windows with last cmake
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        Assert isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake -DCUSTOM_OP=ON
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild
@@ -119,15 +105,25 @@ Execute ([CTest] CTest with custom settings):
             Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
+    endif
+
+Execute ([CTest] CTest with custom settings):
+    " enable tests for windows with last cmake
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+        endif
         silent CTest
     endif
 
 Execute ([CTest] CTest with custom args):
     if !has('win32')
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake -DCUSTOM_OP=ON
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -140,10 +136,6 @@ Execute ([CTest] CTest with custom args):
 
 Execute ([CTest] CTest with custom args and a bang):
     if !has('win32')
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake -DCUSTOM_OP=ON
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
