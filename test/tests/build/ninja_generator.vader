@@ -1,31 +1,40 @@
 Before:
     silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
     let g:cmake_project_generator="Ninja"
-    if !has('win32')
-        let g:make_arguments='-j8'
-    endif
     silent on
+
+After:
+    silent call RemoveCMakeDirs()
 
 Execute ([Ninja] Find Ninja generator):
     if !has('win32') " Skip for Windows
         Assert executable('ninja'), "Ninja is not found!"
     endif
 
-Execute ([Ninja] Check CMake generator with Ninja):
+Execute ([Ninja] Check CMake generator name):
     if !has('win32') " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let cmake_info = utils#cmake#common#getInfo()
         let gen_name = cmake_info['cmake']['generator']
         AssertEqual 'Ninja', gen_name
+    endif
+
+Execute ([Ninja] Generate cmake project with Ninja generator):
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
     endif
 
 Execute ([Ninja] Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         silent CMakeBuild
@@ -33,9 +42,12 @@ Execute ([Ninja] Build cmake project with Ninja generator):
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
     endif
 
-Execute ([Ninja] Clean cmake project with Ninja generator):
+Execute ([Ninja] Build cmake project with Ninja generator):
     if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         silent CMakeBuild
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
@@ -46,7 +58,8 @@ Execute ([Ninja] Clean cmake project with Ninja generator):
 
 Execute ([Ninja] Build cmake project with Ninja generator and tests):
     if !has('win32') " Skip for Windows
-        silent CMakeResetAndReload -DENABLE_TESTS=ON
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake -DENABLE_TESTS=ON
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         silent CMakeBuild
@@ -57,8 +70,9 @@ Execute ([Ninja] Build cmake project with Ninja generator and tests):
 
 Execute ([Ninja] Build cmake project with -C param):
     if !has('win32') " Skip for Windows
-        let g:make_arguments = "-C ."
-        silent CMakeResetAndReload
+        let g:make_arguments="-C ."
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         silent CMakeBuild
@@ -70,7 +84,8 @@ Execute ([Ninja] Build cmake project with generator from usr args):
     if !has('win32') " Skip for Windows
         let g:cmake_project_generator=""
         let g:cmake_usr_args="-GNinja"
-        silent CMakeResetAndReload
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
         silent CMakeBuild
@@ -80,6 +95,7 @@ Execute ([Ninja] Build cmake project with generator from usr args):
 
 Execute ([Ninja] Get all Ninja targets):
     if !has('win32') " Skip for Windows
+        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = cmake4vim#GetAllTargets()
         Assert len(targets) > 10
