@@ -62,9 +62,6 @@ function! s:nVimOut(job_id, data, event) abort
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
-    if empty(s:cmake4vim_term) || a:job_id != s:cmake4vim_term['job']
-        return
-    endif
     let l:job = s:cmake4vim_term['job']
     let l:cmd = s:cmake4vim_term['cmd']
 

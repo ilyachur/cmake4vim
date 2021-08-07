@@ -52,5 +52,5 @@ vint <root-project-dir>
 
 The test suite is written using [Vader](https://github.com/junegunn/vader.vim). You can use next script to run all tests:
 ```
-<root-project-dir>/test/local_run.sh
+python <root-project-dir>/test/local_run.py
 ```

@@ -338,7 +338,7 @@ function! utils#cmake#getBinaryPath() abort
             let l:target = l:cmake_info['targets']['Debug'][g:cmake_build_target]
         endif
         if l:target['type'] !=# 'EXECUTABLE'
-            let v:errmsg = 'Target ' . g:cmake_build_target . 'is not an executable'
+            let v:errmsg = 'Target ' . g:cmake_build_target . ' is not an executable'
             call utils#common#Warning(v:errmsg)
             return ''
         endif
