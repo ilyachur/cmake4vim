@@ -4,8 +4,14 @@ import os
 import sys
 import re
 import time
+import shutil
 import platform
 import subprocess
+
+def remove_test_files(root_dir):
+    cmake_proj_dir = os.path.join(root_dir, 'cmake projects', 'test proj')
+    for folder in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']:
+        shutil.rmtree(os.path.join(cmake_proj_dir, folder), ignore_errors=True)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='cmake4vim local test runner')
@@ -41,12 +47,15 @@ if __name__ == '__main__':
     else:
         test_cases = [y for x in os.walk(test_dir) for y in glob(os.path.join(x[0], '*.vader'))]
 
+    ret_code = 0
     for test_path in test_cases:
         test_case = os.path.basename(test_path).split('.')[0]
         if args.profile:
             os.environ['VIM_PROFILE_FILE'] = os.path.join(home_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.txt')
         start = time.time()
+        remove_test_files(current_dir)
         res = subprocess.run([args.editor, '-Nu', 'vimrc', '+Vader! ' + test_path])
+        remove_test_files(current_dir)
         end = time.time()
         print(end - start)
 
@@ -58,4 +67,6 @@ if __name__ == '__main__':
             os.chdir(current_dir)
 
         if res.returncode != 0:
-            exit(res.returncode)
+            ret_code = res.returncode
+
+    exit(ret_code)

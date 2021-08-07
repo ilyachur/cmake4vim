@@ -1,16 +1,11 @@
 Before:
     silent call OpenTestProject()
-    silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
     " Use on in order to close all windows and avoid E36 error
     silent on
 
-After:
-    silent call RemoveCMakeDirs()
-
 Execute ([CMakeRun] Should not find non-binary target):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     silent CMakeBuild
@@ -19,21 +14,15 @@ Execute ([CMakeRun] Should not find non-binary target):
 
 Execute ([CMakeRun] Should not find library target):
     if utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         CMakeSelectTarget test_lib
-        silent CMakeBuild
         let result = utils#cmake#getBinaryPath()
         AssertEqual result, ''
     endif
 
 Execute ([CMakeRun] Should find binary target):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     CMakeSelectTarget test_app
-    silent CMakeBuild
     AssertEqual g:cmake_build_target, 'test_app'
     if !has('win32')
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
@@ -57,7 +46,6 @@ Execute ([CMakeRun] Run for empty target):
 
 Execute ([CMakeRun] Run test_app target and open quickfix):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        silent CMake
         silent CMakeSelectTarget test_app
         silent CMakeBuild
         silent CMakeRun
@@ -70,11 +58,39 @@ Execute ([CMakeRun] Run test_app target and open quickfix):
     AssertEqual    1, len(output)
 
 Execute ([CMakeRun] Run non-binary target and open quickfix):
-    silent CMake
-    silent CMakeBuild
     silent CMakeSelectTarget all
     silent CMakeRun
     AssertEqual v:errmsg , 'Executable "all" was not found'
+
+Execute ([CMakeRun] Run test_app target with mask arguments):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMakeSelectTarget test_app
+        silent CMakeRun --gtest_filter=Test*
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+    endif
+    let output = getqflist()
+    AssertEqual 1, len(output)
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
+
+" This test fails on CI, but works locally
+" needs to be investigated when someone stumbles upon it ( @mark2185 )
+Execute ([CMakeRun] Run test_app target with mask arguments with job executor):
+    if !has('win32')
+        silent CMakeSelectTarget test_app
+        let g:cmake_build_executor='job'
+        AssertEqual bufnr('cmake4vim_execute'), -1
+        silent CMakeRun --gtest_filter=Test*
+        call WaitForJob()
+        AssertEqual bufnr('cmake4vim_execute'), -1
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+    endif
+    let output = getqflist()
+    Assert 1 == len(output), output
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
 
 Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
@@ -90,36 +106,3 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     AssertEqual        1, len(output)
     AssertEqual '123 F1', output[0]['text']
 
-Execute ([CMakeRun] Run test_app target with mask arguments):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        silent CMake
-        silent CMakeSelectTarget test_app
-        silent CMakeBuild
-        silent CMakeRun --gtest_filter=Test*
-    else
-        " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
-    endif
-    let output = getqflist()
-    AssertEqual 1, len(output)
-    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
-
-" This test fails on CI, but works locally
-" needs to be investigated when someone stumbles upon it ( @mark2185 )
-Execute ([CMakeRun] Run test_app target with mask arguments with job executor):
-    if !has('win32')
-        silent CMake
-        silent CMakeSelectTarget test_app
-        silent CMakeBuild
-        let g:cmake_build_executor='job'
-        AssertEqual bufnr('cmake4vim_execute'), -1
-        silent CMakeRun --gtest_filter=Test*
-        sleep 10
-        AssertEqual bufnr('cmake4vim_execute'), -1
-    else
-        " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
-    endif
-    let output = getqflist()
-    Assert 1 == len(output), output
-    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
