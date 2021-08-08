@@ -58,6 +58,11 @@ Execute ([Job executor] Run 2 jobs at once):
     AssertEqual bufnr('cmake4vim_execute'), -1
     call WaitForJob()
 
+Execute ([Job executor] Append job to empty pool):
+    let ret = utils#exec#term#append('sleep 2', 1, '')
+    AssertNotEqual ret, 0
+    call WaitForJob()
+
 Execute ([Job executor] Run job and don't mess up the alternate file):
     silent edit first.txt
     silent edit second.txt
