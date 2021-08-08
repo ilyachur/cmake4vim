@@ -69,3 +69,31 @@ Execute ([Job executor] Run job and don't mess up the alternate file):
     cclose
     AssertEqual bufname("#"), "first.txt"
     call WaitForJob()
+
+Execute ([Job executor] Run test_app target with mask arguments with job executor):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMake
+        call WaitForJob()
+        silent CMakeSelectTarget test_app
+        AssertEqual bufnr('cmake4vim_execute'), -1
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should not be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should not be built"
+        endif
+        silent CMakeRun --gtest_filter=Test*
+        call WaitForJob()
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+        endif
+        AssertEqual bufnr('cmake4vim_execute'), -1
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+    endif
+    let output = getqflist()
+    Assert 1 == len(output), output
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
+

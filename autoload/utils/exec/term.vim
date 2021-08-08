@@ -3,20 +3,27 @@
 
 " Private functions {{{ "
 let s:cmake4vim_term = {}
-let s:err_fmt = ''
+let s:cmake4vim_jobs_pool = []
 
 function! s:createQuickFix() abort
     let l:old_error = &errorformat
-    if s:err_fmt !=# ''
-        let &errorformat = s:err_fmt
+    if s:cmake4vim_term['err_fmt'] !=# ''
+        let &errorformat = s:cmake4vim_term['err_fmt']
     endif
+    " just to be sure all messages were processed
+    sleep 100m
     cgetexpr join(s:cmake4vim_term['cout'], "\n")
     silent call setqflist( [], 'a', { 'title' : s:cmake4vim_term[ 'cmd' ] } )
-    if s:err_fmt !=# ''
+    if s:cmake4vim_term['err_fmt'] !=# ''
         let &errorformat = l:old_error
     endif
     " Remove cmake4vim job
     let s:cmake4vim_term = {}
+    if len(s:cmake4vim_jobs_pool) > 0
+        let l:next_job = s:cmake4vim_jobs_pool[0]
+        let s:cmake4vim_jobs_pool = s:cmake4vim_jobs_pool[1:]
+        silent call utils#exec#term#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['err_fmt'])
+    endif
 endfunction
 
 function! s:prepareOut(msg) abort
@@ -55,10 +62,12 @@ endfunction
 
 " nvim functions {{{ "
 function! s:nVimOut(job_id, data, event) abort
-    " Collect outputs
-    for val in filter(a:data, '!empty(v:val)')
-        let s:cmake4vim_term['cout'] += s:prepareOut(val)
-    endfor
+    if !empty(s:cmake4vim_term)
+        " Collect outputs
+        for val in filter(a:data, '!empty(v:val)')
+            let s:cmake4vim_term['cout'] += s:prepareOut(val)
+        endfor
+    endif
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
@@ -90,9 +99,14 @@ function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
     endif
     cclose
     let l:cmake4vim_term = 'cmake4vim_execute'
-    let s:err_fmt = a:err_fmt
     let l:currentnr = winnr()
     let l:termbufnr = 0
+    let s:cmake4vim_term = {
+                \ 'cmd': a:cmd,
+                \ 'open_qf': a:open_qf,
+                \ 'cout': [],
+                \ 'err_fmt': a:err_fmt
+                \ }
     if has('nvim')
         execute '10split'
         execute 'enew'
@@ -116,19 +130,29 @@ function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
                     \ 'norestore': 1,
                     \ })
     endif
-    let s:cmake4vim_term = {
-                \ 'job': l:job,
-                \ 'cmd': a:cmd,
-                \ 'open_qf': a:open_qf,
-                \ 'cout': []
-                \ }
     if has('nvim')
         let s:cmake4vim_term['termbuf'] = l:termbufnr
     endif
+    let s:cmake4vim_term['job'] = l:job
     exec l:currentnr.'wincmd w'
     return l:job
 endfunction
 
 function! utils#exec#term#status() abort
     return s:cmake4vim_term
+endfunction
+
+function! utils#exec#term#append(cmd, open_qf, err_fmt) abort
+    " if there is a job or if the buffer is open, abort
+    if !empty(s:cmake4vim_term)
+        let s:cmake4vim_jobs_pool += [
+                    \ {
+                        \ 'cmd': a:cmd,
+                        \ 'open_qf': a:open_qf,
+                        \ 'err_fmt': a:err_fmt
+                    \ }
+                \]
+        return
+    endif
+    call utils#exec#term#run(a:cmd, a:open_qf, a:err_fmt)
 endfunction

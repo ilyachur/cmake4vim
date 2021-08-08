@@ -74,24 +74,6 @@ Execute ([CMakeRun] Run test_app target with mask arguments):
     AssertEqual 1, len(output)
     AssertEqual '--gtest_filter=Test* F1', output[0]['text']
 
-" This test fails on CI, but works locally
-" needs to be investigated when someone stumbles upon it ( @mark2185 )
-Execute ([CMakeRun] Run test_app target with mask arguments with job executor):
-    if !has('win32')
-        silent CMakeSelectTarget test_app
-        let g:cmake_build_executor='job'
-        AssertEqual bufnr('cmake4vim_execute'), -1
-        silent CMakeRun --gtest_filter=Test*
-        call WaitForJob()
-        AssertEqual bufnr('cmake4vim_execute'), -1
-    else
-        " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
-    endif
-    let output = getqflist()
-    Assert 1 == len(output), output
-    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
-
 Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
         silent CMake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/tmp
@@ -106,3 +88,20 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     AssertEqual        1, len(output)
     AssertEqual '123 F1', output[0]['text']
 
+Execute ([CMakeRun] run command builds and executes target):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        CMakeResetAndReload
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        if !has('win32')
+            Assert !filereadable("cmake-build-Release/app/test_app"), "app should not be built"
+        else
+            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should not be built"
+        endif
+        CMakeSelectTarget test_app
+        silent CMakeRun
+        if !has('win32')
+            Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        else
+            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+        endif
+    endif
