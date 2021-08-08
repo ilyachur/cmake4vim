@@ -39,6 +39,7 @@ Execute ([Term executor] Run 2 terms at once):
     endif
 
 Execute ([Term executor] Run test_app target with mask arguments with term executor):
+    if !has('win32')    " Skip for Windows
     if utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         call WaitForJob()
@@ -65,4 +66,5 @@ Execute ([Term executor] Run test_app target with mask arguments with term execu
     let output = getqflist()
     Assert 1 == len(output), output
     AssertEqual '--gtest_filter=Test* F1', output[0]['text']
+    endif
 

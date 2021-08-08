@@ -89,7 +89,7 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     AssertEqual '123 F1', output[0]['text']
 
 Execute ([CMakeRun] run command builds and executes target):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if utils#cmake#verNewerOrEq([3, 14])
         silent CMakeResetAndReload
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         if !has('win32')
