@@ -25,7 +25,7 @@ function! utils#common#executeCommands(cmds, open_result, ...) abort
         " Close quickfix list to discard custom error format
         silent! cclose
         " Dispatch doesn't support pool of tasks
-        let l:cmd = join(a:cmds, " && ")
+        let l:cmd = join(a:cmds, ' && ')
         silent call utils#exec#dispatch#run(l:cmd, a:open_result, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
