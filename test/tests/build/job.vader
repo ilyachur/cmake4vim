@@ -71,7 +71,7 @@ Execute ([Job executor] Run job and don't mess up the alternate file):
     call WaitForJob()
 
 Execute ([Job executor] Run test_app target with mask arguments with job executor):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         call WaitForJob()
         silent CMakeSelectTarget test_app
@@ -92,6 +92,7 @@ Execute ([Job executor] Run test_app target with mask arguments with job executo
     else
         " WA to skip test
         call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+        call WaitForJob()
     endif
     let output = getqflist()
     Assert 1 == len(output), output

@@ -90,7 +90,7 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
 
 Execute ([CMakeRun] run command builds and executes target):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        CMakeResetAndReload
+        silent CMakeResetAndReload
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         if !has('win32')
             Assert !filereadable("cmake-build-Release/app/test_app"), "app should not be built"
