@@ -140,9 +140,10 @@ Execute ([CMake kits] Check build path pattern when doing a clean build):
     let g:cmake_build_path_pattern = [ "./custom-build-name/%s", "g:cmake_selected_kit" ]
 
     if has('win32')
-        AssertNotEqual -1, stridx( utils#cmake#getBuildDir(), "custom-build-name\\First" )
+        Assert utils#cmake#getBuildDir() =~# "custom-build-name", utils#cmake#getBuildDir()
+        Assert utils#cmake#getBuildDir() =~# "First"            , utils#cmake#getBuildDir()
     else
-        AssertNotEqual -1, stridx( utils#cmake#getBuildDir(), "custom-build-name/First" )
+        Assert utils#cmake#getBuildDir() =~# "custom-build-name/First", utils#cmake#getBuildDir()
     endif
 
 Execute ([CMake kits] Call joinUserArgs with a string):
