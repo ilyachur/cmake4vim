@@ -11,6 +11,7 @@ function! s:readVimspectorConfig() abort
     try
         return json_decode(join(readfile(s:getVimspectorConfig()), ''))
     catch
+        call utils#common#Warning( 'Exception reading vimspector config: ' . v:exception )
         return {}
     endtry
 endfunction
