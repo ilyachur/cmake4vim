@@ -54,10 +54,11 @@ if __name__ == '__main__':
             os.environ['VIM_PROFILE_FILE'] = os.path.join(home_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.txt')
         start = time.time()
         remove_test_files(current_dir)
-        res = subprocess.run([args.editor, '-Nu', 'vimrc', '+Vader! ' + test_path])
+        res = subprocess.run([args.editor, '-Es', '-Nu', 'vimrc', '+Vader! ' + test_path])
         remove_test_files(current_dir)
         end = time.time()
-        print(end - start)
+        # unnecessary? vader prints this already
+        # print(end - start)
 
         if args.profile:
             os.chdir(os.path.join(current_dir, '..'))

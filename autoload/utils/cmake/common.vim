@@ -6,8 +6,11 @@ if !exists('s:cmake_cache_info')
 endif
 
 " Functions reset current CMake cache from the memory
+" and cmake-kits cache
+" basically all caching is cleared
 function! utils#cmake#common#resetCache() abort
     let s:cmake_cache_info = {}
+    call utils#cmake#resetCache()
 endfunction
 
 " Prepare requests to CMake
