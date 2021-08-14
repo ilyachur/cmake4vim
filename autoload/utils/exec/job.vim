@@ -176,15 +176,15 @@ endfunction
 
 function! utils#exec#job#append(cmd, open_qf, err_fmt) abort
     " if there is a job or if the buffer is open, abort
-    if !empty(s:cmake4vim_job)
-        let s:cmake4vim_jobs_pool += [
-                    \ {
-                        \ 'cmd': a:cmd,
-                        \ 'open_qf': a:open_qf,
-                        \ 'err_fmt': a:err_fmt
-                    \ }
-                \]
-        return 0
+    if empty(s:cmake4vim_job)
+        return utils#exec#job#run(a:cmd, a:open_qf, a:err_fmt)
     endif
-    return utils#exec#job#run(a:cmd, a:open_qf, a:err_fmt)
+    let s:cmake4vim_jobs_pool += [
+                \ {
+                    \ 'cmd': a:cmd,
+                    \ 'open_qf': a:open_qf,
+                    \ 'err_fmt': a:err_fmt
+                \ }
+            \ ]
+    return 0
 endfunction
