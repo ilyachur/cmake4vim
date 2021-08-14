@@ -42,12 +42,12 @@ function! utils#common#executeCommands(cmds, open_result, ...) abort
         endfor
     else
         " Close quickfix list to discard custom error format
-        silent! cclose
         for l:cmd in a:cmds
+            silent! cclose
             " system is synchronous executor
             let l:cmd = s:add_noglob(l:cmd)
             let l:ret_code = utils#exec#system#run(l:cmd, a:open_result, l:errFormat)
-            if l:ret_code != 0:
+            if l:ret_code != 0
                 break
             endif
         endfor
