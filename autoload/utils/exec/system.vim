@@ -24,4 +24,5 @@ function! utils#exec#system#run(cmd, open_qf, errFormat) abort
     if a:errFormat !=# ''
         let &l:errorformat = l:old_error
     endif
+    return l:ret_code
 endfunction
