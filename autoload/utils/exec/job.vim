@@ -40,9 +40,8 @@ function! s:createQuickFix() abort
     " Remove cmake4vim job
     let s:cmake4vim_job = {}
     call s:closeBuffer()
-    if len(s:cmake4vim_jobs_pool) > 0
-        let l:next_job = s:cmake4vim_jobs_pool[0]
-        let s:cmake4vim_jobs_pool = s:cmake4vim_jobs_pool[1:]
+    if !empty(s:cmake4vim_jobs_pool)
+        let [ l:next_job; s:cmake4vim_jobs_pool  ] = s:cmake4vim_jobs_pool
         silent call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['err_fmt'])
     endif
 endfunction
@@ -50,14 +49,17 @@ endfunction
 function! s:vimClose(channel) abort
     let l:open_qf = get(s:cmake4vim_job, 'open_qf', 0)
 
-    if has_key( s:cmake4vim_job, 'job' )
-        if job_info(s:cmake4vim_job['job'])['exitval'] == 0
-            echon 'Success! ' . s:cmake4vim_job['cmd']
-        else
-            echon 'Failure! ' . s:cmake4vim_job['cmd']
-        endif
+    let l:ret_code = job_info(s:cmake4vim_job['job'])['exitval']
+    if l:ret_code == 0
+        echon 'Success! ' . s:cmake4vim_job['cmd']
+    else
+        echon 'Failure! ' . s:cmake4vim_job['cmd']
     endif
 
+    " Clean the job pool if exit code is not equal to 0
+    if l:ret_code != 0
+        let s:cmake4vim_jobs_pool = []
+    endif
     call s:createQuickFix()
 
     if l:open_qf == 0
@@ -87,6 +89,10 @@ function! s:nVimExit(job_id, data, event) abort
     call deletebufline( l:bufnr, 1 )
     call setbufvar(l:bufnr, '&modifiable', 0)
 
+    " Clean the job pool if exit code is not equal to 0
+    if a:data != 0
+        let s:cmake4vim_jobs_pool = []
+    endif
     call s:createQuickFix()
     if a:data != 0 || l:open_qf != 0
         copen
@@ -168,7 +174,6 @@ function! utils#exec#job#status() abort
 endfunction
 
 function! utils#exec#job#append(cmd, open_qf, err_fmt) abort
-    " if there is a job or if the buffer is open, abort
     if !empty(s:cmake4vim_job)
         let s:cmake4vim_jobs_pool += [
                     \ {

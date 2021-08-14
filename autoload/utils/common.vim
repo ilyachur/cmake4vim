@@ -17,7 +17,7 @@ function! s:add_noglob(cmd) abort
 endfunction
 " }}} Private functions "
 
-" Executes the command
+" Executes commands
 function! utils#common#executeCommands(cmds, open_result, ...) abort
     let l:errFormat = get(a:, 1, '')
 
