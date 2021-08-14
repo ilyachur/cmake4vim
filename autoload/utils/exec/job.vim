@@ -176,7 +176,7 @@ endfunction
 
 function! utils#exec#job#append(cmd, open_qf, err_fmt) abort
     " if there is a job or if the buffer is open, abort
-    if !empty(s:cmake4vim_job) || bufnr(s:cmake4vim_buf) != -1
+    if !empty(s:cmake4vim_job)
         let s:cmake4vim_jobs_pool += [
                     \ {
                         \ 'cmd': a:cmd,

@@ -100,5 +100,5 @@ Execute ([Job executor] Run test_app target with mask arguments with job executo
 
 Execute ([Job executor] Append job to empty pool):
     let ret = utils#exec#term#append('sleep 2', 1, '')
-    AssertNotEqual ret, 0
+    Assert ret != 0 && ret != -1, ret
     call WaitForJob()

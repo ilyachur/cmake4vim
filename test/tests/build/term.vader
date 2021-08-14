@@ -41,7 +41,7 @@ Execute ([Term executor] Run 2 terms at once):
 Execute ([Term executor] Append job to empty pool):
     if !has('win32')    " Skip for Windows
         let ret = utils#exec#term#append('sleep 2', 1, '')
-        AssertNotEqual ret, 0
+        Assert ret != 0 && ret != -1, ret
         call WaitForJob()
     endif
 
