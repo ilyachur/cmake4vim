@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # prepare environment
     current_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
     test_dir = os.path.join(current_dir, 'tests')
-    home_dir = os.path.join(current_dir, '/tmp')
+    home_dir = os.path.join(current_dir, 'tmp')
     if args.out_dir:
         out_dir = os.path.abspath(args.out_dir)
     else:
