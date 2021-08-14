@@ -214,14 +214,8 @@ Execute ([CMake targets] Only default build types have default values):
     AssertEqual g:cmake_variants[ 'custom-build' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
 
 Execute ([CMake targets] Get default build types):
-    " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
-        AssertEqual len(result), 4
-    endif
+    let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
+    AssertEqual len(result), 4
 
 Execute ([CMake targets] Check all targets for empty project):
     " enable tests for windows with last cmake

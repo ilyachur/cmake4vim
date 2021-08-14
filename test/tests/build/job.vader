@@ -25,16 +25,16 @@ Execute ([Job executor] Generate cmake project with default settings):
 Execute ([Job executor] Generate cmake project with default settings and build error target):
     if !has('win32')    " Skip for Windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        AssertEqual bufnr('cmake4vim_execute'), -1
+        AssertEqual bufnr('cmake4vim_execute'), -1, "There should be no cmake4vim_execute buffer"
         silent CMake
         call WaitForJob()
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent CMakeBuild incorrect_lib
         silent on
+        silent CMakeBuild incorrect_lib
         call WaitForJob()
         Assert HasQF() == 1
         silent call utils#exec#job#stop()
-        AssertEqual bufnr('cmake4vim_execute'), -1
+        AssertEqual bufnr('cmake4vim_execute'), -1, "There should be no cmake4vim_execute buffer"
     endif
 
 Execute ([Job executor] Check job cancel command without run):

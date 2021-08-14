@@ -1,5 +1,8 @@
 " Helpers {{{
 function! RemoveFile(file)
+    if empty(a:file) || !filewritable(fnameescape(a:file))
+        return
+    endif
     if has('win32')
         silent echo system("del /F /Q \"".a:file."\" >nul 2>&1")
     else
@@ -8,6 +11,9 @@ function! RemoveFile(file)
 endfunction
 
 function! RemoveDirectory(folder)
+    if empty(a:folder) || !filewritable(fnameescape(a:folder))
+        return
+    endif
     if has('win32')
         silent echo system(printf('rd /S /Q "%s" >nul 2>&1', a:folder))
     else
@@ -58,8 +64,8 @@ function! ResetPluginOptions()
     call utils#cmake#common#resetCache()
 endfunction
 
-function! WaitForJob()
-    let max_wait = 100
+function! WaitForJob() abort
+    let max_wait = 10
     while 1
         let l:job = utils#common#executeStatus()
         if empty(l:job)
@@ -69,7 +75,7 @@ function! WaitForJob()
         if max_wait == 0
             throw json_encode(l:job) . ' job did not finish.'
         endif
-        execute 'sleep' 100.'m'
+        1sleep
     endwhile
 endfunction
 
