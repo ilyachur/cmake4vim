@@ -79,10 +79,6 @@ function! s:nVimOut(job_id, data, event) abort
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
-    if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
-        return
-    endif
-
     let l:open_qf = s:cmake4vim_job['open_qf']
 
     " using only appendbufline results in an empty first line
@@ -125,14 +121,11 @@ function! utils#exec#job#stop() abort
         return
     endif
     let l:job = s:cmake4vim_job['job']
-    try
-        if has('nvim')
-            call jobstop(l:job)
-        else
-            call job_stop(l:job)
-        endif
-    catch
-    endtry
+    if has('nvim')
+        call jobstop(l:job)
+    else
+        call job_stop(l:job)
+    endif
     let s:cmake4vim_jobs_pool = []
     call s:createQuickFix()
     copen
@@ -176,15 +169,15 @@ endfunction
 
 function! utils#exec#job#append(cmd, open_qf, err_fmt) abort
     " if there is a job or if the buffer is open, abort
-    if empty(s:cmake4vim_job)
-        return utils#exec#job#run(a:cmd, a:open_qf, a:err_fmt)
+    if !empty(s:cmake4vim_job)
+        let s:cmake4vim_jobs_pool += [
+                    \ {
+                        \ 'cmd': a:cmd,
+                        \ 'open_qf': a:open_qf,
+                        \ 'err_fmt': a:err_fmt
+                    \ }
+                \ ]
+        return 0
     endif
-    let s:cmake4vim_jobs_pool += [
-                \ {
-                    \ 'cmd': a:cmd,
-                    \ 'open_qf': a:open_qf,
-                    \ 'err_fmt': a:err_fmt
-                \ }
-            \ ]
-    return 0
+    return utils#exec#job#run(a:cmd, a:open_qf, a:err_fmt)
 endfunction
