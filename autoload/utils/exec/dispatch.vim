@@ -18,5 +18,6 @@ function! utils#exec#dispatch#run(cmd, open_qf, errFormat) abort
     if a:errFormat !=# ''
         let &l:errorformat = l:old_error
     endif
+    return 0
 endfunction
 

@@ -4,7 +4,7 @@
 " Private functions {{{ "
 let s:cmake4vim_job = {}
 let s:cmake4vim_buf = 'cmake4vim_execute'
-let s:err_fmt = ''
+let s:cmake4vim_jobs_pool = []
 
 function! s:closeBuffer() abort
     let l:bufnr = bufnr(s:cmake4vim_buf)
@@ -21,36 +21,46 @@ function! s:closeBuffer() abort
 endfunction
 
 function! s:createQuickFix() abort
+    " just to be sure all messages were processed
+    sleep 100m
     let l:bufnr = bufnr(s:cmake4vim_buf)
     if l:bufnr == -1
         return
     endif
     let l:old_error = &errorformat
-    if s:err_fmt !=# ''
-        let &errorformat = s:err_fmt
+    if s:cmake4vim_job['err_fmt'] !=# ''
+        let &errorformat = s:cmake4vim_job['err_fmt']
     endif
+
     silent execute 'cgetbuffer ' . l:bufnr
     silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
-    if s:err_fmt !=# ''
+    if s:cmake4vim_job['err_fmt'] !=# ''
         let &errorformat = l:old_error
     endif
     " Remove cmake4vim job
     let s:cmake4vim_job = {}
+    call s:closeBuffer()
+    if !empty(s:cmake4vim_jobs_pool)
+        let [ l:next_job; s:cmake4vim_jobs_pool  ] = s:cmake4vim_jobs_pool
+        silent call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['err_fmt'])
+    endif
 endfunction
 
 function! s:vimClose(channel) abort
     let l:open_qf = get(s:cmake4vim_job, 'open_qf', 0)
 
-    if has_key( s:cmake4vim_job, 'job' )
-        if job_info(s:cmake4vim_job['job'])['exitval'] == 0
-            echon 'Success! ' . s:cmake4vim_job['cmd']
-        else
-            echon 'Failure! ' . s:cmake4vim_job['cmd']
-        endif
+    let l:ret_code = job_info(s:cmake4vim_job['job'])['exitval']
+    if l:ret_code == 0
+        echon 'Success! ' . s:cmake4vim_job['cmd']
+    else
+        echon 'Failure! ' . s:cmake4vim_job['cmd']
     endif
 
+    " Clean the job pool if exit code is not equal to 0
+    if l:ret_code != 0
+        let s:cmake4vim_jobs_pool = []
+    endif
     call s:createQuickFix()
-    call s:closeBuffer()
 
     if l:open_qf == 0
         silent cwindow
@@ -71,14 +81,7 @@ function! s:nVimOut(job_id, data, event) abort
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
-    if empty(s:cmake4vim_job) || a:job_id != s:cmake4vim_job['job']
-        return
-    endif
-
     let l:open_qf = s:cmake4vim_job['open_qf']
-
-    " just to be sure all messages were processed
-    sleep 100m
 
     " using only appendbufline results in an empty first line
     let l:bufnr = bufnr(s:cmake4vim_buf)
@@ -86,8 +89,11 @@ function! s:nVimExit(job_id, data, event) abort
     call deletebufline( l:bufnr, 1 )
     call setbufvar(l:bufnr, '&modifiable', 0)
 
+    " Clean the job pool if exit code is not equal to 0
+    if a:data != 0
+        let s:cmake4vim_jobs_pool = []
+    endif
     call s:createQuickFix()
-    call s:closeBuffer()
     if a:data != 0 || l:open_qf != 0
         copen
     endif
@@ -121,16 +127,13 @@ function! utils#exec#job#stop() abort
         return
     endif
     let l:job = s:cmake4vim_job['job']
-    try
-        if has('nvim')
-            call jobstop(l:job)
-        else
-            call job_stop(l:job)
-        endif
-    catch
-    endtry
+    if has('nvim')
+        call jobstop(l:job)
+    else
+        call job_stop(l:job)
+    endif
+    let s:cmake4vim_jobs_pool = []
     call s:createQuickFix()
-    call s:closeBuffer()
     copen
     call utils#common#Warning('Job is cancelled!')
 endfunction
@@ -142,7 +145,7 @@ function! utils#exec#job#run(cmd, open_qf, err_fmt) abort
         return -1
     endif
     let l:outbufnr = s:createJobBuf()
-    let s:err_fmt = a:err_fmt
+    let s:cmake4vim_job = { 'cmd': a:cmd, 'open_qf': a:open_qf, 'err_fmt': a:err_fmt }
     if has('nvim')
         let l:job = jobstart(a:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
@@ -159,7 +162,7 @@ function! utils#exec#job#run(cmd, open_qf, err_fmt) abort
                     \ 'err_modifiable' : 0,
                     \ })
     endif
-    let s:cmake4vim_job = { 'job': l:job, 'cmd': a:cmd, 'open_qf': a:open_qf }
+   let s:cmake4vim_job['job'] = l:job
     if !has('nvim')
        let s:cmake4vim_job['channel'] = job_getchannel(l:job)
     endif
@@ -168,4 +171,18 @@ endfunction
 
 function! utils#exec#job#status() abort
     return s:cmake4vim_job
+endfunction
+
+function! utils#exec#job#append(cmd, open_qf, err_fmt) abort
+    if !empty(s:cmake4vim_job)
+        let s:cmake4vim_jobs_pool += [
+                    \ {
+                        \ 'cmd': a:cmd,
+                        \ 'open_qf': a:open_qf,
+                        \ 'err_fmt': a:err_fmt
+                    \ }
+                \ ]
+        return 0
+    endif
+    return utils#exec#job#run(a:cmd, a:open_qf, a:err_fmt)
 endfunction
