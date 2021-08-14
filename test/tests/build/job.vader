@@ -100,5 +100,9 @@ Execute ([Job executor] Run test_app target with mask arguments with job executo
 
 Execute ([Job executor] Append job to empty pool):
     let ret = utils#exec#job#append('sleep 2', 1, '')
-    Assert ret != 0 && ret != -1, ret
+    if has('nvim')
+        Assert ret != 0 && ret != -1, ret
+    else
+        Assert job_status(ret) ==# 'run'
+    endif
     call WaitForJob()
