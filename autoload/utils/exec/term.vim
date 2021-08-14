@@ -152,7 +152,7 @@ function! utils#exec#term#append(cmd, open_qf, err_fmt) abort
                         \ 'err_fmt': a:err_fmt
                     \ }
                 \]
-        return 0
+        return
     endif
-    return utils#exec#term#run(a:cmd, a:open_qf, a:err_fmt)
+    call utils#exec#term#run(a:cmd, a:open_qf, a:err_fmt)
 endfunction

@@ -38,13 +38,6 @@ Execute ([Term executor] Run 2 terms at once):
         call WaitForJob()
     endif
 
-Execute ([Term executor] Append job to empty pool):
-    if !has('win32')    " Skip for Windows
-        let ret = utils#exec#term#append('sleep 2', 1, '')
-        AssertNotEqual ret, 0
-        call WaitForJob()
-    endif
-
 Execute ([Term executor] Run test_app target with mask arguments with term executor):
     if !has('win32')    " Skip for Windows
     if utils#cmake#verNewerOrEq([3, 14])
