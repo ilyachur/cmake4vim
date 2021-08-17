@@ -232,7 +232,7 @@ You could add such entries to your `g:cmake_kits` and override `CMakeSelectKit` 
 Add this to the `after` directory, e.g. `~/.vim/after/plugin/cmake.vim`:
 ```
 function! s:customSelectKit(name) abort
-    let l:loaded_kits = utils#cmake#getLoadedCMakeKits()
+    let l:loaded_kits = utils#cmake#kits#getCMakeKits()
     if !has_key( l:loaded_kits, a:name )
         call utils#common#Warning(printf("CMake kit '%s' not found", a:name))
         return
@@ -251,7 +251,7 @@ endfunction
 function! s:FZFSelectKit() abort
     if exists(':FZF')
         return fzf#run({
-                    \ 'source': sort( keys( utils#cmake#getLoadedCMakeKits() ), 'i' ),
+                    \ 'source': sort( keys( utils#cmake#kits#getCMakeKits() ), 'i' ),
                     \ 'options': '+m -n 1 --prompt CMakeKit\>\ ',
                     \ 'down':    '30%',
                     \ 'sink':    function('s:customSelectKit')})

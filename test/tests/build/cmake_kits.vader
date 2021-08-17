@@ -14,7 +14,6 @@ Before:
                 \    "environment_variables" : { "MY_CUSTOM_VARIABLE" : "15", "MY_OTHER_CUSTOM_VARIABLE" : "YES" }
                 \},
                 \ "Second" : { "compilers" : { "C": "", "CXX": "" }, "cmake_usr_args" : { 'Flag' : 'ON' } } }
-    silent call utils#cmake#reloadCMakeKits()
     let g:cmake_build_path_pattern = []
     " Use on in order to close all windows and avoid E36 error
     silent on
@@ -166,16 +165,17 @@ Execute ([CMake Kits] Find CMakeKit config in current folder):
     Assert !filereadable('.cmake-kits.json'), 'File already exists'
     silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
     Assert filereadable('.cmake-kits.json'), 'File was not created'
-    let config = utils#cmake#kits#findCMakeKitsConfig()
-    Assert !empty(config), 'Config file not found'
+    let kits = utils#cmake#kits#getCMakeKits()
+    Assert has_key(kits, 'randomKey'), 'Kits not loaded'
     silent call RemoveFile(g:cmake_kits_global_path)
 
 Execute ([CMake Kits] Find CMakeKit specified by g:cmake_kits_global_path):
     let g:cmake_kits_global_path = '.global-cmake-kits.json'
     Assert !filereadable(g:cmake_kits_global_path), 'File already exists'
+    Assert !filereadable('.cmake-kits.json'), 'File already exists'
     silent call writefile([json_encode({ 'randomKey' : 5 })], g:cmake_kits_global_path)
     Assert filereadable(g:cmake_kits_global_path), 'File was not created'
-    Assert !empty(utils#cmake#kits#findCMakeKitsConfig()), 'Config file not found'
+    Assert has_key(utils#cmake#kits#getCMakeKits(), 'randomKey'), 'Kits not loaded'
     silent call RemoveFile(g:cmake_kits_global_path)
 
 Execute ([CMake Kits] CMakeKit config in current folder has priority over g:cmake_kits_global_path):
@@ -188,18 +188,17 @@ Execute ([CMake Kits] CMakeKit config in current folder has priority over g:cmak
     silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
     Assert filereadable('.cmake-kits.json'), 'File was not created'
 
-    let config = utils#cmake#kits#getCMakeKits()
-    Assert !empty(config), 'Config is empty'
-    AssertEqual config['randomKey'], 5
+    let kits = utils#cmake#kits#getCMakeKits()
+    Assert !empty(kits), 'Kits not loaded'
+    AssertEqual kits['randomKey'], 5
     silent call RemoveFile(g:cmake_kits_global_path)
 
-Execute ([CMake Kits] Fail to find CMakeKit):
+Execute ([CMake Kits] Fail to find CMakeKit config):
     Assert !filereadable('.cmake-kits.json')
     AssertEqual g:cmake_kits_global_path, ''
-    Assert empty(utils#cmake#kits#findCMakeKitsConfig()), 'Found config file'
-
-Execute ([CMake Kits] Read empty path):
-    Assert empty(utils#cmake#kits#readCMakeKits(''))
+    let kit = utils#cmake#kits#getCMakeKits()
+    Assert has_key( kit, 'First'  ), 'Kit "First"  not found'
+    Assert has_key( kit, 'Second' ), 'Kit "Second" not found'
 
 Execute ([CMake Kits] Read valid CMakeKit config without predefined kits):
     unlet g:cmake_kits
@@ -227,7 +226,7 @@ Execute ([CMake Kits] Read non-existant CMakeKit config with predefined kits):
     Assert has_key(cmake_kits_from_config, 'Second')
 
 Execute ([CMake Kits] Reload cmake kits):
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
     " it loaded g:cmake_kits
     Assert len(keys(loaded_kits)) == 2
 
@@ -236,46 +235,70 @@ Execute ([CMake Kits] Reload cmake kits):
     Assert filereadable('.cmake-kits.json'), 'File was not created'
     sleep 2
 
-    silent call utils#cmake#reloadCMakeKits()
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
     " it loaded .cmake-kits.json
     Assert len(keys(loaded_kits)) == 1
     Assert has_key(loaded_kits, 'randomKey'), "Missing key"
 
     silent call writefile([json_encode({ 'randomKey' : 5 , 'secondKey' : 10})], '.cmake-kits.json')
     sleep 2
-    silent call utils#cmake#reloadCMakeKits()
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
     " it loaded .cmake-kits.json
     Assert len(keys(loaded_kits)) == 2
     Assert has_key(loaded_kits, 'randomKey')
     Assert has_key(loaded_kits, 'secondKey')
 
-Execute ([CMake Kits] Read invalid cmake-kits.json):
-    call utils#cmake#common#resetCache()
-
-    Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile(['{"randomKey":5, error}'], '.cmake-kits.json')
-    Assert filereadable('.cmake-kits.json'), 'File was not created'
-
-    Assert empty(utils#cmake#kits#readCMakeKits( '.cmake-kits.json' )), 'Invalid json read successfully'
-
-    let g:cmake_kits = {}
-    call utils#cmake#common#resetCache()
-    Assert empty(utils#cmake#getLoadedCMakeKits()), 's:loaded_cmake_kits is not empty'
-
-Execute ([CMake Kits] Reload cmake kits):
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
-    " it loaded g:cmake_kits
+Execute ([CMake Kits] Test kits caching):
+    let g:cmake_kits_global_path = '.global-cmake-kits.json'
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
+    " it should load g:cmake_kits
     Assert len(keys(loaded_kits)) == 2
+    Assert has_key( loaded_kits, 'First' ) && has_key( loaded_kits, 'Second' ), 'g:cmake_kits were not loaded'
+
+    Assert !filereadable(g:cmake_kits_global_path), 'File already exists'
+    silent call writefile([json_encode({ 'global-kit' : 5 })], g:cmake_kits_global_path)
+    Assert filereadable(g:cmake_kits_global_path), 'File was not created'
 
     Assert !filereadable('.cmake-kits.json'), 'File already exists'
-    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
+    silent call writefile([json_encode({ 'local-kit' : 5 })], '.cmake-kits.json')
     Assert filereadable('.cmake-kits.json'), 'File was not created'
+
     sleep 2
 
-    silent CMake
-    let loaded_kits = utils#cmake#getLoadedCMakeKits()
-    " it loaded .cmake-kits.json
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
+    " it should load .cmake-kits.json
     AssertEqual 1, len(keys(loaded_kits))
-    Assert has_key(loaded_kits, 'randomKey'), "Missing key"
+    Assert has_key(loaded_kits, 'local-kit'), "Missing key"
+
+    sleep 2
+    " introduce an error into the json config
+    silent call writefile(["error"], '.cmake-kits.json', 'a')
+
+    " there should be an error in the messages
+    redir => cmake_kits_error
+    call utils#cmake#kits#getCMakeKits()
+    redir END
+
+    Assert cmake_kits_error =~# 'Invalid config', cmake_kits_error
+
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
+    " it should fall back to global cmake-kits.json
+    AssertEqual 1, len(keys(loaded_kits))
+    Assert has_key(loaded_kits, 'global-kit'), "Missing key"
+
+    sleep 2
+    " fix the error
+    silent call writefile([json_encode({ 'local-kit' : 5 })], '.cmake-kits.json')
+
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
+    " it should read .cmake-kits.json again
+    AssertEqual 1, len(keys(loaded_kits))
+    Assert has_key(loaded_kits, 'local-kit'), "Missing key"
+
+    silent call RemoveFile(".cmake-kits.json")
+    silent call RemoveFile(g:cmake_kits_global_path)
+
+    let loaded_kits = utils#cmake#kits#getCMakeKits()
+    " now it should fall back to g:cmake_kits
+    AssertEqual 2, len(keys(loaded_kits))
+    Assert has_key( loaded_kits, 'First' ) && has_key( loaded_kits, 'Second' ), 'g:cmake_kits were not loaded'

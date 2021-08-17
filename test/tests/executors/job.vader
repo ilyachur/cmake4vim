@@ -105,7 +105,7 @@ Execute ([Job executor] Append job to empty pool):
     if has('nvim')
         Assert ret != 0 && ret != -1, ret
     else
-        AssertEqual type( ret ), v:t_job
+        AssertEqual type(ret), v:t_job
         Assert job_status(ret) ==# 'run'
     endif
     call WaitForJob()

@@ -38,7 +38,7 @@ function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
 endfunction
 
 function! cmake4vim#CompleteKit(arg_lead, cmd_line, cursor_pos) abort
-    return join(sort(keys(utils#cmake#getLoadedCMakeKits()), 'i'), "\n")
+    return join(sort(keys(utils#cmake#kits#getCMakeKits()), 'i'), "\n")
 endfunction
 
 " Method remove build directory and reset the cmake cache
@@ -61,9 +61,6 @@ function! cmake4vim#GenerateCMake(...) abort
 
     " Prepare requests to CMake system
     call utils#cmake#common#makeRequests(l:build_dir)
-
-    " reload CMakeKits if needed
-    call utils#cmake#reloadCMakeKits()
 
     " Generates a command for CMake
     let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand(join(a:000))
@@ -186,7 +183,7 @@ endfunction
 
 " Functions allows to switch between cmake kits
 function! cmake4vim#SelectKit(name) abort
-    if !has_key( utils#cmake#getLoadedCMakeKits(), a:name )
+    if !has_key( utils#cmake#kits#getCMakeKits(), a:name )
         call utils#common#Warning(printf("CMake kit '%s' not found", a:name))
         return
     endif
