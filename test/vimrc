@@ -74,7 +74,7 @@ function! WaitForJob() abort
         let max_wait -= 1
         if max_wait == 0
             Log 'Job did not finish: ' . string(l:job)
-            throw "Test failure"
+            throw 'Test failure'
         endif
         1sleep
     endwhile
