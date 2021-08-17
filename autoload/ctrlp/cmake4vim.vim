@@ -52,7 +52,7 @@ function! ctrlp#cmake4vim#initBuildTypes() abort
 endfunction
 
 function! ctrlp#cmake4vim#initKits() abort
-    return keys( utils#cmake#getLoadedCMakeKits() )
+    return keys( utils#cmake#kits#getCMakeKits() )
 endfunction
 
 function! ctrlp#cmake4vim#acceptTarget(mode, str) abort
