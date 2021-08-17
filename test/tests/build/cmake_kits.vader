@@ -263,3 +263,19 @@ Execute ([CMake Kits] Read invalid cmake-kits.json):
     let g:cmake_kits = {}
     call utils#cmake#common#resetCache()
     Assert empty(utils#cmake#getLoadedCMakeKits()), 's:loaded_cmake_kits is not empty'
+
+Execute ([CMake Kits] Reload cmake kits):
+    let loaded_kits = utils#cmake#getLoadedCMakeKits()
+    " it loaded g:cmake_kits
+    Assert len(keys(loaded_kits)) == 2
+
+    Assert !filereadable('.cmake-kits.json'), 'File already exists'
+    silent call writefile([json_encode({ 'randomKey' : 5 })], '.cmake-kits.json')
+    Assert filereadable('.cmake-kits.json'), 'File was not created'
+    sleep 2
+
+    silent CMake
+    let loaded_kits = utils#cmake#getLoadedCMakeKits()
+    " it loaded .cmake-kits.json
+    AssertEqual 1, len(keys(loaded_kits))
+    Assert has_key(loaded_kits, 'randomKey'), "Missing key"

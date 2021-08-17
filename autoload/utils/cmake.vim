@@ -92,9 +92,13 @@ endfunction
 "
 function! utils#cmake#getLoadedCMakeKits() abort
     if empty(s:loaded_cmake_kits)
-        return utils#cmake#kits#getCMakeKits()
+        let s:loaded_cmake_kits = utils#cmake#kits#getCMakeKits()
     endif
     return s:loaded_cmake_kits
+endfunction
+
+function! utils#cmake#setLoadedCMakeKits( kits ) abort
+    let s:loaded_cmake_kits = a:kits
 endfunction
 
 function! utils#cmake#setEnv(name) abort
@@ -394,4 +398,5 @@ function! utils#cmake#resetCache() abort
     let s:populated_build_types = []
     let s:cached_usr_args       = {}
     let s:loaded_cmake_kits     = utils#cmake#kits#getCMakeKits()
+    call utils#cmake#kits#resetCMakeKitsCache()
 endfunction
