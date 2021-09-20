@@ -194,7 +194,7 @@ function! cmake4vim#SelectKit(name) abort
 endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
-    if empty( 'g:cmake_build_target' )
+    if empty( g:cmake_build_target )
         call utils#common#Warning('Please select target first!')
         return
     endif
