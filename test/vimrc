@@ -65,7 +65,7 @@ function! ResetPluginOptions()
 endfunction
 
 function! WaitForJob() abort
-    let max_wait = 25
+    let max_wait = 10
     while 1
         let l:job = utils#common#executeStatus()
         if empty(l:job)
@@ -73,7 +73,7 @@ function! WaitForJob() abort
         endif
         let max_wait -= 1
         if max_wait == 0
-            throw 'Job did not finish: ' . string(l:job)
+            throw json_encode(l:job) . ' job did not finish.'
         endif
         1sleep
     endwhile
