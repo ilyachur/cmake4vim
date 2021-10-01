@@ -52,7 +52,7 @@ if __name__ == '__main__':
         if args.profile:
             os.environ['VIM_PROFILE_FILE'] = os.path.join(home_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.txt')
         remove_test_files(current_dir)
-        res = subprocess.run([args.editor, '-Es', '-Nu', 'vimrc', '+Vader! ' + test_path])
+        res = subprocess.run([args.editor, '-Es', '-Nu', 'vimrc', '+Vader! -q ' + test_path])
         remove_test_files(current_dir)
 
         if args.profile:
