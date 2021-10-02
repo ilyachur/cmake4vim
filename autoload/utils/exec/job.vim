@@ -121,6 +121,10 @@ function! s:createJobBuf() abort
 endfunction
 " }}} Private functions "
 
+function! utils#exec#job#getJobsPool() abort
+    return s:cmake4vim_jobs_pool
+endfunction
+
 function! utils#exec#job#stop() abort
     if empty(s:cmake4vim_job)
         call s:closeBuffer()

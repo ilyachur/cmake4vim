@@ -99,10 +99,13 @@ Execute ([Job executor] Run test_app target with mask arguments with job executo
     AssertEqual '--gtest_filter=Test* F1', output[0]['text']
 
 Execute ([Job executor] Append job to empty pool):
+    Assert empty( utils#exec#job#getJobsPool() ), 'Jobs pool not empty!'
+
     let ret = utils#exec#job#append('sleep 2', 1, '')
     if has('nvim')
         Assert ret != 0 && ret != -1, ret
     else
+        AssertEqual type(ret), v:t_job
         Assert job_status(ret) ==# 'run'
     endif
     call WaitForJob()

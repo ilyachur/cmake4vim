@@ -4,7 +4,6 @@
 " Private functions {{{ "
 let s:populated_build_types = []
 let s:cached_usr_args       = {}
-let s:loaded_cmake_kits     = utils#cmake#kits#getCMakeKits()
 
 function! s:detectCMakeBuildType() abort
     if g:cmake_build_type !=# ''
@@ -90,22 +89,15 @@ function! s:populateDefaultCMakeVariants() abort
 endfunction
 " }}} Private functions "
 "
-function! utils#cmake#getLoadedCMakeKits() abort
-    if empty(s:loaded_cmake_kits)
-        return utils#cmake#kits#getCMakeKits()
-    endif
-    return s:loaded_cmake_kits
-endfunction
-
 function! utils#cmake#setEnv(name) abort
-    let l:cmake_kit = get( s:loaded_cmake_kits, a:name, {} )
+    let l:cmake_kit = get( utils#cmake#kits#getCMakeKits(), a:name, {} )
     for [key, val] in items( get( l:cmake_kit, 'environment_variables', {} ) )
         execute printf('let $%s="%s"', key, val)
     endfor
 endfunction
 
 function! utils#cmake#unsetEnv(name) abort
-    let l:cmake_kit = get( s:loaded_cmake_kits, a:name, {} )
+    let l:cmake_kit = get( utils#cmake#kits#getCMakeKits(), a:name, {} )
     for key in keys( get( l:cmake_kit, 'environment_variables', {} ) )
         execute printf('unlet $%s', key)
     endfor
@@ -250,9 +242,9 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     " * project generator
     " * toolchain file
     " * compilers
-    if g:cmake_selected_kit !=# '' && has_key( s:loaded_cmake_kits, g:cmake_selected_kit )
+    if g:cmake_selected_kit !=# '' && has_key( utils#cmake#kits#getCMakeKits(), g:cmake_selected_kit )
         silent call utils#cmake#setEnv( g:cmake_selected_kit ) " just in case the user has set the variable manually
-        let l:active_kit = s:loaded_cmake_kits[ g:cmake_selected_kit ]
+        let l:active_kit = utils#cmake#kits#getCMakeKits()[ g:cmake_selected_kit ]
         let l:cmake_project_generator = get( l:active_kit, 'generator'     , l:cmake_project_generator )
         let l:cmake_toolchain_file    = get( l:active_kit, 'toolchain_file', l:cmake_toolchain_file    )
         let l:cmake_kit_usr_args      = [ utils#cmake#joinUserArgs( get( l:active_kit, 'cmake_usr_args', {} ) ) ]
@@ -386,12 +378,8 @@ function! utils#cmake#getBinaryPath() abort
     return l:exec_path
 endfunction
 
-function! utils#cmake#reloadCMakeKits() abort
-    let s:loaded_cmake_kits = utils#cmake#kits#getCMakeKits()
-endfunction
-
 function! utils#cmake#resetCache() abort
+    call utils#cmake#kits#resetCMakeKitsCache()
     let s:populated_build_types = []
     let s:cached_usr_args       = {}
-    let s:loaded_cmake_kits     = utils#cmake#kits#getCMakeKits()
 endfunction
