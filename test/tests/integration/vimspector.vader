@@ -95,7 +95,7 @@ Execute ([Vimspector] Change correct vimspector config to incorrect data):
         Assert empty(config), "Config should be empty!"
     endif
 
-Execute ([Vimspector] Run test_app target and change vimspector config):
+Execute ([Vimspector] Run test_app target and change vimspector config with default config):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget test_app
@@ -113,6 +113,54 @@ Execute ([Vimspector] Run test_app target and change vimspector config):
         else
             AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
         endif
+        Assert has_key(config['configurations']['test_app']['configuration'], 'type'), "Test_app configuration should have type"
+        AssertEqual config['configurations']['test_app']['configuration']['type'], ''
+        Assert has_key(config['configurations']['test_app']['configuration'], 'request'), "Test_app configuration should have request"
+        AssertEqual config['configurations']['test_app']['configuration']['request'], 'launch'
+        Assert has_key(config['configurations']['test_app'], 'adapter'), "Test_app configuration should have adapter"
+        AssertEqual config['configurations']['test_app']['adapter'], ''
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 3
+        AssertEqual config['configurations']['test_app']['configuration']['args'], ['1', '2', '3']
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo 1 2 3 F1', 1)
+    endif
+
+Execute ([Vimspector] Run test_app target and change vimspector config with custom config):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        let g:cmake_vimspector_default_configuration = {
+                    \ 'adapter': 'CodeLLDB',
+                    \ 'configuration': {
+                        \ 'type': 'lldb',
+                        \ 'request': 'launch',
+                        \ 'cwd': '${workspaceRoot}',
+                        \ 'Mimode': '',
+                        \ 'args': [],
+                        \ 'program': ''
+                        \ }
+                    \ }
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        silent CMakeRun 1 2 3
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        Assert has_key(config['configurations']['test_app']['configuration'], 'program'), "Test_app configuration should have program"
+        if !has('win32')
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
+        else
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+        endif
+        Assert has_key(config['configurations']['test_app']['configuration'], 'type'), "Test_app configuration should have type"
+        AssertEqual config['configurations']['test_app']['configuration']['type'], 'lldb'
+        Assert has_key(config['configurations']['test_app']['configuration'], 'request'), "Test_app configuration should have request"
+        AssertEqual config['configurations']['test_app']['configuration']['request'], 'launch'
+        Assert has_key(config['configurations']['test_app'], 'adapter'), "Test_app configuration should have adapter"
+        AssertEqual config['configurations']['test_app']['adapter'], 'CodeLLDB'
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 3
         AssertEqual config['configurations']['test_app']['configuration']['args'], ['1', '2', '3']
     else

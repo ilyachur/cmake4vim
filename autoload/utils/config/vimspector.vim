@@ -40,27 +40,11 @@ function! s:generateEmptyVimspectorConfig() abort
     call s:writeJson(l:config)
 endfunction
 
-function! s:createNewTarget() abort
-    let l:configuration = {}
-    let l:configuration['type'] = ''
-    let l:configuration['request'] = 'launch'
-    let l:configuration['cwd'] = '${workspaceRoot}'
-    let l:configuration['Mimode'] = ''
-    let l:configuration['args'] = []
-    let l:configuration['program'] = ''
-
-    let l:config = {}
-    let l:config['adapter'] = ''
-    let l:config['configuration'] = l:configuration
-
-    return l:config
-endfunction
-
 function! s:updateConfig(vimspector_config, targets_config) abort
     let l:res_config = a:vimspector_config
     for [target, config] in items(a:targets_config)
         if !has_key(l:res_config, target)
-            let l:res_config[target] = s:createNewTarget()
+            let l:res_config[target] = g:cmake_vimspector_default_configuration
         endif
         " Each target should have configuration section
         if !has_key(l:res_config[target], 'configuration') || !has_key(config, 'app') || !has_key(config, 'args')
