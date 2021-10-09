@@ -254,3 +254,13 @@ Execute ([Vimspector] Read vimspector config containing backslashes):
             AssertEqual trim(readfile('.vimspector.json')[32]), '"--gtest_filter=\"Hello\""'
         endif
     endif
+
+Execute ([Vimspector] Run all target and check vimspector config):
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+        silent CMake
+        silent CMakeSelectTarget all
+        silent CMakeBuild
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        silent CMakeRun 1 2 3
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+    endif
