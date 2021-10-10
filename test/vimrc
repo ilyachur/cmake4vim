@@ -61,6 +61,17 @@ function! ResetPluginOptions()
     let g:cmake_cxx_compiler=''
     let g:cmake_c_compiler=''
     let g:cmake_toolchain_file=''
+    let g:cmake_vimspector_default_configuration = {
+                \ 'adapter': '',
+                \ 'configuration': {
+                    \ 'type': '',
+                    \ 'request': 'launch',
+                    \ 'cwd': '${workspaceRoot}',
+                    \ 'Mimode': '',
+                    \ 'args': [],
+                    \ 'program': ''
+                    \ }
+                \ }
     call utils#cmake#common#resetCache()
 endfunction
 

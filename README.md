@@ -105,6 +105,20 @@ The options below allow to change plugin behavior.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`g:cmake_vimspector_default_configuration`** is a default configuration for new vimspector target. Default is:
+ ```
+    let g:cmake_vimspector_default_configuration = {
+                \ 'adapter': '',
+                \ 'configuration': {
+                    \ 'type': '',
+                    \ 'request': 'launch',
+                    \ 'cwd': '${workspaceRoot}',
+                    \ 'Mimode': '',
+                    \ 'args': [],
+                    \ 'program': ''
+                    \ }
+                \ }
+ ```
  - **`g:cmake_build_executor`** allows to force set the build executor. Default is empty. Available values are:
     - 'job' uses job to asynchronous build
     - 'term' uses terminal to asynchronous build *Experimental*

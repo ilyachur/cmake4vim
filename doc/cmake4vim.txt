@@ -149,6 +149,10 @@ g:cmake_vimspector_support          enables support of vimspector config.
                                     arguments for the selected target in
                                     vimspector config.
 
+g:cmake_vimspector_default_configuration
+                                    configures the default vimspector
+                                    configuration for new target
+
 g:cmake_variants                    enables predefined cmake build variants
                                     in the form of a dictionary.
                                     It is populated by default CMake

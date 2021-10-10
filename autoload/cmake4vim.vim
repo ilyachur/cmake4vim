@@ -208,9 +208,9 @@ function! cmake4vim#RunTarget(bang, ...) abort
     let l:build_command = cmake4vim#SelectTarget(g:cmake_build_target)
     let l:exec_path = utils#cmake#getBinaryPath()
     let l:conf = { g:cmake_build_target : { 'app': l:exec_path, 'args': l:args } }
-    call utils#config#vimspector#updateConfig(l:conf)
     if strlen(l:exec_path)
         call utils#common#executeCommands([l:build_command, join([utils#fs#fnameescape(l:exec_path)] + l:args, ' ')], 1)
+        call utils#config#vimspector#updateConfig(l:conf)
     else
         let v:errmsg = 'Executable "' . g:cmake_build_target . '" was not found'
         call utils#common#Warning(v:errmsg)

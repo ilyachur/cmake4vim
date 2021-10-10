@@ -21,6 +21,17 @@ let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1    
 let g:cmake_compile_commands      = get(g:, 'cmake_compile_commands'     , 0             )
 let g:cmake_compile_commands_link = get(g:, 'cmake_compile_commands_link', ''            )
 let g:cmake_vimspector_support    = get(g:, 'cmake_vimspector_support'   , 0             )
+let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default_configuration', {
+            \ 'adapter': '',
+            \ 'configuration': {
+                \ 'type': '',
+                \ 'request': 'launch',
+                \ 'cwd': '${workspaceRoot}',
+                \ 'Mimode': '',
+                \ 'args': [],
+                \ 'program': ''
+                \ }
+            \ })
 
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
