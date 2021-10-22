@@ -116,3 +116,94 @@ Execute ([Ninja] Update g:cmake_executable option):
         AssertNotEqual stridx(genCommand, 'custom_make'), -1, genCommand
         AssertNotEqual stridx(buildCommand, 'custom_make'), -1, buildCommand
     endif
+
+Execute ([Ninja] Build single unit with build in source):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        CMakeCompileSource app/main.cpp
+        Assert filereadable("cmake-build-Release/app/CMakeFiles/test_app.dir/main.cpp.o"), "Object file is not created"
+    endif
+
+Execute ([Ninja] Build single unit with build in source, with spaces):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        CMakeCompileSource app/folder with spaces/test.cpp
+        Assert filereadable("cmake-build-Release/app/CMakeFiles/PathWithSpaces.dir/folder_with_spaces/test.cpp.o"), "Object file is not created"
+    endif
+
+Execute ([Ninja] Build single unit with build out of source):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        " this is only tested on UNIX so /tmp/ certainly exists
+        let g:cmake_build_path_pattern = [ '/tmp/Release', '' ]
+        Assert !isdirectory("/tmp/Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("/tmp/Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("/tmp/Release/build.ninja"), "build.ninja should be generated"
+        CMakeCompileSource app/main.cpp
+        Assert filereadable("/tmp/Release/app/CMakeFiles/test_app.dir/main.cpp.o"), "Object file is not created"
+        call RemoveDirectory("/tmp/Release")
+    endif
+
+Execute ([Ninja] Build single unit without build folder):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        redir => error_message
+        CMakeCompileSource app/main.cpp
+        redir END
+        AssertEqual "\nCMake project was not found!", error_message
+    endif
+
+Execute ([Ninja] Build single unit without CMake info):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        call RemoveFile("cmake-build-Release/CMakeCache.txt")
+        redir => error_message
+        CMakeCompileSource app/main.cpp
+        redir END
+        AssertEqual "\nCMake cache was not found!", error_message
+    endif
+
+Execute ([Ninja] Build non-existant source file):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        redir => error_message
+        silent CMakeCompileSource nonexistant-filename
+        redir END
+        AssertEqual "\nGiven file is not a source file!", error_message
+    endif
+
+Execute ([Ninja] Build file which has no target):
+    if !has('win32') " skip for windows
+        let g:cmake_project_generator = ''
+        let g:cmake_usr_args = '-GNinja'
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        silent CMake
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        Assert filereadable("cmake-build-Release/build.ninja"), "build.ninja should be generated"
+        silent CMakeCompileSource tests/src/test_class.cpp
+        Assert getqflist()[-1].text =~# 'unknown target'
+    endif

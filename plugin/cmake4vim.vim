@@ -70,11 +70,12 @@ command!       -nargs=1 -complete=custom,cmake4vim#CompleteTarget       CMakeSel
 command!       -nargs=1 -complete=custom,cmake4vim#CompleteBuildType    CMakeSelectBuildType    call cmake4vim#SelectBuildType(<f-args>)
 command!       -nargs=1 -complete=custom,cmake4vim#CompleteKit          CMakeSelectKit          call cmake4vim#SelectKit(<f-args>)
 command!       -nargs=? -complete=custom,cmake4vim#CompleteCCMakeModes  CCMake                  call cmake4vim#CCMake(<f-args>)
-command! -bang -nargs=?  CTest      call cmake4vim#CTest(<bang>0, <f-args>)
-command!                 CMakeReset call cmake4vim#ResetCMakeCache()
-command!                 CMakeClean call cmake4vim#CleanCMake()
-command!                 CMakeInfo  call utils#window#OpenCMakeInfo()
-command! -bang -nargs=*  CMakeRun   call cmake4vim#RunTarget(<bang>0, <f-args>)
+command! -bang -nargs=?  CTest              call cmake4vim#CTest(<bang>0, <f-args>)
+command!                 CMakeReset         call cmake4vim#ResetCMakeCache()
+command!                 CMakeClean         call cmake4vim#CleanCMake()
+command!                 CMakeInfo          call utils#window#OpenCMakeInfo()
+command! -bang -nargs=*  CMakeRun           call cmake4vim#RunTarget(<bang>0, <f-args>)
+command!       -nargs=?  CMakeCompileSource call cmake4vim#CompileSource(<f-args>)
 " }}} Commands "
 
 " Mappings {{{
@@ -87,4 +88,5 @@ nnoremap <silent> <Plug>(CMakeInfo)                 :call utils#window#OpenCMake
 nnoremap <silent> <Plug>(CMakeRun)                  :call cmake4vim#RunTarget(0)<CR>
 nnoremap <silent> <Plug>(CTest)                     :call cmake4vim#CTest(0)<CR>
 nnoremap <silent> <Plug>(CCMake)                    :call cmake4vim#CCMake()<CR>
+nnoremap <silent> <Plug>(CMakeCompileSource)        :call cmake4vim#CompileSource()<CR>
 " }}} Mappings

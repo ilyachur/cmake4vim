@@ -17,6 +17,9 @@ add_subdirectory(app)
 # Disabled by default library which has some compilations errors
 add_subdirectory(incorrect_lib)
 
+add_executable(MakefileDemo makefile_main.cpp) # because make cannot build targets of subdirectories
+add_executable(MakefilePathWithSpaces "folder with spaces/test.cpp")
+
 if (ENABLE_TESTS)
     enable_testing()
     add_subdirectory(tests)
