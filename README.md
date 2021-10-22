@@ -106,7 +106,7 @@ The options below allow to change plugin behavior.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
- - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0.
  - **`g:cmake_vimspector_default_configuration`** is a default configuration for new vimspector target. Default is:
  ```
     let g:cmake_vimspector_default_configuration = {
