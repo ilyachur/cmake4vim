@@ -19,7 +19,7 @@ function! utils#exec#system#run(cmd, open_qf, errFormat) abort
     cgetexpr l:s_out
     call setqflist( [], 'a', { 'title' : a:cmd } )
     if a:open_qf == 1 || l:ret_code != 0
-        copen
+        execute g:cmake_build_executor_height . 'copen'
     endif
     if a:errFormat !=# ''
         let &l:errorformat = l:old_error
