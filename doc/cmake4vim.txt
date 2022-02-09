@@ -176,30 +176,4 @@ g:cmake_kits                        enables predefined cmake kits in the form
 g:cmake_selected_kit                currently selected cmake kit.
                                     Default is empty.
 
-DEPRECATED VARIABLES                                                  *cmake-deprecated-variables*
-
-*g:cmake_project_generator*           allows to set the project generator for
-                                    build scripts. Default is empty.
-                                    Will be removed at the beginning of 2022.
-                                    Please use `let g:cmake_usr_args='-G<Generator>'` instead.
-
-*g:cmake_install_prefix*              allows to change -DCMAKE_INSTALL_PREFIX.
-                                    Default is empty.
-                                    Will be removed at the beginning of 2022.
-                                    Please use `let g:cmake_usr_args='-DCMAKE_INSTALL_PREFIX=<prefix>'` instead.
-
-*g:cmake_c_compiler*                  allows to change -DCMAKE_C_COMPILER.
-                                    Default is empty.
-                                    Will be removed at the beginning of 2022.
-                                    Please use `let g:cmake_usr_args='-DCMAKE_C_COMPILER=<compiler>'` instead.
-
-*g:cmake_cxx_compiler*                allows to change -DCMAKE_CXX_COMPILER.
-                                    Default is empty.
-                                    Will be removed at the beginning of 2022.
-                                    Please use `let g:cmake_usr_args='-DCMAKE_CXX_COMPILER=<compiler>'` instead.
-*g:cmake_toolchain_file*              currently selected toolchain file.
-                                    Default is empty.
-                                    Will be removed at the beginning of 2022.
-                                    Please use `let g:cmake_usr_args='-DCMAKE_TOOLCHAIN_FILE=<file>'` instead.
-
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help

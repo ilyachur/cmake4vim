@@ -209,34 +209,6 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     " Set build type
     let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . l:cmake_variant['cmake_build_type']]
 
-    let l:cmake_project_generator = g:cmake_project_generator
-    let l:cmake_toolchain_file    = g:cmake_toolchain_file
-    let l:cmake_c_compiler        = g:cmake_c_compiler
-    let l:cmake_cxx_compiler      = g:cmake_cxx_compiler
-
-    " Print warnings about deprecated variables
-    if g:cmake_project_generator !=# ''
-        call utils#common#Warning('g:cmake_project_generator option is deprecated and will be removed at the beginning of 2022 year!' .
-                    \ ' Please use `let g:cmake_usr_args="-G<Generator>"` instead.')
-    endif
-    if g:cmake_install_prefix !=# ''
-        call utils#common#Warning('g:cmake_install_prefix option is deprecated and will be removed at the beginning of 2022 year!' .
-                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_INSTALL_PREFIX=<prefix>"` instead.')
-    endif
-    if g:cmake_c_compiler !=# ''
-        call utils#common#Warning('g:cmake_c_compiler option is deprecated and will be removed at the beginning of 2022 year!' .
-                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_C_COMPILER=<compiler>"` instead.')
-    endif
-    if g:cmake_cxx_compiler !=# ''
-        call utils#common#Warning('g:cmake_cxx_compiler option is deprecated and will be removed at the beginning of 2022 year!' .
-                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_CXX_COMPILER=<compiler>"` instead.')
-    endif
-    if g:cmake_toolchain_file !=# ''
-        call utils#common#Warning('g:cmake_toolchain_file option is deprecated and will be removed at the beginning of 2022 year!' .
-                    \ ' Please use `let g:cmake_usr_args="-DCMAKE_TOOLCHAIN_FILE=<file>"` instead.')
-    endif
-
-
     " CMakeKit can contain:
     " * additional user arguments
     " * project generator
@@ -258,10 +230,6 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     if l:cmake_project_generator !=# ''
         let l:cmake_args += [printf('-G "%s"', l:cmake_project_generator)]
     endif
-    if g:cmake_install_prefix !=# ''
-        let l:cmake_args += ['-DCMAKE_INSTALL_PREFIX=' . g:cmake_install_prefix]
-    endif
-
     " Set toolchain file ( it has priority over compilers )
     if l:cmake_toolchain_file !=# ''
         let l:cmake_args += ['-DCMAKE_TOOLCHAIN_FILE=' . l:cmake_toolchain_file]

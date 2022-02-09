@@ -56,11 +56,6 @@ function! ResetPluginOptions()
     let g:cmake_kits = {}
     let g:cmake_kits_global_path = ''
 
-    let g:cmake_project_generator=''
-    let g:cmake_install_prefix=''
-    let g:cmake_cxx_compiler=''
-    let g:cmake_c_compiler=''
-    let g:cmake_toolchain_file=''
     let g:cmake_vimspector_default_configuration = {
                 \ 'adapter': '',
                 \ 'configuration': {

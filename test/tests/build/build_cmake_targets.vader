@@ -268,7 +268,6 @@ Execute ([CMake targets] Check CMakeClean for empty project):
 
 Execute ([Unix Makefiles] Build single unit with build in source):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         let g:cmake_usr_args = '-G "Unix Makefiles"'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -280,7 +279,6 @@ Execute ([Unix Makefiles] Build single unit with build in source):
 
 Execute ([Unix Makefiles] Build single unit with build in source, with spaces):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -291,7 +289,6 @@ Execute ([Unix Makefiles] Build single unit with build in source, with spaces):
 
 Execute ([Unix Makefiles] Build single unit with build out of source):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         " this is only tested on UNIX so /tmp/ certainly exists
         let g:cmake_build_path_pattern = [ '/tmp/Release', '' ]
         Assert !isdirectory("/tmp/Release"), "Build directory shouldn't exist"
@@ -305,7 +302,6 @@ Execute ([Unix Makefiles] Build single unit with build out of source):
 
 Execute ([Unix Makefiles] Build single unit without build folder):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         redir => error_message
         CMakeCompileSource app/main.cpp
@@ -315,7 +311,6 @@ Execute ([Unix Makefiles] Build single unit without build folder):
 
 Execute ([Unix Makefiles] Build single unit without CMake info):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -329,7 +324,6 @@ Execute ([Unix Makefiles] Build single unit without CMake info):
 
 Execute ([Unix Makefiles] Build non-existant source file):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -342,7 +336,6 @@ Execute ([Unix Makefiles] Build non-existant source file):
 
 Execute ([Unix Makefiles] Build file which has no target):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"

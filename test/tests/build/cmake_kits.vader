@@ -36,13 +36,6 @@ Execute ([CMake kits] Check CMakeKit autocomplete):
     AssertEqual len(kits), 3
     AssertEqual kits, [ "First", "Second", "Third" ]
 
-Execute ([CMake kits] Check toolchain file):
-    let g:cmake_kits = {}
-    let g:cmake_toolchain_file = 'android.toolchain.cmake'
-
-    let generation_command = utils#cmake#getCMakeGenerationCommand()
-    Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake', generation_command
-
 Execute ([CMake kits] Check CMakeKit toolchain file):
     silent CMakeSelectKit First
     let generation_command = utils#cmake#getCMakeGenerationCommand()

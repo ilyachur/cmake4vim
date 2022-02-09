@@ -17,9 +17,6 @@ function! s:restoreCMakeGenerator() abort
     " Need to restore cmake_generator for case when plugin changes make
     " command
     if empty(l:cmake_gen)
-        let l:cmake_gen = g:cmake_project_generator
-    endif
-    if empty(l:cmake_gen)
         " By default win32 CMakeGenerator should be VS, other systems make
         if has('win32')
             let l:cmake_gen = 'Visual Studio'

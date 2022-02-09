@@ -3,7 +3,7 @@ Before:
     silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
-    let g:cmake_project_generator="Ninja"
+    let g:cmake_usr_args="-GNinja"
     silent on
 
 After:
@@ -82,8 +82,6 @@ Execute ([Ninja] Build cmake project with -C param):
 
 Execute ([Ninja] Build cmake project with generator from usr args):
     if !has('win32') " Skip for Windows
-        let g:cmake_project_generator=""
-        let g:cmake_usr_args="-GNinja"
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -119,8 +117,6 @@ Execute ([Ninja] Update g:cmake_executable option):
 
 Execute ([Ninja] Build single unit with build in source):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -131,8 +127,6 @@ Execute ([Ninja] Build single unit with build in source):
 
 Execute ([Ninja] Build single unit with build in source, with spaces):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -143,8 +137,6 @@ Execute ([Ninja] Build single unit with build in source, with spaces):
 
 Execute ([Ninja] Build single unit with build out of source):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         " this is only tested on UNIX so /tmp/ certainly exists
         let g:cmake_build_path_pattern = [ '/tmp/Release', '' ]
         Assert !isdirectory("/tmp/Release"), "Build directory shouldn't exist"
@@ -158,8 +150,6 @@ Execute ([Ninja] Build single unit with build out of source):
 
 Execute ([Ninja] Build single unit without build folder):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         redir => error_message
         CMakeCompileSource app/main.cpp
@@ -169,8 +159,6 @@ Execute ([Ninja] Build single unit without build folder):
 
 Execute ([Ninja] Build single unit without CMake info):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -184,8 +172,6 @@ Execute ([Ninja] Build single unit without CMake info):
 
 Execute ([Ninja] Build non-existant source file):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -198,8 +184,6 @@ Execute ([Ninja] Build non-existant source file):
 
 Execute ([Ninja] Build file which has no target):
     if !has('win32') " skip for windows
-        let g:cmake_project_generator = ''
-        let g:cmake_usr_args = '-GNinja'
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
