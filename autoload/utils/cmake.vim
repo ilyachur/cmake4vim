@@ -208,6 +208,10 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
 
     " Set build type
     let l:cmake_args += ['-DCMAKE_BUILD_TYPE=' . l:cmake_variant['cmake_build_type']]
+    let l:cmake_project_generator = ''
+    let l:cmake_toolchain_file    = ''
+    let l:cmake_c_compiler        = ''
+    let l:cmake_cxx_compiler      = ''
 
     " CMakeKit can contain:
     " * additional user arguments
