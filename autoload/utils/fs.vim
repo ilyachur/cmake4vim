@@ -46,10 +46,12 @@ function! utils#fs#createLink(src, dst) abort
     "     return
     " endif
     silent call utils#fs#removeFile(a:dst)
-    if has('win32')
-        silent call system('copy ' . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
-    else
+    if executable('copy')
+        silent call system('copy '  . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
+    elseif executable('ln')
         silent call system('ln -s ' . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
+    else
+        call utils#common#Warning('Cannot create link!')
     endif
 endfunction
 
