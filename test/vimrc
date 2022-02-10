@@ -76,7 +76,7 @@ function! ResetPluginOptions()
 endfunction
 
 function! WaitForJob() abort
-    let max_wait = 10
+    let max_wait = 20
     while 1
         let l:job = utils#common#executeStatus()
         if empty(l:job)
