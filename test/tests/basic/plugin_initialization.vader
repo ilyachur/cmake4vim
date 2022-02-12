@@ -15,11 +15,7 @@ Execute ([Plugin Initialization] Check default initialization):
     AssertEqual g:cmake_compile_commands_link, ""
     AssertEqual g:cmake_compile_commands, 0
     AssertEqual g:cmake_usr_args, ""
-    AssertEqual g:cmake_cxx_compiler, ""
-    AssertEqual g:cmake_c_compiler, ""
     AssertEqual g:cmake_build_type, ""
-    AssertEqual g:cmake_install_prefix, ""
-    AssertEqual g:cmake_project_generator, ""
     AssertEqual g:make_arguments, ""
     AssertEqual g:cmake_executable, "cmake"
     let cmake_info = utils#cmake#common#getInfo()
@@ -40,7 +36,6 @@ Execute ([Plugin Initialization] Check default initialization):
     AssertEqual sort( keys(g:cmake_variants) ), ['Debug', 'MinSizeRel', 'RelWithDebInfo', 'Release']
     AssertEqual g:cmake_ctest_args, ''
     AssertEqual g:cmake_kits, {}
-    AssertEqual g:cmake_toolchain_file, ''
     AssertEqual g:cmake_selected_kit, ''
     AssertEqual g:cmake_kits_global_path, ''
 

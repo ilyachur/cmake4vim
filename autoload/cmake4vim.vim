@@ -186,21 +186,25 @@ function! cmake4vim#CompileSource( ... ) abort
 
     let l:generator = l:cache_info[ 'cmake' ][ 'generator' ]
 
-    let l:prefix = ''
-    if l:generator =~# 'Ninja' && !utils#cmake#verNewerOrEq( [ 3, 14 ] )
+    let l:target_name = ''
+    if l:generator =~# 'Unix Makefiles' || utils#cmake#verNewerOrEq( [ 3, 14 ] )
+        let l:target_name = utils#gen#common#getSingleUnitTargetName( l:generator, l:source_name )
+    else
+        let l:prefix = ''
         let l:build_dir = l:cache_info[ 'cmake' ][ 'build_dir' ]
-
         " build folder is below getcwd()
-        if stridx( l:build_dir, getcwd() ) == 0
-            let l:subfolders = split(trim( split( l:build_dir, getcwd() )[0], '/'), '/')
-            for i in range( len( l:subfolders ) )
-                let l:prefix .= '../'
-            endfor
-
+        if l:generator =~# 'Ninja' && stridx( l:build_dir, getcwd() ) == 0
+                let l:subfolders = split(trim( split( l:build_dir, getcwd() )[0], '/'), '/')
+                for i in range( len( l:subfolders ) )
+                    let l:prefix .= '../'
+                endfor
+                if utils#cmake#verNewerOrEq( [ 3, 13 ] )
+                    let l:target_name = '"' . l:prefix . l:source_name . '^' . '"'
+                else
+                    let l:target_name = l:prefix . fnameescape( l:source_name ) . '^'
+                endif
         endif
     endif
-
-    let l:target_name = utils#gen#common#getSingleUnitTargetName( l:generator, l:prefix . l:source_name )
 
     " TODO: find the middle point
     if !utils#cmake#verNewerOrEq( [ 3, 13 ] )

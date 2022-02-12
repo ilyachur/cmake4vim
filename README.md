@@ -153,16 +153,6 @@ The list contains variables which allow to configure CMake build.
  - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
 
 
-#### Deprecated options
-
-**These options were deprecated and will be removed at the beginning of 2022 year.**
-
- - **`g:cmake_project_generator`** allows to set the project generator for build scripts. **The option was deprecated, please use `let g:cmake_usr_args='-G<Generator>'` instead.** Default is empty.
- - **`g:cmake_install_prefix`** allows to change **`-DCMAKE_INSTALL_PREFIX`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_INSTALL_PREFIX=<prefix>'` instead.** Default is empty.
- - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_C_COMPILER=<compiler>'` instead.** Default is empty.
- - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_CXX_COMPILER=<compiler>'` instead.** Default is empty.
- - **`g:cmake_toolchain_file`** currently selected toolchain file. **The option was deprecated, please use `let g:cmake_usr_args='-DCMAKE_TOOLCHAIN_FILE=<file>'` instead.** Default is empty.
-
 #### Examples
 
 CMake kits can be given in the following ways:
