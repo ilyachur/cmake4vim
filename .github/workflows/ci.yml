@@ -33,6 +33,7 @@ jobs:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
@@ -89,7 +90,7 @@ jobs:
           ninja --version
     - if: matrix.os == 'macos-latest'  # Install gtest in order to avoid problems with cmake 2.8 on macOS
       run: |
-        git clone --depth 1 --branch release-1.11.0 https://github.com/google/googletest ${HOME}/gtest 
+        git clone --depth 1 --branch release-1.11.0 https://github.com/google/googletest ${HOME}/gtest
         mkdir ${HOME}/gtest/build
         pushd ${HOME}/gtest/build
         cmake -DCMAKE_CXX_FLAGS="-std=c++11" ..
