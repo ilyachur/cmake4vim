@@ -33,7 +33,6 @@ jobs:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
@@ -56,6 +55,10 @@ jobs:
 
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 25
+
+    defaults:
+        run:
+            working-directory: '${{ matrix.vim_type  }}_${{ matrix.vim_version  }}_${{ matrix.platform  }}_${{ matrix.cmake_version }}'
 
     steps:
     - name: Clone CMake4Vim
