@@ -7,7 +7,7 @@
                 "request": "launch",
                 "program": "${workspaceRoot}/test_app",
                 "args": ["1", "2", "3*", "4"],
-                "cwd": "${workspaceRoot}",
+                "cwd": "${workspaceRoot}/app",
                 "externalConsole": false,
                 "stopAtEntry": true,
                 "MImode": "lldb"

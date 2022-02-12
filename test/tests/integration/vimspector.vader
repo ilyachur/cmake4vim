@@ -121,9 +121,6 @@ Execute ([Vimspector] Run test_app target and change vimspector config with defa
         AssertEqual config['configurations']['test_app']['adapter'], ''
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 3
         AssertEqual config['configurations']['test_app']['configuration']['args'], ['1', '2', '3']
-    else
-        " WA to skip test
-        call utils#common#executeCommand('echo 1 2 3 F1', 1)
     endif
 
 Execute ([Vimspector] Run test_app target and change vimspector config with custom config):
@@ -165,11 +162,11 @@ Execute ([Vimspector] Run test_app target and change vimspector config with cust
         AssertEqual config['configurations']['test_app']['configuration']['args'], ['1', '2', '3']
     else
         " WA to skip test
-        call utils#common#executeCommand('echo 1 2 3 F1', 1)
+        call utils#common#executeCommand('echo 1 2 3 F1 test proj', 1)
     endif
 
-Expect ([Vimspector] See '1 2 3 F1' result in quickfix):
-  || 1 2 3 F1
+Expect ([Vimspector] See '1 2 3 F1 test proj' result in quickfix):
+  || 1 2 3 F1 test proj
 
 Execute ([Vimspector] Run test_app target with vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
@@ -200,7 +197,7 @@ Execute ([Vimspector] Run test_app target with vimspector args):
     endif
 
 Expect ([Vimspector] See '1 2 3* 4 F1' result in quickfix):
-  || 1 2 3* 4 F1
+  || 1 2 3* 4 F1 app
 
 Execute ([Vimspector] Run test_app target with reset vimspector args):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
@@ -231,7 +228,7 @@ Execute ([Vimspector] Run test_app target with reset vimspector args):
     endif
 
 Expect ([Vimspector] See 'F1' result in quickfix):
-  || F1
+  || F1 app
 
 Execute ([Vimspector] Read vimspector config containing backslashes):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])

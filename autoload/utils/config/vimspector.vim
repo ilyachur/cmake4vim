@@ -55,6 +55,11 @@ function! s:updateConfig(vimspector_config, targets_config) abort
     endfor
     return l:res_config
 endfunction
+
+function! s:normalizeWorkDir(cwd) abort
+    let l:cwd = substitute(a:cwd, '${workspaceRoot}', getcwd(), 'g')
+    return l:cwd
+endfunction
 " }}} Private functions "
 
 " Config has the next format:
@@ -87,7 +92,7 @@ function! utils#config#vimspector#updateConfig(config) abort
 endfunction
 
 function! utils#config#vimspector#getTargetConfig(target) abort
-    let l:result = {'app': '', 'args': []}
+    let l:result = {'app': '', 'args': [], 'cwd': getcwd()}
     if filereadable(s:getVimspectorConfig())
         let l:config = utils#config#vimspector#updateConfig({})
         if !empty(l:config)
@@ -95,6 +100,7 @@ function! utils#config#vimspector#getTargetConfig(target) abort
             if has_key(l:conf, a:target) && has_key(l:conf[a:target], 'configuration')
                 let l:result['app' ] = get( l:conf[a:target]['configuration'], 'program', l:result['app' ] )
                 let l:result['args'] = get( l:conf[a:target]['configuration'], 'args'   , l:result['args'] )
+                let l:result['cwd'] = s:normalizeWorkDir(get( l:conf[a:target]['configuration'], 'cwd', l:result['cwd'] ))
             endif
         endif
     endif

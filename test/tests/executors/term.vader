@@ -32,15 +32,15 @@ Execute ([Term executor] Generate cmake project with default settings and build 
 
 Execute ([Term executor] Run 2 terms at once):
     if !has('win32')    " Skip for Windows
-        let ret =  utils#exec#term#run('sleep 2', 1, '')
-        let ret_code = utils#exec#term#run('sleep 2', 1, '')
+        let ret =  utils#exec#term#run('sleep 2', 1, getcwd(), '')
+        let ret_code = utils#exec#term#run('sleep 2', 1, getcwd(), '')
         AssertEqual ret_code, -1
         call WaitForJob()
     endif
 
 Execute ([Term executor] Append job to empty pool):
     if !has('win32')    " Skip for Windows
-        let ret = utils#exec#term#append('sleep 2', 1, '')
+        let ret = utils#exec#term#append('sleep 2', 1, getcwd(), '')
         Assert ret != 0 && ret != -1, ret
         call WaitForJob()
     endif
@@ -70,6 +70,6 @@ Execute ([Term executor] Run test_app target with mask arguments with term execu
         endif
     let output = getqflist()
     Assert 1 == len(output), output
-    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
+    AssertEqual '--gtest_filter=Test* F1 test proj', output[0]['text']
     endif
 
