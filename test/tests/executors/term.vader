@@ -46,7 +46,7 @@ Execute ([Term executor] Append job to empty pool):
     endif
 
 Execute ([Term executor] Run test_app target with mask arguments with term executor):
-    if !has('win32')    " Skip for Windows
+    if !has('win32') && !has('macunix')    " Skip for Windows and macOS
         if utils#cmake#verNewerOrEq([3, 14])
             silent CMake
             call WaitForJob()
