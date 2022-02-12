@@ -63,6 +63,8 @@ jobs:
     steps:
     - name: Clone CMake4Vim
       uses: actions/checkout@v2
+      with:
+          path: '${{ matrix.vim_type  }}_${{ matrix.vim_version  }}_${{ matrix.platform  }}_${{ matrix.cmake_version }}'
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
