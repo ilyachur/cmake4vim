@@ -56,15 +56,9 @@ jobs:
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 25
 
-    defaults:
-        run:
-            working-directory: '${{ matrix.vim_type  }}_${{ matrix.vim_version  }}_${{ matrix.platform  }}_${{ matrix.cmake_version }}'
-
     steps:
     - name: Clone CMake4Vim
       uses: actions/checkout@v2
-      with:
-          path: '${{ matrix.vim_type  }}_${{ matrix.vim_version  }}_${{ matrix.platform  }}_${{ matrix.cmake_version }}'
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
@@ -109,7 +103,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: coverage
-        path: '${{ matrix.vim_type  }}_${{ matrix.vim_version  }}_${{ matrix.platform  }}_${{ matrix.cmake_version }}/*.xml'
+        path: ./*.xml
         if-no-files-found: error
 
   Report:
