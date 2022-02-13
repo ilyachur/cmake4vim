@@ -1,7 +1,9 @@
 #include <test_class.hpp>
 #include <iostream>
 #include <string>
-#ifndef _WIN32
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <unistd.h>
 #include <limits.h>
 #endif
@@ -9,8 +11,9 @@
 std::string get_cwd() {
     std::string path;
 #ifdef _WIN32
-    // Windows has issue: "The filename, directory name, or volume label syntax is incorrect." on CI
-    return "app";
+    char* cwd = _getcwd(0, 0);
+    path = cwd;
+    free(cwd);
 #else
     char buffer[PATH_MAX];
     if (getcwd(buffer, sizeof(buffer)) == NULL) {
