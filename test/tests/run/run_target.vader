@@ -51,7 +51,7 @@ Execute ([CMakeRun] Run test_app target and open quickfix):
         silent CMakeRun
     else
         " WA to skip test
-        call utils#common#executeCommand('echo F1', 1)
+        call utils#common#executeCommand('echo F1 test proj', 1)
     endif
     let output = getqflist()
     AssertEqual 'F1 test proj', output[0]['text']
@@ -68,7 +68,7 @@ Execute ([CMakeRun] Run test_app target with mask arguments):
         silent CMakeRun --gtest_filter=Test*
     else
         " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1 test proj', 1)
     endif
     let output = getqflist()
     AssertEqual 1, len(output)
@@ -82,7 +82,7 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
         silent CMakeRun 123
     else
         " WA to skip test
-        call utils#common#executeCommand('echo 123 F1', 1)
+        call utils#common#executeCommand('echo 123 F1 test proj', 1)
     endif
     let output = getqflist()
     AssertEqual        1, len(output)

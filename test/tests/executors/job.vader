@@ -91,7 +91,7 @@ Execute ([Job executor] Run test_app target with mask arguments with job executo
         AssertEqual bufnr('cmake4vim_execute'), -1
     else
         " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1 test proj', 1)
         call WaitForJob()
     endif
     let output = getqflist()

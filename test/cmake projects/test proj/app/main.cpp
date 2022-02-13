@@ -4,6 +4,12 @@
 #include <limits.h>
 #ifdef _WIN32
 #include <direct.h>
+#include <windows.h>
+
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif
+
 #else
 #include <unistd.h>
 #endif
@@ -11,7 +17,7 @@
 std::string get_cwd() {
     char buffer[PATH_MAX];
 #ifdef _WIN32
-    _getcwd(buff, PATH_MAX);
+    _getcwd(buffer, PATH_MAX);
 #else
     if (getcwd(buffer, sizeof(buffer)) == NULL) {
         return "";
