@@ -28,7 +28,7 @@ function! utils#common#executeCommands(cmds, open_result, ...) abort
         " Dispatch doesn't support pool of tasks
         let l:cmd = join(a:cmds, ' && ')
         if l:cwd != getcwd()
-            let l:cmd = 'cd "' . l:cwd . '" && ' . l:cmd . ' && cd "' . getcwd() . '"'
+            let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
         endif
         silent call utils#exec#dispatch#run(l:cmd, a:open_result, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
@@ -52,7 +52,7 @@ function! utils#common#executeCommands(cmds, open_result, ...) abort
             " system is synchronous executor
             let l:cmd = s:add_noglob(l:cmd)
             if l:cwd != getcwd()
-                let l:cmd = 'cd "' . l:cwd . '" && ' . l:cmd . ' && cd "' . getcwd() . '"'
+                let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
             endif
             let l:ret_code = utils#exec#system#run(l:cmd, a:open_result, l:errFormat)
             if l:ret_code != 0
