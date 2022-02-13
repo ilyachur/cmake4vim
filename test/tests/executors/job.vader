@@ -45,14 +45,14 @@ Execute ([Job executor] Check job cancel command without run):
 
 Execute ([Job executor] Check job cancel command):
     AssertEqual bufnr('cmake4vim_execute'), -1
-    silent call utils#exec#job#run('sleep 10', 1, '')
+    silent call utils#exec#job#run('sleep 10', 1, getcwd(), '')
     silent call utils#exec#job#stop()
     AssertEqual bufnr('cmake4vim_execute'), -1
     call WaitForJob()
 
 Execute ([Job executor] Run 2 jobs at once):
-    silent call utils#exec#job#run('sleep 10', 1, '')
-    let ret_code = utils#exec#job#run('sleep 10', 1, '')
+    silent call utils#exec#job#run('sleep 10', 1, getcwd(), '')
+    let ret_code = utils#exec#job#run('sleep 10', 1, getcwd(), '')
     AssertEqual ret_code, -1
     silent call utils#exec#job#stop()
     AssertEqual bufnr('cmake4vim_execute'), -1
@@ -62,7 +62,7 @@ Execute ([Job executor] Run job and don't mess up the alternate file):
     silent edit first.txt
     silent edit second.txt
     AssertEqual bufname("#"), "first.txt"
-    silent call utils#exec#job#run('sleep 1', 1, '')
+    silent call utils#exec#job#run('sleep 1', 1, getcwd(), '')
     AssertEqual bufname("#"), "first.txt"
     sleep 2
     copen
@@ -91,17 +91,17 @@ Execute ([Job executor] Run test_app target with mask arguments with job executo
         AssertEqual bufnr('cmake4vim_execute'), -1
     else
         " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1 test proj', 1)
         call WaitForJob()
     endif
     let output = getqflist()
     Assert 1 == len(output), output
-    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
+    AssertEqual '--gtest_filter=Test* F1 test proj', output[0]['text']
 
 Execute ([Job executor] Append job to empty pool):
     Assert empty( utils#exec#job#getJobsPool() ), 'Jobs pool not empty!'
 
-    let ret = utils#exec#job#append('sleep 2', 1, '')
+    let ret = utils#exec#job#append('sleep 2', 1, getcwd(), '')
     if has('nvim')
         Assert ret != 0 && ret != -1, ret
     else

@@ -19,26 +19,31 @@ endfunction
 
 " Executes commands
 function! utils#common#executeCommands(cmds, open_result, ...) abort
-    let l:errFormat = get(a:, 1, '')
+    let l:cwd = get(a:, 1, getcwd())
+    let l:errFormat = get(a:, 2, '')
 
     if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
         " Close quickfix list to discard custom error format
         silent! cclose
         " Dispatch doesn't support pool of tasks
         let l:cmd = join(a:cmds, ' && ')
+        if l:cwd != getcwd()
+            let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
+        endif
         silent call utils#exec#dispatch#run(l:cmd, a:open_result, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
         let [l:cmd; l:cmds] = a:cmds
-        silent call utils#exec#job#run(s:add_noglob(l:cmd), a:open_result, l:errFormat)
+
+        silent call utils#exec#job#run(s:add_noglob(l:cmd), a:open_result, l:cwd, l:errFormat)
         for l:command in l:cmds
-            silent call utils#exec#job#append(s:add_noglob(l:command), a:open_result, l:errFormat)
+            silent call utils#exec#job#append(s:add_noglob(l:command), a:open_result, l:cwd, l:errFormat)
         endfor
     elseif (g:cmake_build_executor ==# 'term') || (g:cmake_build_executor ==# '' && (has('terminal') || has('nvim')))
         let [l:cmd; l:cmds] = a:cmds
-        silent call utils#exec#term#run(s:add_noglob(l:cmd), a:open_result, l:errFormat)
+        silent call utils#exec#term#run(s:add_noglob(l:cmd), a:open_result, l:cwd, l:errFormat)
         for l:command in l:cmds
-            silent call utils#exec#term#append(s:add_noglob(l:command), a:open_result, l:errFormat)
+            silent call utils#exec#term#append(s:add_noglob(l:command), a:open_result, l:cwd, l:errFormat)
         endfor
     else
         " Close quickfix list to discard custom error format
@@ -46,6 +51,9 @@ function! utils#common#executeCommands(cmds, open_result, ...) abort
             silent! cclose
             " system is synchronous executor
             let l:cmd = s:add_noglob(l:cmd)
+            if l:cwd != getcwd()
+                let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
+            endif
             let l:ret_code = utils#exec#system#run(l:cmd, a:open_result, l:errFormat)
             if l:ret_code != 0
                 break
@@ -55,9 +63,10 @@ function! utils#common#executeCommands(cmds, open_result, ...) abort
 endfunction
 
 function! utils#common#executeCommand(cmd, open_result, ...) abort
-    let l:errFormat = get(a:, 1, '')
+    let l:cwd = get(a:, 1, getcwd())
+    let l:errFormat = get(a:, 2, '')
 
-    silent call utils#common#executeCommands([a:cmd], a:open_result, l:errFormat)
+    silent call utils#common#executeCommands([a:cmd], a:open_result, l:cwd, l:errFormat)
 endfunction
 
 function! utils#common#executeStatus() abort

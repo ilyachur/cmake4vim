@@ -21,7 +21,7 @@ function! s:createQuickFix() abort
     let s:cmake4vim_term = {}
     if !empty(s:cmake4vim_jobs_pool)
         let [ l:next_job; s:cmake4vim_jobs_pool  ] = s:cmake4vim_jobs_pool
-        silent call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['err_fmt'])
+        silent call utils#exec#term#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
     endif
 endfunction
 
@@ -97,7 +97,7 @@ endfunction
 " }}} nvim functions "
 " }}} Private functions "
 
-function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
+function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
     " if there is a job or if the buffer is open, abort
     if !empty(s:cmake4vim_term)
         call utils#common#Warning('Async execute is already running')
@@ -120,6 +120,7 @@ function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
                     \ 'on_stdout': function('s:nVimOut'),
                     \ 'on_stderr': function('s:nVimOut'),
                     \ 'on_exit': function('s:nVimExit'),
+                    \ 'cwd': a:cwd,
                     \ })
         normal! G
         let l:termbufnr = bufnr()
@@ -134,6 +135,7 @@ function! utils#exec#term#run(cmd, open_qf, err_fmt) abort
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
                     \ 'norestore': 1,
+                    \ 'cwd': a:cwd,
                     \ })
     endif
     if has('nvim')
@@ -148,16 +150,17 @@ function! utils#exec#term#status() abort
     return s:cmake4vim_term
 endfunction
 
-function! utils#exec#term#append(cmd, open_qf, err_fmt) abort
+function! utils#exec#term#append(cmd, open_qf, cwd, err_fmt) abort
     if !empty(s:cmake4vim_term)
         let s:cmake4vim_jobs_pool += [
                     \ {
                         \ 'cmd': a:cmd,
+                        \ 'cwd': a:cwd,
                         \ 'open_qf': a:open_qf,
                         \ 'err_fmt': a:err_fmt
                     \ }
                 \]
         return 0
     endif
-    return utils#exec#term#run(a:cmd, a:open_qf, a:err_fmt)
+    return utils#exec#term#run(a:cmd, a:open_qf, a:cwd, a:err_fmt)
 endfunction

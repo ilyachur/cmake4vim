@@ -51,10 +51,10 @@ Execute ([CMakeRun] Run test_app target and open quickfix):
         silent CMakeRun
     else
         " WA to skip test
-        call utils#common#executeCommand('echo F1', 1)
+        call utils#common#executeCommand('echo F1 test proj', 1)
     endif
     let output = getqflist()
-    AssertEqual 'F1', output[0]['text']
+    AssertEqual 'F1 test proj', output[0]['text']
     AssertEqual    1, len(output)
 
 Execute ([CMakeRun] Run non-binary target and open quickfix):
@@ -68,11 +68,11 @@ Execute ([CMakeRun] Run test_app target with mask arguments):
         silent CMakeRun --gtest_filter=Test*
     else
         " WA to skip test
-        call utils#common#executeCommand('echo --gtest_filter=Test* F1', 1)
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1 test proj', 1)
     endif
     let output = getqflist()
     AssertEqual 1, len(output)
-    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
+    AssertEqual '--gtest_filter=Test* F1 test proj', output[0]['text']
 
 Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
@@ -82,11 +82,11 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
         silent CMakeRun 123
     else
         " WA to skip test
-        call utils#common#executeCommand('echo 123 F1', 1)
+        call utils#common#executeCommand('echo 123 F1 test proj', 1)
     endif
     let output = getqflist()
     AssertEqual        1, len(output)
-    AssertEqual '123 F1', output[0]['text']
+    AssertEqual '123 F1 test proj', output[0]['text']
 
 Execute ([CMakeRun] run command builds and executes target):
     if utils#cmake#verNewerOrEq([3, 14])
