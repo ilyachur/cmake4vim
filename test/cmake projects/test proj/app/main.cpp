@@ -1,26 +1,10 @@
 #include <test_class.hpp>
 #include <iostream>
 #include <string>
-#ifdef _WIN32
-#include <direct.h>
-#else
-#include <unistd.h>
-#include <limits.h>
-#endif
+#include <filesystem>
 
 std::string get_cwd() {
-    std::string path;
-#ifdef _WIN32
-    char* cwd = _getcwd(0, 0);
-    path = cwd;
-    free(cwd);
-#else
-    char buffer[PATH_MAX];
-    if (getcwd(buffer, sizeof(buffer)) == NULL) {
-        return "";
-    }
-    path = buffer;
-#endif
+    std::string path = std::filesystem::current_path();
     size_t found = path.find_last_of("/\\");
     return path.substr(found+1);
 }
