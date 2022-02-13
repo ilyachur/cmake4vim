@@ -1,29 +1,26 @@
 #include <test_class.hpp>
 #include <iostream>
 #include <string>
-#include <limits.h>
 #ifdef _WIN32
 #include <direct.h>
-#include <windows.h>
-
-#ifndef PATH_MAX
-#define PATH_MAX MAX_PATH
-#endif
-
 #else
 #include <unistd.h>
+#include <limits.h>
 #endif
 
 std::string get_cwd() {
-    char buffer[PATH_MAX];
+    std::string path;
 #ifdef _WIN32
-    _getcwd(buffer, PATH_MAX);
+    char* cwd = _getcwd(0, 0);
+    path = cwd;
+    free(cwd);
 #else
+    char buffer[PATH_MAX];
     if (getcwd(buffer, sizeof(buffer)) == NULL) {
         return "";
     }
+    path = buffer;
 #endif
-    std::string path = buffer;
     size_t found = path.find_last_of("/\\");
     return path.substr(found+1);
 }
