@@ -63,9 +63,9 @@ function! s:vimClose(channel) abort
     call s:createQuickFix()
 
     if l:open_qf == 0
-        silent cwindow
+        silent execute g:cmake_build_executor_height . 'cwindow'
     else
-        silent copen
+        silent execute g:cmake_build_executor_height . 'copen'
     endif
     cbottom
 endfunction
@@ -95,7 +95,7 @@ function! s:nVimExit(job_id, data, event) abort
     endif
     call s:createQuickFix()
     if a:data != 0 || l:open_qf != 0
-        copen
+        silent execute g:cmake_build_executor_height . 'copen'
     endif
 endfunction
 
@@ -106,10 +106,10 @@ function! s:createJobBuf() abort
     " qflist is open somewhere
     if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
         " move the cursor there
-        copen
+        silent execute g:cmake_build_executor_height . 'copen'
         silent execute 'keepalt edit ' . s:cmake4vim_buf
     else
-        silent execute 'keepalt belowright 10split ' . s:cmake4vim_buf
+        silent execute printf('keepalt belowright %dsplit %s', g:cmake_build_executor_height, s:cmake4vim_buf)
     endif
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
@@ -138,7 +138,7 @@ function! utils#exec#job#stop() abort
     endif
     let s:cmake4vim_jobs_pool = []
     call s:createQuickFix()
-    copen
+    silent execute g:cmake_build_executor_height . 'copen'
     call utils#common#Warning('Job is cancelled!')
 endfunction
 

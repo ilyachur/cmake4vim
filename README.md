@@ -127,6 +127,7 @@ The options below allow to change plugin behavior.
     - 'dispatch' uses [vim-dispatch](https://github.com/tpope/vim-dispatch) plugin to asynchronous build
     - 'system' uses synchronous build
     - '' uses automatic detection of supported modes (the priority is `dispatch`, `job`, `term`, `system`)
+ - **`g:cmake_build_executor_height`** defines the height (in rows) of the build window and quickfixlist window showing the results. Default is 10.
 
 #### Build path
 

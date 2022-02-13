@@ -35,7 +35,8 @@ let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default
 
 " Optional variable allow to specify the build executor
 " Possible values: 'job', 'dispatch', 'system', ''
-let g:cmake_build_executor = get(g:, 'cmake_build_executor', '')
+let g:cmake_build_executor        = get(g:, 'cmake_build_executor'       , '')
+let g:cmake_build_executor_height = get(g:, 'cmake_build_executor_height', 10)
 
 " Build path
 let g:cmake_build_path_pattern    = get(g:, 'cmake_build_path_pattern'   , ''            )

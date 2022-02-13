@@ -48,9 +48,9 @@ function! s:vimClose(channel, status) abort
     call s:createQuickFix()
 
     if l:open_qf == 0
-        silent cwindow
+        silent execute g:cmake_build_executor_height . 'cwindow'
     else
-        silent copen
+        silent execute g:cmake_build_executor_height . 'copen'
     endif
     cbottom
 
@@ -86,7 +86,7 @@ function! s:nVimExit(job_id, data, event) abort
     call s:createQuickFix()
 
     if a:data != 0 || l:open_qf != 0
-        copen
+        silent execute g:cmake_build_executor_height . 'copen'
     endif
     if a:data == 0
         silent echon 'Success! ' . l:cmd
@@ -114,7 +114,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                 \ 'err_fmt': a:err_fmt
                 \ }
     if has('nvim')
-        execute '10split'
+        execute g:cmake_build_executor_height . 'split'
         execute 'enew'
         let l:job = termopen(a:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
@@ -131,7 +131,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                     \ 'exit_cb': function('s:vimClose'),
                     \ 'out_cb': function('s:vimOut'),
                     \ 'term_finish': 'close',
-                    \ 'term_rows': 10,
+                    \ 'term_rows': g:cmake_build_executor_height,
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
                     \ 'norestore': 1,

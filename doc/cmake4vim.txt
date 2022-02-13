@@ -147,6 +147,10 @@ g:cmake_build_executor              allows to force set the build executor.
                                     Available values are 'job', 'term', 'dispatch',
                                     'system' and ''. Default is empty.
 
+g:cmake_build_executor_height       defines the height (in rows) of the
+                                    build window and quickfixlist window showing
+                                    the results. Default is 10.
+
 g:cmake_vimspector_support          enables support of vimspector config.
                                     Plugin can read and change command line
                                     arguments for the selected target in
