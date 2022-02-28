@@ -135,7 +135,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
                     \ 'norestore': 1,
-                    \ 'cwd': a:cwd,
+                    \ 'cwd': a:cwd
                     \ })
     endif
     if has('nvim')

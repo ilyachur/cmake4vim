@@ -1,5 +1,6 @@
 Before:
     silent call OpenTestProject()
+    silent call RemoveFile(".vimspector.json")
     silent call RemoveCMakeDirs()
 
     silent call ResetPluginOptions()
@@ -8,6 +9,7 @@ Before:
     silent on
 
 After:
+    silent call RemoveFile(".vimspector.json")
     silent call RemoveCMakeDirs()
 
 Execute ([Dispatch executor] Generate cmake project with default settings):
@@ -25,5 +27,32 @@ Execute ([Dispatch executor] Generate cmake project with default settings):
             let iter += 1
         endwhile
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let &rtp = old_rtp
+    endif
+
+Execute ([Dispatch executor] Build and run target):
+    if !has('win32') && utils#cmake#verNewerOrEq([3, 14])  " Skip for Windows and old CMake versions
+        let old_rtp = &rtp
+        set rtp+=$HOME/.vim/plugged/vim-dispatch
+        set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
+        set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
+        source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
+        let g:cmake_vimspector_support = 1
+        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent CMake
+        let iter = 0
+        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+            sleep 2
+            let iter += 1
+        endwhile
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        silent CMakeSelectTarget test_app
+        silent CMakeRun --gtest_filter=Test*
+        let iter = 0
+        while iter < 30 && !filereadable("cmake-build-Release/app/test_app")
+            sleep 2
+            let iter += 1
+        endwhile
+        Assert filereadable("cmake-build-Release/app/test_app"), "test_app should be built"
         let &rtp = old_rtp
     endif

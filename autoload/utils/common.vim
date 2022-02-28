@@ -18,39 +18,65 @@ endfunction
 " }}} Private functions "
 
 " Executes commands
-function! utils#common#executeCommands(cmds, open_result, ...) abort
-    let l:cwd = get(a:, 1, getcwd())
-    let l:errFormat = get(a:, 2, '')
-
+function! utils#common#executeCommands(cmds, open_result) abort
+    " add all fields
+    let l:commands = []
+    for l:cmd in a:cmds
+        call add(l:commands, {
+                    \ 'cmd': l:cmd['cmd'],
+                    \ 'cwd': get( l:cmd, 'cwd', getcwd() ),
+                    \ 'errFormat': get( l:cmd, 'errFormat', '' )
+                    \ })
+    endfor
     if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
         " Close quickfix list to discard custom error format
         silent! cclose
+        let l:cmd_line = ''
+        let l:pcwd = getcwd()
+        let l:errFormat = ''
         " Dispatch doesn't support pool of tasks
-        let l:cmd = join(a:cmds, ' && ')
-        if l:cwd != getcwd()
-            let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
+        for l:cmd in l:commands
+            " generate common command
+            if l:cmd_line !=# ''
+                let l:cmd_line .= ' && '
+            endif
+            let l:cwd = l:cmd['cwd']
+            if l:cwd['errFormat'] !=# ''
+                let l:errFormat = l:cwd['errFormat']
+            endif
+            if l:cwd != l:pcwd
+                let l:cmd_line .= 'cd ' . utils#fs#fnameescape(l:cwd) . ' && '
+                let l:pcwd = l:cwd
+            endif
+            let l:cmd_line .= l:cmd['cmd']
+        endfor
+        if l:pcwd != getcwd()
+            let l:cmd_line .= ' && cd ' . utils#fs#fnameescape(getcwd())
         endif
-        silent call utils#exec#dispatch#run(l:cmd, a:open_result, l:errFormat)
+        silent call utils#exec#dispatch#run(l:cmd_line, a:open_result, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
-        let [l:cmd; l:cmds] = a:cmds
+        let [l:cmd; l:cmds] = l:commands
 
-        silent call utils#exec#job#run(s:add_noglob(l:cmd), a:open_result, l:cwd, l:errFormat)
+        silent call utils#exec#job#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
         for l:command in l:cmds
-            silent call utils#exec#job#append(s:add_noglob(l:command), a:open_result, l:cwd, l:errFormat)
+            silent call utils#exec#job#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
         endfor
     elseif (g:cmake_build_executor ==# 'term') || (g:cmake_build_executor ==# '' && (has('terminal') || has('nvim')))
-        let [l:cmd; l:cmds] = a:cmds
-        silent call utils#exec#term#run(s:add_noglob(l:cmd), a:open_result, l:cwd, l:errFormat)
+        let [l:cmd; l:cmds] = l:commands
+
+        silent call utils#exec#term#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
         for l:command in l:cmds
-            silent call utils#exec#term#append(s:add_noglob(l:command), a:open_result, l:cwd, l:errFormat)
+            silent call utils#exec#term#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
         endfor
     else
         " Close quickfix list to discard custom error format
-        for l:cmd in a:cmds
+        for l:cmd_dict in l:commands
             silent! cclose
             " system is synchronous executor
-            let l:cmd = s:add_noglob(l:cmd)
+            let l:cmd = s:add_noglob(l:cmd_dict['cmd'])
+            let l:cwd = l:cmd_dict['cwd']
+            let l:errFormat = l:cmd_dict['errFormat']
             if l:cwd != getcwd()
                 let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
             endif
@@ -66,7 +92,7 @@ function! utils#common#executeCommand(cmd, open_result, ...) abort
     let l:cwd = get(a:, 1, getcwd())
     let l:errFormat = get(a:, 2, '')
 
-    silent call utils#common#executeCommands([a:cmd], a:open_result, l:cwd, l:errFormat)
+    silent call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat}], a:open_result)
 endfunction
 
 function! utils#common#executeStatus() abort
