@@ -50,9 +50,6 @@ function! utils#common#executeCommands(cmds, open_result) abort
             endif
             let l:cmd_line .= l:cmd['cmd']
         endfor
-        if l:cmd_line ==# ''
-            return
-        endif
         if l:pcwd != getcwd()
             let l:cmd_line .= ' && cd ' . utils#fs#fnameescape(getcwd())
         endif
