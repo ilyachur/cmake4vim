@@ -31,7 +31,7 @@ Execute ([Dispatch executor] Generate cmake project with default settings):
     endif
 
 Execute ([Dispatch executor] Build and run target):
-    if !has('win32')    " Skip for Windows
+    if !has('win32') && utils#cmake#verNewerOrEq([3, 14])  " Skip for Windows and old CMake versions
         let old_rtp = &rtp
         set rtp+=$HOME/.vim/plugged/vim-dispatch
         set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
