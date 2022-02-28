@@ -23,16 +23,8 @@ function! utils#common#executeCommands(cmds, open_result) abort
     let l:commands = []
     for l:cmd in a:cmds
         let l:dict_cmd = {'cmd': l:cmd['cmd']}
-        if !has_key(l:cmd, 'cwd')
-            let l:dict_cmd['cwd'] = getcwd()
-        else
-            let l:dict_cmd['cwd'] = l:cmd['cwd']
-        endif
-        if !has_key(l:cmd, 'errFormat')
-            let l:dict_cmd['errFormat'] = ''
-        else
-            let l:dict_cmd['errFormat'] = l:cmd['errFormat']
-        endif
+        let l:dict_cmd['cwd'] = get( l:cmd, 'cwd', getcwd()  )
+        let l:dict_cmd['errFormat'] = get( l:cmd, 'errFormat', ''  )
         let l:commands += [l:dict_cmd]
     endfor
     if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
@@ -102,7 +94,7 @@ function! utils#common#executeCommand(cmd, open_result, ...) abort
     let l:cwd = get(a:, 1, getcwd())
     let l:errFormat = get(a:, 2, '')
 
-    silent call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat}], open_result)
+    silent call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat}], a:open_result)
 endfunction
 
 function! utils#common#executeStatus() abort
