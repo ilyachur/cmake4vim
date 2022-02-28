@@ -22,11 +22,11 @@ function! utils#common#executeCommands(cmds, open_result) abort
     " add all fields
     let l:commands = []
     for l:cmd in a:cmds
-        call add(l:commands, #{
-                    \ cmd: l:cmd['cmd'],
-                    \ cwd: get( l:cmd, 'cwd', getcwd() ),
-                    \ errFormat: get( l:cmd, 'errFormat', '' )
-                    \ } )
+        call add(l:commands, {
+                    \ 'cmd': l:cmd['cmd'],
+                    \ 'cwd': get( l:cmd, 'cwd', getcwd() ),
+                    \ 'errFormat': get( l:cmd, 'errFormat', '' )
+                    \ })
     endfor
     if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
         " Close quickfix list to discard custom error format
