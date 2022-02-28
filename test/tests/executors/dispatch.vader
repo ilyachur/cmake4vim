@@ -39,7 +39,6 @@ Execute ([Dispatch executor] Build and run target):
         source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
         let g:cmake_vimspector_support = 1
         silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let iter = 0
         while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
