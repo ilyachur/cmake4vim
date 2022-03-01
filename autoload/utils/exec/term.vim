@@ -21,7 +21,7 @@ function! s:createQuickFix() abort
     let s:cmake4vim_term = {}
     if !empty(s:cmake4vim_jobs_pool)
         let [ l:next_job; s:cmake4vim_jobs_pool  ] = s:cmake4vim_jobs_pool
-        silent call utils#exec#term#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
+        call utils#exec#term#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
     endif
 endfunction
 
