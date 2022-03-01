@@ -103,6 +103,10 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
         call utils#common#Warning('Async execute is already running')
         return -1
     endif
+    if !isdirectory(a:cwd)
+        call utils#common#Warning('Cannot run job. Work directory: ' . a:cwd . 'does not exist.')
+        return -1
+    endif
     cclose
     let l:cmake4vim_term = 'cmake4vim_execute'
     let l:currentnr = winnr()

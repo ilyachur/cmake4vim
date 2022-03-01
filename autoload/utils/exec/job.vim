@@ -148,6 +148,10 @@ function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt) abort
         call utils#common#Warning('Async execute is already running')
         return -1
     endif
+    if !isdirectory(a:cwd)
+        call utils#common#Warning('Cannot run job. Work directory: ' . a:cwd . 'does not exist.')
+        return -1
+    endif
     let l:outbufnr = s:createJobBuf()
     let s:cmake4vim_job = { 'cmd': a:cmd, 'open_qf': a:open_qf, 'err_fmt': a:err_fmt }
     if has('nvim')
