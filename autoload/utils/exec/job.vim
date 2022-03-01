@@ -42,7 +42,7 @@ function! s:createQuickFix() abort
     call s:closeBuffer()
     if !empty(s:cmake4vim_jobs_pool)
         let [ l:next_job; s:cmake4vim_jobs_pool  ] = s:cmake4vim_jobs_pool
-        silent call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
+        call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
     endif
 endfunction
 
@@ -146,6 +146,10 @@ function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt) abort
     " if there is a job or if the buffer is open, abort
     if !empty(s:cmake4vim_job) || bufnr(s:cmake4vim_buf) != -1
         call utils#common#Warning('Async execute is already running')
+        return -1
+    endif
+    if !isdirectory(a:cwd)
+        call utils#common#Warning('Cannot run job. Work directory: ' . a:cwd . 'does not exist.')
         return -1
     endif
     let l:outbufnr = s:createJobBuf()

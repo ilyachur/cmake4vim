@@ -53,21 +53,21 @@ function! utils#common#executeCommands(cmds, open_result) abort
         if l:pcwd != getcwd()
             let l:cmd_line .= ' && cd ' . utils#fs#fnameescape(getcwd())
         endif
-        silent call utils#exec#dispatch#run(l:cmd_line, a:open_result, l:errFormat)
+        call utils#exec#dispatch#run(l:cmd_line, a:open_result, l:errFormat)
     elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
         let [l:cmd; l:cmds] = l:commands
 
-        silent call utils#exec#job#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
+        call utils#exec#job#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
         for l:command in l:cmds
-            silent call utils#exec#job#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
+            call utils#exec#job#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
         endfor
     elseif (g:cmake_build_executor ==# 'term') || (g:cmake_build_executor ==# '' && (has('terminal') || has('nvim')))
         let [l:cmd; l:cmds] = l:commands
 
-        silent call utils#exec#term#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
+        call utils#exec#term#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
         for l:command in l:cmds
-            silent call utils#exec#term#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
+            call utils#exec#term#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
         endfor
     else
         " Close quickfix list to discard custom error format
@@ -92,7 +92,7 @@ function! utils#common#executeCommand(cmd, open_result, ...) abort
     let l:cwd = get(a:, 1, getcwd())
     let l:errFormat = get(a:, 2, '')
 
-    silent call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat}], a:open_result)
+    call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat}], a:open_result)
 endfunction
 
 function! utils#common#executeStatus() abort
