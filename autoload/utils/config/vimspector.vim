@@ -21,6 +21,7 @@ function! s:writeJson(json_content) abort
     if has('python3')
 py3 << EOF
 import json
+import vim
 with open( vim.eval('s:getVimspectorConfig()'), 'w' ) as vimspector_json:
     sorted_content = json.dump(vim.eval('a:json_content'), vimspector_json, indent=4, sort_keys=True)
 EOF
