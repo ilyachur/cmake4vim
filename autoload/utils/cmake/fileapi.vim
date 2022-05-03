@@ -117,6 +117,9 @@ function! utils#cmake#fileapi#parseReply(build_dir) abort
         return {}
     endif
     let l:index_file = globpath(l:reply_folder, 'index*')
+    if l:index_file ==# ''
+        return {}
+    endif
     let l:common =  s:parseAll(l:reply_folder, l:index_file)
 
     return l:common
