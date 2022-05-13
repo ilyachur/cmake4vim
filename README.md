@@ -1,9 +1,15 @@
 # **cmake4vim**
 
-[![Build Status](https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg)](#)
-[![Code style](https://img.shields.io/github/workflow/status/ilyachur/cmake4vim/code-style?&logo=github&label=vint)](#)
-[![codecov](https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg)](https://codecov.io/gh/ilyachur/cmake4vim)
-[![License](https://img.shields.io/badge/license-GNU_GPL_3.0-green.svg)](https://github.com/ilyachur/cmake4vim/blob/master/LICENSE) [![Join the chat at https://gitter.im/cmake4vim/Lobby](https://badges.gitter.im/cmake4vim/Lobby.svg)](https://gitter.im/cmake4vim/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<p>
+    <a href="#"><img src="https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg" alt="Build Status"/></a>
+    <a href="#"><img src="https://img.shields.io/github/workflow/status/ilyachur/cmake4vim/code-style?&logo=github&label=vint" alt="Code style"/></a>
+    <a href="https://codecov.io/gh/ilyachur/cmake4vim"><img src="https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg" alt="Code coverage"/></a>
+    <a href="https://github.com/ilyachur/cmake4vim/issues"><img src="https://img.shields.io/github/issues/ilyachur/cmake4vim" alt="Issues"/></a>
+    <a href="https://github.com/ilyachur/cmake4vim/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-GNU_GPL_3.0-green.svg" alt="License"/></a>
+    <a href="https://gitter.im/cmake4vim/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge><img src="https://badges.gitter.im/cmake4vim/Lobby.svg" alt="Gitter"/></a>
+    <a href="https://github.com/ilyachur/cmake4vim/commits/main"><img src="https://img.shields.io/github/last-commit/ilyachur/cmake4vim" alt="Latest commit"/></a>
+    <a href="https://github.com/ilyachur/cmake4vim/stargazers"><img src="https://img.shields.io/github/stars/ilyachur/cmake4vim" alt="Repository's starts"/></a>
+</p>
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 
