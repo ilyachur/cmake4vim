@@ -9,6 +9,7 @@
     <a href="https://gitter.im/cmake4vim/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge><img src="https://badges.gitter.im/cmake4vim/Lobby.svg" alt="Gitter"/></a>
     <a href="https://github.com/ilyachur/cmake4vim/commits/main"><img src="https://img.shields.io/github/last-commit/ilyachur/cmake4vim" alt="Latest commit"/></a>
     <a href="https://github.com/ilyachur/cmake4vim/stargazers"><img src="https://img.shields.io/github/stars/ilyachur/cmake4vim" alt="Repository's starts"/></a>
+    <a href="https://gitter.im/cmake4vim/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/cmake4vim/Lobby.svg" alt="Join the chat"/></a>
 </p>
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
