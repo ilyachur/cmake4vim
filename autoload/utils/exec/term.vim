@@ -130,6 +130,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
         let l:termbufnr = bufnr()
     else
         let l:cmd = has('win32') ? a:cmd : [&shell, '-c', a:cmd]
+        silent execute printf('keepalt botright %dsplit', g:cmake_build_executor_height)
         let l:job = term_start(l:cmd, {
                     \ 'term_name': l:cmake4vim_term,
                     \ 'exit_cb': function('s:vimClose'),
@@ -139,6 +140,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
                     \ 'norestore': 1,
+                    \ 'curwin': 1,
                     \ 'cwd': a:cwd
                     \ })
     endif
