@@ -20,6 +20,14 @@ function! s:closeBuffer() abort
     silent exec 'bwipeout ' . l:bufnr
 endfunction
 
+function! s:removeANSI(buffer) abort
+    let l = 1
+    for line in getbufline(a:buffer, 1, '$')
+        call setbufline(a:buffer, l, substitute(line, '\e\[[0-9;]*m', '', 'g'))
+        let l = l + 1
+    endfor
+endfunction
+
 function! s:createQuickFix() abort
     " just to be sure all messages were processed
     sleep 100m
@@ -32,6 +40,9 @@ function! s:createQuickFix() abort
         let &errorformat = s:cmake4vim_job['err_fmt']
     endif
 
+    call setbufvar(l:bufnr, '&modifiable', 1)
+    call s:removeANSI(l:bufnr)
+    call setbufvar(l:bufnr, '&modifiable', 0)
     silent execute 'cgetbuffer ' . l:bufnr
     silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
     if s:cmake4vim_job['err_fmt'] !=# ''
@@ -169,6 +180,7 @@ function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt) abort
                     \ 'err_io' : 'buffer', 'err_buf' : l:outbufnr,
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
+                    \ 'pty': 1,
                     \ 'cwd': a:cwd,
                     \ })
     endif
