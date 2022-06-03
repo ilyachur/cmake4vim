@@ -10,6 +10,8 @@ Before:
 After:
     silent cclose
     silent call RemoveCMakeDirs()
+    new
+    only!
 
 Execute ([Term executor] Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
