@@ -20,6 +20,14 @@ function! s:closeBuffer() abort
     silent exec 'bwipeout ' . l:bufnr
 endfunction
 
+function! s:removeANSI(buffer) abort
+    let l = 1
+    for line in getbufline(a:buffer, 1, '$')
+        call setbufline(a:buffer, l, substitute(line, '\e\[[0-9;]*m', '', 'g'))
+        let l = l + 1
+    endfor
+endfunction
+
 function! s:createQuickFix() abort
     " just to be sure all messages were processed
     sleep 100m
@@ -32,6 +40,9 @@ function! s:createQuickFix() abort
         let &errorformat = s:cmake4vim_job['err_fmt']
     endif
 
+    call setbufvar(l:bufnr, '&modifiable', 1)
+    call s:removeANSI(l:bufnr)
+    call setbufvar(l:bufnr, '&modifiable', 0)
     silent execute 'cgetbuffer ' . l:bufnr
     silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
     if s:cmake4vim_job['err_fmt'] !=# ''
@@ -63,9 +74,9 @@ function! s:vimClose(channel) abort
     call s:createQuickFix()
 
     if l:open_qf == 0
-        silent execute g:cmake_build_executor_height . 'cwindow'
+        silent execute printf( 'botright %dcwindow', g:cmake_build_executor_height )
     else
-        silent execute g:cmake_build_executor_height . 'copen'
+        silent execute printf( 'botright %dcopen', g:cmake_build_executor_height )
     endif
     cbottom
 endfunction
@@ -95,7 +106,7 @@ function! s:nVimExit(job_id, data, event) abort
     endif
     call s:createQuickFix()
     if a:data != 0 || l:open_qf != 0
-        silent execute g:cmake_build_executor_height . 'copen'
+        silent execute printf( 'botright %dcopen', g:cmake_build_executor_height )
     endif
 endfunction
 
@@ -106,10 +117,10 @@ function! s:createJobBuf() abort
     " qflist is open somewhere
     if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
         " move the cursor there
-        silent execute g:cmake_build_executor_height . 'copen'
+        silent execute printf( 'botright %dcopen', g:cmake_build_executor_height )
         silent execute 'keepalt edit ' . s:cmake4vim_buf
     else
-        silent execute printf('keepalt belowright %dsplit %s', g:cmake_build_executor_height, s:cmake4vim_buf)
+        silent execute printf('keepalt botright %dsplit %s', g:cmake_build_executor_height, s:cmake4vim_buf)
     endif
     setlocal bufhidden=hide buftype=nofile buflisted nolist
     setlocal noswapfile nowrap nomodifiable
@@ -169,6 +180,7 @@ function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt) abort
                     \ 'err_io' : 'buffer', 'err_buf' : l:outbufnr,
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
+                    \ 'pty': 1,
                     \ 'cwd': a:cwd,
                     \ })
     endif

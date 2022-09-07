@@ -35,9 +35,14 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 * Plugin allows to find and run executable file for selected target.
 * Plugin supports [Vimspector](https://github.com/puremourning/vimspector) plugin. Plugin can generate and modify Vimspector configuration file in order to save command line arguments and allows to debug application.
 
-## **Usage**
+## Extensions
 
-### **Installation**
+ - [SantinoKeupp/telescope-cmake4vim.nvim](https://github.com/SantinoKeupp/telescope-cmake4vim.nvim) - [Telescope](https://github.com/nvim-telescope/telescope.nvim) integration.
+ - [SantinoKeupp/lualine-cmake4vim.nvim](https://github.com/SantinoKeupp/lualine-cmake4vim.nvim) - Integration with [Lualine](https://github.com/nvim-lualine/lualine.nvim). Plugin adds information about elected kit, build type and build target.
+
+## Usage
+
+### Installation
 
 You can use VimPlug for installation:
 ```vim
@@ -49,7 +54,7 @@ cd ~/.vim/bundle
 git clone https://github.com/ilyachur/cmake4vim
 ```
 
-### **Commands**
+### Commands
 
 The current version of the plugin supports next commands:
 
@@ -100,7 +105,7 @@ The current version of the plugin supports next commands:
 | `(CCMake)`                | `:CCMake`                 |
 | `(CMakeCompileSource)`    | `:CMakeCompileSource`     |
 
-### **Variables**
+### Variables
 
 Plugin supports special global variables which are allow to change behaviour of commands (you can change them in your **.vimrc**):
 
@@ -204,7 +209,7 @@ Example of a `.cmake-kits.json` file:
 } } }
 ```
 
-### **Jump to**
+### Jump to
 
 Plugin is closely integrated with quickfix list and allows to use quickfix features to jump between error or warning messages.
 
@@ -222,12 +227,12 @@ Plugin is closely integrated with quickfix list and allows to use quickfix featu
 * Ninja compilation error
 ![ninja error](doc/error_ninja.gif)
 
-## **Contributing**
+## Contributing
 
 Bug reports, feedback, feature and other pull requests are appreciated. Check the [Contributing Guidelines](CONTRIBUTING.md) for how to
 create a feature request, submit a pull request or post an issue.
 
-## **Tips and tricks**
+## Tips and tricks
 
 ### Open shell in the build directory
 
@@ -276,7 +281,7 @@ command! -nargs=1 -complete=custom,cmake4vim#CompleteKit CMakeSelectKit    call 
 command!                                                 FZFCMakeSelectKit call s:FZFSelectKit()
 ```
 
-## **References**
+## References
 
 ### Author
 
