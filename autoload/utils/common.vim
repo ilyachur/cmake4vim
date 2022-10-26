@@ -109,9 +109,8 @@ endfunction
 function! utils#common#Warning(msg) abort
     if !has('nvim') && v:version >= 820
         call popup_notification(a:msg, #{highlight: 'WarningMsg', pos: 'center' })
-    else
-        echohl WarningMsg |
-                    \ echomsg a:msg |
-                    \ echohl None
     endif
+    silent echohl WarningMsg |
+                \ echomsg a:msg |
+                \ echohl None
 endfunction
