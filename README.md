@@ -1,4 +1,4 @@
-# **cmake4vim**
+# **cmake4vim** - CMake integration to Vim/Neovim
 
 <p>
     <a href="#"><img src="https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg" alt="Build Status"/></a>
