@@ -124,7 +124,6 @@ The options below allow to change plugin behavior.
     let g:cmake_vimspector_default_configuration = {
                 \ 'adapter': '',
                 \ 'configuration': {
-                    \ 'type': '',
                     \ 'request': 'launch',
                     \ 'cwd': '${workspaceRoot}',
                     \ 'Mimode': '',
