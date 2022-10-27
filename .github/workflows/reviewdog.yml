@@ -1,5 +1,5 @@
 name: CodeStyle
-on: [pull_request]
+on: [push, pull_request]
 
 jobs:
   vimlint:
@@ -19,7 +19,7 @@ jobs:
         run: |
           vint .
       - name: vint
-        if: failure() # Run to report code style issues
+        if: failure() && startsWith(github.event_name, 'pull_request') # Run to report code style issues
         uses: reviewdog/action-vint@v1
         with:
           github_token: ${{ secrets.github_token }}
