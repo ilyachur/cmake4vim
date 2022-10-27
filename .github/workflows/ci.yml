@@ -11,24 +11,6 @@ on:
       - master
 
 jobs:
-  code_style:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup python modules
-      uses: actions/setup-python@master
-      with:
-          python-version: 3.7
-    - name: Install Vint
-      run: |
-          pip3 install vim-vint
-
-    - name: Run code style check
-      run: |
-        vint .
-
   tests:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     strategy:
