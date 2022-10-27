@@ -91,8 +91,14 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    silent call cmake4vim#ResetCMakeCache()
-    call cmake4vim#GenerateCMake(join(a:000))
+    if utils#cmake#verNewerOrEq([3, 24])
+        let l:build_dir = utils#cmake#findBuildDir()
+        call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
+        call cmake4vim#SelectTarget(g:cmake_build_target)
+    else
+        silent call cmake4vim#ResetCMakeCache()
+        call cmake4vim#GenerateCMake(join(a:000))
+    endif
 endfunction
 
 " The function is called when user saves cmake scripts

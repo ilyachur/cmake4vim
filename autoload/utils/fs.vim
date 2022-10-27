@@ -46,12 +46,10 @@ function! utils#fs#createLink(src, dst) abort
     "     return
     " endif
     silent call utils#fs#removeFile(a:dst)
-    if executable('copy')
+    if !utils#cmake#verNewerOrEq([3, 13]) && executable('copy')
         silent call system('copy '  . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
-    elseif executable('ln')
-        silent call system('ln -s ' . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
     else
-        call utils#common#Warning('Cannot create link!')
+        silent call system('cmake -E create_symlink ' . utils#fs#fnameescape(a:src) . ' ' . utils#fs#fnameescape(a:dst))
     endif
 endfunction
 
