@@ -1,4 +1,4 @@
-# **cmake4vim**
+# **cmake4vim** - CMake integration to Vim/Neovim
 
 <p>
     <a href="#"><img src="https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg" alt="Build Status"/></a>
@@ -28,6 +28,7 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 * The plugin has an integration with next fuzzy finder plugins:
    * **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)**
    * **[FZF](https://github.com/junegunn/fzf.vim)**
+   * **[Telescope](https://github.com/nvim-telescope/telescope.nvim)** is supported through [extension](./README.md#extensions).
 * The plugin allows to specify make arguments for native build system (for example *-jN* and something else for Unix Make).
 * The plugin parses the output of cmake command and supports jump to warnings or errors.
 * Supports work with multiple build types
@@ -124,7 +125,6 @@ The options below allow to change plugin behavior.
     let g:cmake_vimspector_default_configuration = {
                 \ 'adapter': '',
                 \ 'configuration': {
-                    \ 'type': '',
                     \ 'request': 'launch',
                     \ 'cwd': '${workspaceRoot}',
                     \ 'Mimode': '',

@@ -24,7 +24,6 @@ let g:cmake_vimspector_support    = get(g:, 'cmake_vimspector_support'   , 0    
 let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default_configuration', {
             \ 'adapter': '',
             \ 'configuration': {
-                \ 'type': '',
                 \ 'request': 'launch',
                 \ 'cwd': '${workspaceRoot}',
                 \ 'Mimode': '',
