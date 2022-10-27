@@ -6,9 +6,11 @@ jobs:
     name: vimlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: vimlint
-        uses: tsuyoshicho/action-vimlint@v1
+      - name: Clone CMake4Vim
+        uses: actions/checkout@v2
+      - name: vimlint report
+        uses: reviewdog/action-vimlint@v1
         with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review # Change reporter.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: error
