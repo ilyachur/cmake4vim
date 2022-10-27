@@ -13,3 +13,9 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review # Change reporter.
           level: error
+      - name: vint-check
+        uses: reviewdog/action-vint@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-check
+          level: error
