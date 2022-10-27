@@ -15,7 +15,7 @@ augroup END
 
 " Options {{{ "
 " Common
-let g:cmake_executable            = get(g:, 'cmake_executable'           , 'cmake'       )
+let g:cmake_executable            = get(g:, "cmake_executable"           , 'cmake'       )
 let g:cmake_reload_after_save     = get(g:, 'cmake_reload_after_save'    , 0             )
 let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )
 let g:cmake_compile_commands      = get(g:, 'cmake_compile_commands'     , 0             )
