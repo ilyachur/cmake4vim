@@ -7,7 +7,6 @@ on:
     branches:
       - master
     paths:
-      - '.github/workflows/ci.yml'
       - 'after/**'
       - 'autoload/**'
       - 'plugin/**'
@@ -16,7 +15,6 @@ on:
     branches:
       - master
     paths:
-      - '.github/workflows/ci.yml'
       - 'after/**'
       - 'autoload/**'
       - 'plugin/**'
