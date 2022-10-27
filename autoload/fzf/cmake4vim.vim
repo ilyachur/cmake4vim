@@ -4,6 +4,7 @@
 if exists('g:loaded_fzf_cmake4vim')
     finish
 endif
+
 let g:loaded_fzf_cmake4vim = 1
 
 function! fzf#cmake4vim#SelectTarget(...) abort
