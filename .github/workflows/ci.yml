@@ -23,7 +23,7 @@ on:
       - 'test/**'
 
 concurrency:
-  group: ${{ github.head_ref || github.run_id }}
+  group: ${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
