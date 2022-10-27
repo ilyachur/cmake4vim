@@ -6,9 +6,21 @@ on:
   push:
     branches:
       - master
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'after/**'
+      - 'autoload/**'
+      - 'plugin/**'
+      - 'test/**'
   pull_request:
     branches:
       - master
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'after/**'
+      - 'autoload/**'
+      - 'plugin/**'
+      - 'test/**'
 
 jobs:
   tests:
