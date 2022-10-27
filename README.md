@@ -28,6 +28,7 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 * The plugin has an integration with next fuzzy finder plugins:
    * **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)**
    * **[FZF](https://github.com/junegunn/fzf.vim)**
+   * **[Telescope](https://github.com/nvim-telescope/telescope.nvim)** is supported through [extension](./README.md#extensions).
 * The plugin allows to specify make arguments for native build system (for example *-jN* and something else for Unix Make).
 * The plugin parses the output of cmake command and supports jump to warnings or errors.
 * Supports work with multiple build types
