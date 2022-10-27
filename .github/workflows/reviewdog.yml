@@ -19,7 +19,7 @@ jobs:
         run: |
           vint .
       - name: vint
-        if: failure() && startsWith(github.event_name, 'pull_request') # Run to report code style issues
+        if: failure()
         uses: reviewdog/action-vint@v1
         with:
           github_token: ${{ secrets.github_token }}
