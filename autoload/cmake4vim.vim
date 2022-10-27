@@ -107,7 +107,7 @@ endfunction
 function! cmake4vim#CleanCMake() abort
     " Get generator specific clean target name
     let l:clean_target = utils#gen#common#getCleanTarget()
-    if l:clean_target ==# ''
+    if l:clean_target == ""
         call utils#common#Warning('CMake generator is not supported!')
         return
     endif
@@ -120,7 +120,7 @@ endfunction
 " Returns all CMake targets
 function! cmake4vim#GetAllTargets() abort
     let l:build_dir = utils#cmake#findBuildDir()
-    if l:build_dir ==# ''
+    if l:build_dir==# ''
         call utils#common#Warning('CMake targets were not found!')
     endif
     return utils#gen#common#getTargets(l:build_dir)
@@ -146,7 +146,7 @@ endfunction
 
 " Builds CMake project
 function! cmake4vim#CMakeBuild(...) abort
-    if empty( utils#cmake#findBuildDir() )
+    if empty(utils#cmake#findBuildDir())
         call utils#common#Warning('CMake project was not found!')
         return
     endif
@@ -155,7 +155,7 @@ function! cmake4vim#CMakeBuild(...) abort
     " Select target
     let l:result = cmake4vim#SelectTarget(l:cmake_target)
     " Build
-    call utils#common#executeCommand(l:result, 0)
+    call utils#common#executeCommand(l:result,0)
 endfunction
 
 " Builds current source
