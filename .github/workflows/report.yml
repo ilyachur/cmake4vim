@@ -2,7 +2,7 @@ name: Post CI
 
 on:
   workflow_run:
-    workflows: [ ci ]
+    workflows: [ CI ]
     branches: [ master ]
     types: [ completed ]
   push:
