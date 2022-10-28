@@ -6,6 +6,8 @@ on:
       - CI
     types:
       - completed
+    branches:
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
