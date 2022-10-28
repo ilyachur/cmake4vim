@@ -2,9 +2,10 @@ name: Post CI
 
 on:
   workflow_run:
-    workflows: [ CI ]
-    branches: [ master ]
-    types: [ completed ]
+    workflows:
+      - CI
+    types:
+      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: ahmadnassri/action-workflow-run-wait@v1
     - uses: actions/checkout@v2
     - name: Download artifacts
       uses: actions/download-artifact@v2
@@ -31,7 +30,6 @@ jobs:
       run: |
         bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
     - name: Upload coverage to Codecov
-      if: ${{ github.event.workflow_run.conclusion != 'success' }}
+      if: ${{ github.event.workflow_run.conclusion != 'failure' }}
       run: |
-        echo ${{ github.event.workflow_run.conclusion }}
         exit 1
