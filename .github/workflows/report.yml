@@ -1,3 +1,5 @@
+name: Post CI
+
 on:
   workflow_run:
     workflows: [ ci ]
@@ -6,9 +8,21 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.github/workflows/ci.yml'
+      - 'after/**'
+      - 'autoload/**'
+      - 'plugin/**'
+      - 'test/**'
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '.github/workflows/ci.yml'
+      - 'after/**'
+      - 'autoload/**'
+      - 'plugin/**'
+      - 'test/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,4 +50,6 @@ jobs:
         bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
     - name: Upload coverage to Codecov
       if: ${{ github.event.workflow_run.conclusion != 'success' }}
-      run: exit 1
+      run: |
+        echo ${{ github.event.workflow_run.conclusion }}
+        exit 1
