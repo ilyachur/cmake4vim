@@ -26,7 +26,6 @@ jobs:
       with:
         filters: |
           paths:
-            - '.github/workflows/ci.yml'
             - 'after/**'
             - 'autoload/**'
             - 'plugin/**'
