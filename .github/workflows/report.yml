@@ -9,7 +9,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/**'
       - 'after/**'
       - 'autoload/**'
       - 'plugin/**'
@@ -18,7 +18,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/**'
       - 'after/**'
       - 'autoload/**'
       - 'plugin/**'
