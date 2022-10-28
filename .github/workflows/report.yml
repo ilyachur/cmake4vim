@@ -3,6 +3,16 @@ on:
     workflows: [ ci ]
     branches: [ master ]
     types: [ completed ]
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   Report:
