@@ -12,7 +12,6 @@
     <a href="https://gitter.im/cmake4vim/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/cmake4vim/Lobby.svg" alt="Join the chat"/></a>
 </p>
 
-Test
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 
 ![cmake4vim common](doc/common.gif)
