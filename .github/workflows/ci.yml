@@ -34,6 +34,8 @@ jobs:
 
   tests:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
+    needs:
+      - changes
     if: ${{ needs.changes.outputs.paths == 'true' }}
     strategy:
       fail-fast: false
