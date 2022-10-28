@@ -2,12 +2,9 @@ name: Post CI
 
 on:
   workflow_run:
-    workflows:
-      - CI
+    workflows: [CI]
     types:
       - completed
-    branches:
-      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,8 +20,8 @@ jobs:
       uses: actions/download-artifact@v2
       if: ${{ github.event.workflow_run.conclusion == 'success' }}
       with:
-          name: coverage
-          path: ./cov_report
+        name: coverage
+        path: ./cov_report
     - name: Upload coverage to Codecov
       if: ${{ github.event.workflow_run.conclusion == 'success' }}
       env:
