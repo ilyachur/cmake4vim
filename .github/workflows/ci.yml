@@ -8,6 +8,7 @@ on:
       - master
     paths:
       - '.github/workflows/ci.yml'
+      - '.github/workflows/report.yml'
       - 'after/**'
       - 'autoload/**'
       - 'plugin/**'
@@ -17,6 +18,7 @@ on:
       - master
     paths:
       - '.github/workflows/ci.yml'
+      - '.github/workflows/report.yml'
       - 'after/**'
       - 'autoload/**'
       - 'plugin/**'
@@ -61,45 +63,45 @@ jobs:
       uses: actions/setup-python@master
       with:
           python-version: 3.7
-    - name: Install covimerage
-      run: |
-          pip3 install 'click<8.0.0'
-          pip3 install covimerage
-          pip3 install coveralls
-    - name: Install vim
-      uses: rhysd/action-setup-vim@v1
-      with:
-        neovim: ${{ matrix.nvim }}
-        version: ${{ matrix.vim_version  }}
-    - name: Install cmake
-      uses: jwlawson/actions-setup-cmake@master
-      with:
-          cmake-version: ${{ matrix.cmake_version }}
-    - name: Check cmake
-      run: |
-          which cmake
-          cmake --version
-    - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
-    - name: Check Ninja
-      run: |
-          which ninja
-          ninja --version
-    - if: matrix.os == 'macos-latest'  # Install gtest in order to avoid problems with cmake 2.8 on macOS
-      run: |
-        git clone --depth 1 --branch release-1.11.0 https://github.com/google/googletest ${HOME}/gtest
-        mkdir ${HOME}/gtest/build
-        pushd ${HOME}/gtest/build
-        cmake -DCMAKE_CXX_FLAGS="-std=c++11" ..
-        make -j8
-        make install
-        popd
-    - name: Run tests
-      run: |
-        python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: coverage
-        path: ./*.xml
-        if-no-files-found: error
+    # - name: Install covimerage
+    #   run: |
+    #       pip3 install 'click<8.0.0'
+    #       pip3 install covimerage
+    #       pip3 install coveralls
+    # - name: Install vim
+    #   uses: rhysd/action-setup-vim@v1
+    #   with:
+    #     neovim: ${{ matrix.nvim }}
+    #     version: ${{ matrix.vim_version  }}
+    # - name: Install cmake
+    #   uses: jwlawson/actions-setup-cmake@master
+    #   with:
+    #       cmake-version: ${{ matrix.cmake_version }}
+    # - name: Check cmake
+    #   run: |
+    #       which cmake
+    #       cmake --version
+    # - name: Setup Ninja
+    #   uses: seanmiddleditch/gha-setup-ninja@master
+    # - name: Check Ninja
+    #   run: |
+    #       which ninja
+    #       ninja --version
+    # - if: matrix.os == 'macos-latest'  # Install gtest in order to avoid problems with cmake 2.8 on macOS
+    #   run: |
+    #     git clone --depth 1 --branch release-1.11.0 https://github.com/google/googletest ${HOME}/gtest
+    #     mkdir ${HOME}/gtest/build
+    #     pushd ${HOME}/gtest/build
+    #     cmake -DCMAKE_CXX_FLAGS="-std=c++11" ..
+    #     make -j8
+    #     make install
+    #     popd
+    # - name: Run tests
+    #   run: |
+    #     python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: coverage
+    #     path: ./*.xml
+    #     if-no-files-found: error
