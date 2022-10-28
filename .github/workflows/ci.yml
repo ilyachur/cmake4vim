@@ -42,16 +42,9 @@ jobs:
         include:
           - platform: 'Linux'
             os: 'ubuntu-latest'
-          - platform: 'MacOS'
-            os: 'macos-latest'
-          - platform: 'Windows'
-            os: 'windows-latest'
           - vim_type: 'Vim'
             nvim: false
             vim_executable: vim
-          - vim_type: 'Neovim'
-            nvim: true
-            vim_executable: nvim
 
     runs-on: '${{ matrix.os  }}'
     timeout-minutes: 25
