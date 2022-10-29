@@ -10,27 +10,33 @@ on:
     branches:
       - master
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  code_style:
-
+  changes:
     runs-on: ubuntu-latest
-
+    outputs:
+      paths: ${{ steps.filter.outputs.paths }}
     steps:
     - uses: actions/checkout@v2
-    - name: Setup python modules
-      uses: actions/setup-python@master
+    - uses: dorny/paths-filter@v2
+      id: filter
       with:
-          python-version: 3.7
-    - name: Install Vint
-      run: |
-          pip3 install vim-vint
-
-    - name: Run code style check
-      run: |
-        vint .
+        filters: |
+          paths:
+            - '.github/workflows/ci.yml'
+            - 'after/**'
+            - 'autoload/**'
+            - 'plugin/**'
+            - 'test/**'
 
   tests:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
+    needs:
+      - changes
+    if: ${{ needs.changes.outputs.paths == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -109,6 +115,7 @@ jobs:
   Report:
     runs-on: ubuntu-latest
     needs: [tests]
+    if: ${{ needs.changes.outputs.paths == 'true' }}
 
     steps:
     - uses: actions/checkout@v2
