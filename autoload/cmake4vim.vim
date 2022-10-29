@@ -91,6 +91,8 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
+    " CMake 3.24 supports the same functionality
+    " call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
     silent call cmake4vim#ResetCMakeCache()
     call cmake4vim#GenerateCMake(join(a:000))
 endfunction
