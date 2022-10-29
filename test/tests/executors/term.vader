@@ -10,8 +10,6 @@ Before:
 After:
     silent cclose
     silent call RemoveCMakeDirs()
-    new
-    only!
 
 Execute ([Term executor] Generate cmake project with default settings):
     if !has('win32')    " Skip for Windows
@@ -28,7 +26,6 @@ Execute ([Term executor] Generate cmake project with default settings and build 
         call WaitForJob()
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild incorrect_lib
-        silent on
         call WaitForJob()
     endif
 

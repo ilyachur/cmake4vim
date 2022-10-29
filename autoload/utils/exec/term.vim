@@ -48,9 +48,9 @@ function! s:vimClose(channel, status) abort
     call s:createQuickFix()
 
     if l:open_qf == 0
-        silent execute g:cmake_build_executor_height . 'cwindow'
+        silent execute printf('botright %dcwindow', g:cmake_build_executor_height)
     else
-        silent execute g:cmake_build_executor_height . 'copen'
+        silent execute printf('botright %dcopen', g:cmake_build_executor_height)
     endif
     cbottom
 
