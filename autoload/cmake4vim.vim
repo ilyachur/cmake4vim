@@ -92,7 +92,8 @@ endfunction
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
     if utils#cmake#verNewerOrEq([3, 24])
-        let l:build_dir = utils#cmake#findBuildDir()
+        " Creates build directory
+        let l:build_dir = utils#cmake#getBuildDir()
         call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
         call cmake4vim#SelectTarget(g:cmake_build_target)
     else
