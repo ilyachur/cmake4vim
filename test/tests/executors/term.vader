@@ -26,7 +26,6 @@ Execute ([Term executor] Generate cmake project with default settings and build 
         call WaitForJob()
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         silent CMakeBuild incorrect_lib
-        silent on
         call WaitForJob()
     endif
 
