@@ -151,7 +151,7 @@ Execute ([CMake generate] Call prepare file API after project generation):
     endif
 
 Execute ([CMake generate] Generate cmake project in custom source folder):
-    if utils#cmake#verNewerOrEq([3])
+    if utils#cmake#verNewerOrEq([3, 13])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         let g:cmake_src_dir='test proj'
         cd ..

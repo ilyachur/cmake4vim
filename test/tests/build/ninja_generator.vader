@@ -126,7 +126,7 @@ Execute ([Ninja] Build single unit with build in source):
     endif
 
 Execute ([Ninja] Build single unit with build in source, with spaces):
-    if !has('win32') " skip for windows
+    if !has('win32') && utils#cmake#verNewerOrEq([3, 13]) " skip for windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
