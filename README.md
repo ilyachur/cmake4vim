@@ -77,6 +77,8 @@ The current version of the plugin supports next commands:
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config.
  - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
  - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
+ - **`:CTestCurrent`** same as `:CTest` but run tests with `-R current_cmake_target`.
+ - **`:CTestCurrent!`** same as `:CTest!` but run tests with `-R current_cmake_target`.
 
 #### Integration
 
@@ -103,6 +105,7 @@ The current version of the plugin supports next commands:
 | `(CMakeInfo)`             | `:CMakeInfo`              |
 | `(CMakeRun)`              | `:CMakeRun`               |
 | `(CTest)`                 | `:CTest`                  |
+| `(CTestCurrent)`          | `:CTestCurrent`           |
 | `(CCMake)`                | `:CCMake`                 |
 | `(CMakeCompileSource)`    | `:CMakeCompileSource`     |
 

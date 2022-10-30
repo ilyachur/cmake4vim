@@ -42,4 +42,4 @@ else()
 endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${GTEST_LIBRARIES} test_lib)
-add_test(NAME unit COMMAND ${TARGET_NAME})
+add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME})

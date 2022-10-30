@@ -130,7 +130,7 @@ Execute ([CTest] CTest with custom args):
         let g:cmake_ctest_args = '-j2 --output-on-failure --verbose'
         silent CTest -R "non-existant_pattern"
         silent copen
-        Assert w:quickfix_title =~# '-j2 --output-on-failure --verbose -R "non-existant_pattern"'
+        Assert w:quickfix_title =~# '-j2 --output-on-failure --verbose -R "non-existant_pattern"', 'Assert ' . w:quickfix_title
         silent cclose
     endif
 
@@ -142,7 +142,20 @@ Execute ([CTest] CTest with custom args and a bang):
         let g:cmake_ctest_args = '-j2 --output-on-failure --verbose'
         silent CTest! -R "non-existant_pattern"
         silent copen
-        Assert w:quickfix_title !~# '-j2 --output-on-failure --verbose'
-        Assert w:quickfix_title =~# '-R "non-existant_pattern"'
+        Assert w:quickfix_title !~# '-j2 --output-on-failure --verbose', 'Assert1 ' . w:quickfix_title
+        Assert w:quickfix_title =~# '-R "non-existant_pattern"', 'Assert2 ' . w:quickfix_title
+        silent cclose
+    endif
+
+Execute ([CTest] CTest for current target):
+    if !has('win32')
+        silent CMakeBuild unit_tests
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        let g:cmake_ctest_args = ''
+        silent CTestCurrent
+        silent copen
+        Assert w:quickfix_title =~# '-R unit_tests', 'Assert ' . w:quickfix_title
         silent cclose
     endif

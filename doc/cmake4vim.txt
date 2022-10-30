@@ -61,6 +61,14 @@ COMMANDS                                                        *cmake-commands*
     Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest
     arguments.
 
+:CTestCurrent[{Args}]                                            *:CTestCurrent*
+    Runs tests for current target (-R cmake_current target).
+    Uses g:cmake_ctest_args. You can pass additional ctest arguments.
+
+:CTestCurrent![{Args}]                                           *:CTestCurrent!*
+    Runs tests for current target (-R cmake_current target).
+    Ignores g:cmake_ctest_args. You can pass additional ctest arguments.
+
 :CCMake                                                                *:CCMake*
     Allows to use *ccmake* command inside vim.
     The command supports next open modes (by default the horizontal mode
