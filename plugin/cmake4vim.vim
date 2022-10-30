@@ -65,6 +65,7 @@ command!       -nargs=1 -complete=custom,cmake4vim#CompleteBuildType    CMakeSel
 command!       -nargs=1 -complete=custom,cmake4vim#CompleteKit          CMakeSelectKit          call cmake4vim#SelectKit(<f-args>)
 command!       -nargs=? -complete=custom,cmake4vim#CompleteCCMakeModes  CCMake                  call cmake4vim#CCMake(<f-args>)
 command! -bang -nargs=?  CTest              call cmake4vim#CTest(<bang>0, <f-args>)
+command! -bang -nargs=?  CTestCurrent       call cmake4vim#CTestCurrent(<bang>0, <f-args>)
 command!                 CMakeReset         call cmake4vim#ResetCMakeCache()
 command!                 CMakeClean         call cmake4vim#CleanCMake()
 command!                 CMakeInfo          call utils#window#OpenCMakeInfo()
