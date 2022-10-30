@@ -242,7 +242,7 @@ function! cmake4vim#CTest(bang, ...) abort
 endfunction
 
 function! cmake4vim#CTestCurrent(bang, ...) abort
-    let l:args = join(a:000) . ' -R ' . g:cmake_build_target
+    let l:args = printf('%s -R %s',join(a:000), g:cmake_build_target)
     call cmake4vim#CTest(a:bang, l:args)
 endfunction
 
