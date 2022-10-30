@@ -10,6 +10,7 @@ on:
     branches:
       - master
 
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,7 +37,7 @@ jobs:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     needs:
       - changes
-    if: ${{ needs.changes.outputs.paths == 'false' }}
+    if: ${{ needs.changes.outputs.paths == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -115,7 +116,7 @@ jobs:
   Report:
     runs-on: ubuntu-latest
     needs: [tests]
-    if: ${{ needs.changes.outputs.paths == 'false' }}
+    if: ${{ needs.changes.outputs.paths == 'true' }}
 
     steps:
     - uses: actions/checkout@v2
