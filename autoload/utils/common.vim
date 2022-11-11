@@ -107,7 +107,7 @@ endfunction
 
 " Prints warning message
 function! utils#common#Warning(msg) abort
-    if !has('nvim') && v:version >= 820
+    if !has('nvim') && v:version >= 820 && type(a:msg) == v:t_string
         call popup_notification(a:msg, {
                     \ 'highlight': 'WarningMsg',
                     \ 'pos': 'center'

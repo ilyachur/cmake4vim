@@ -225,16 +225,25 @@ function! cmake4vim#CTest(bang, ...) abort
         return
     endif
     let l:cw_dir = getcwd()
-    let l:cmd = 'ctest '
+    let l:cmd = 'ctest'
+    let l:args = []
+    call extend(l:args, a:000)
+    if !a:bang
+        if type(g:cmake_ctest_args) == v:t_list
+            let l:args += g:cmake_ctest_args
+            call extend(l:args, g:cmake_ctest_args)
+        else
+            call extend(l:args, [g:cmake_ctest_args])
+        endif
+    endif
     if !utils#cmake#verNewerOrEq([3, 20])
         " Change work directory
         silent exec 'cd' l:build_dir
     else
-        let l:cmd .= '--test-dir ' . utils#fs#fnameescape(l:build_dir) . ' '
+        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
     endif
-    let l:cmd = printf('%s %s %s',l:cmd, a:bang ? '' : g:cmake_ctest_args, join(a:000))
     " Run
-    call utils#common#executeCommand(l:cmd, 1)
+    call utils#common#executeCommand(printf('%s %s',l:cmd, join(l:args)), 1)
     if !utils#cmake#verNewerOrEq([3, 20])
         " Change work directory to old work directory
         silent exec 'cd' l:cw_dir
@@ -242,8 +251,9 @@ function! cmake4vim#CTest(bang, ...) abort
 endfunction
 
 function! cmake4vim#CTestCurrent(bang, ...) abort
-    let l:args = printf('%s -R %s',join(a:000), g:cmake_build_target)
-    call cmake4vim#CTest(a:bang, l:args)
+    let l:args = [a:bang, '-R', g:cmake_build_target]
+    call extend(l:args, a:000)
+    call call("cmake4vim#CTest", l:args)
 endfunction
 
 " Functions allows to switch between build types
