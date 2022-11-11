@@ -253,7 +253,7 @@ endfunction
 function! cmake4vim#CTestCurrent(bang, ...) abort
     let l:args = [a:bang, '-R', g:cmake_build_target]
     call extend(l:args, a:000)
-    call call("cmake4vim#CTest", l:args)
+    call call('cmake4vim#CTest', l:args)
 endfunction
 
 " Functions allows to switch between build types
