@@ -243,7 +243,7 @@ function! cmake4vim#CTest(bang, ...) abort
         call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
     endif
     " Run
-    call utils#common#executeCommand(printf('%s %s',l:cmd, join(l:args)), 1)
+    call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
     if !utils#cmake#verNewerOrEq([3, 20])
         " Change work directory to old work directory
         silent exec 'cd' l:cw_dir
