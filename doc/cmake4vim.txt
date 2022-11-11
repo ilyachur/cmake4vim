@@ -1,7 +1,7 @@
 *cmake4vim.txt* cmake integration for Vim
 
 Authors:    Ilya Churaev <https://github.com/ilyachur>
-Licence:    GPLv3
+Licence:    MIT
 
 INTRODUCTION                                                             *cmake*
 
