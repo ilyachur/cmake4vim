@@ -36,7 +36,7 @@ function! s:createQuickFix() abort
         return
     endif
     let l:old_error = &errorformat
-    if s:cmake4vim_job['err_fmt'] !=# ''
+    if !empty(s:cmake4vim_job['err_fmt'])
         let &errorformat = s:cmake4vim_job['err_fmt']
     endif
 
@@ -45,14 +45,14 @@ function! s:createQuickFix() abort
     call setbufvar(l:bufnr, '&modifiable', 0)
     silent execute 'cgetbuffer ' . l:bufnr
     silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
-    if s:cmake4vim_job['err_fmt'] !=# ''
+    if !empty(s:cmake4vim_job['err_fmt'])
         let &errorformat = l:old_error
     endif
     " Remove cmake4vim job
     let s:cmake4vim_job = {}
     call s:closeBuffer()
     if !empty(s:cmake4vim_jobs_pool)
-        let [ l:next_job; s:cmake4vim_jobs_pool  ] = s:cmake4vim_jobs_pool
+        let [l:next_job; s:cmake4vim_jobs_pool] = s:cmake4vim_jobs_pool
         call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
     endif
 endfunction
@@ -74,9 +74,9 @@ function! s:vimClose(channel) abort
     call s:createQuickFix()
 
     if l:open_qf == 0
-        silent execute printf( 'botright %dcwindow', g:cmake_build_executor_height )
+        silent execute printf('botright %dcwindow', g:cmake_build_executor_height)
     else
-        silent execute printf( 'botright %dcopen', g:cmake_build_executor_height )
+        silent execute printf('botright %dcopen', g:cmake_build_executor_height)
     endif
     cbottom
 endfunction
@@ -106,7 +106,7 @@ function! s:nVimExit(job_id, data, event) abort
     endif
     call s:createQuickFix()
     if a:data != 0 || l:open_qf != 0
-        silent execute printf( 'botright %dcopen', g:cmake_build_executor_height )
+        silent execute printf('botright %dcopen', g:cmake_build_executor_height)
     endif
 endfunction
 
@@ -117,7 +117,7 @@ function! s:createJobBuf() abort
     " qflist is open somewhere
     if !empty(filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") ==# "qf"'))
         " move the cursor there
-        silent execute printf( 'botright %dcopen', g:cmake_build_executor_height )
+        silent execute printf('botright %dcopen', g:cmake_build_executor_height)
         silent execute 'keepalt edit ' . s:cmake4vim_buf
     else
         silent execute printf('keepalt botright %dsplit %s', g:cmake_build_executor_height, s:cmake4vim_buf)

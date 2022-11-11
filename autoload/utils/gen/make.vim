@@ -24,7 +24,7 @@ function! utils#gen#make#getTargets(build_dir) abort
     call remove(l:res, 0)
     for l:value in l:res
         let l:parced_target = split(l:value)
-        if l:value !=# '' && len(l:parced_target) > 1
+        if !empty(l:value) && len(l:parced_target) > 1
             let l:list_targets += [l:parced_target[1]]
         endif
     endfor

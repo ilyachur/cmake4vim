@@ -11,7 +11,7 @@ function! s:readVimspectorConfig() abort
     try
         return json_decode(join(readfile(s:getVimspectorConfig()), ''))
     catch
-        call utils#common#Warning( 'Exception reading vimspector config: ' . v:exception )
+        call utils#common#Warning('Exception reading vimspector config: ' . v:exception)
         return {}
     endtry
 endfunction
@@ -22,11 +22,11 @@ function! s:writeJson(json_content) abort
 py3 << EOF
 import json
 import vim
-with open( vim.eval('s:getVimspectorConfig()'), 'w' ) as vimspector_json:
+with open(vim.eval('s:getVimspectorConfig()'), 'w') as vimspector_json:
     sorted_content = json.dump(vim.eval('a:json_content'), vimspector_json, indent=4, sort_keys=True)
 EOF
     else " nvim doesn't have python3
-        silent call writefile( [ json_encode( a:json_content ) ], s:getVimspectorConfig() )
+        silent call writefile([json_encode(a:json_content)], s:getVimspectorConfig())
     endif
 
     let l:bufnr = bufnr('.vimspector.json')
@@ -99,9 +99,9 @@ function! utils#config#vimspector#getTargetConfig(target) abort
         if !empty(l:config)
             let l:conf = l:config['configurations']
             if has_key(l:conf, a:target) && has_key(l:conf[a:target], 'configuration')
-                let l:result['app' ] = get( l:conf[a:target]['configuration'], 'program', l:result['app' ] )
-                let l:result['args'] = get( l:conf[a:target]['configuration'], 'args'   , l:result['args'] )
-                let l:result['cwd'] = s:normalizeWorkDir(get( l:conf[a:target]['configuration'], 'cwd', l:result['cwd'] ))
+                let l:result['app'] = get(l:conf[a:target]['configuration'], 'program', l:result['app'])
+                let l:result['args'] = get(l:conf[a:target]['configuration'], 'args', l:result['args'])
+                let l:result['cwd'] = s:normalizeWorkDir(get(l:conf[a:target]['configuration'], 'cwd', l:result['cwd']))
             endif
         endif
     endif

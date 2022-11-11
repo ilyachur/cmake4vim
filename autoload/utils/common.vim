@@ -28,7 +28,7 @@ function! utils#common#executeCommands(cmds, open_result) abort
                     \ 'errFormat': get( l:cmd, 'errFormat', '' )
                     \ })
     endfor
-    if (g:cmake_build_executor ==# 'dispatch') || (g:cmake_build_executor ==# '' && exists(':Dispatch'))
+    if (g:cmake_build_executor ==# 'dispatch') || (empty(g:cmake_build_executor) && exists(':Dispatch'))
         " Close quickfix list to discard custom error format
         silent! cclose
         let l:cmd_line = ''
@@ -37,11 +37,11 @@ function! utils#common#executeCommands(cmds, open_result) abort
         " Dispatch doesn't support pool of tasks
         for l:cmd in l:commands
             " generate common command
-            if l:cmd_line !=# ''
+            if !empty(l:cmd_line)
                 let l:cmd_line .= ' && '
             endif
             let l:cwd = l:cmd['cwd']
-            if l:cwd['errFormat'] !=# ''
+            if !empty(l:cwd['errFormat'])
                 let l:errFormat = l:cwd['errFormat']
             endif
             if l:cwd != l:pcwd
@@ -54,7 +54,7 @@ function! utils#common#executeCommands(cmds, open_result) abort
             let l:cmd_line .= ' && cd ' . utils#fs#fnameescape(getcwd())
         endif
         call utils#exec#dispatch#run(l:cmd_line, a:open_result, l:errFormat)
-    elseif (g:cmake_build_executor ==# 'job') || (g:cmake_build_executor ==# '' && ((has('job') && has('channel')) || has('nvim')))
+    elseif (g:cmake_build_executor ==# 'job') || (empty(g:cmake_build_executor) && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
         let [l:cmd; l:cmds] = l:commands
 
@@ -62,7 +62,7 @@ function! utils#common#executeCommands(cmds, open_result) abort
         for l:command in l:cmds
             call utils#exec#job#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
         endfor
-    elseif (g:cmake_build_executor ==# 'term') || (g:cmake_build_executor ==# '' && (has('terminal') || has('nvim')))
+    elseif (g:cmake_build_executor ==# 'term') || (empty(g:cmake_build_executor) && (has('terminal') || has('nvim')))
         let [l:cmd; l:cmds] = l:commands
 
         call utils#exec#term#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])

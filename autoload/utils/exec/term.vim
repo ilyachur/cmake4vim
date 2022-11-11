@@ -7,14 +7,14 @@ let s:cmake4vim_jobs_pool = []
 
 function! s:createQuickFix() abort
     let l:old_error = &errorformat
-    if s:cmake4vim_term['err_fmt'] !=# ''
+    if !empty(s:cmake4vim_term['err_fmt'])
         let &errorformat = s:cmake4vim_term['err_fmt']
     endif
     " just to be sure all messages were processed
     sleep 100m
     cgetexpr join(s:cmake4vim_term['cout'], "\n")
     silent call setqflist( [], 'a', { 'title' : s:cmake4vim_term[ 'cmd' ] } )
-    if s:cmake4vim_term['err_fmt'] !=# ''
+    if !empty(s:cmake4vim_term['err_fmt'])
         let &errorformat = l:old_error
     endif
     " Remove cmake4vim job

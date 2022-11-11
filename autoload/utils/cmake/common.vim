@@ -29,10 +29,10 @@ endfunction
 " Returns the dictionary with CMake information
 function! utils#cmake#common#getInfo(...) abort
     let l:build_dir = ''
-    if exists('a:1') && a:1 !=# ''
+    if exists('a:1') && !empty(a:1)
         let l:build_dir = a:1
     endif
-    if l:build_dir !=# '' && empty(s:cmake_cache_info)
+    if !empty(l:build_dir) && empty(s:cmake_cache_info)
         call utils#cmake#common#collectCMakeInfo(l:build_dir)
     endif
     if !executable('cmake') || empty(s:cmake_cache_info)

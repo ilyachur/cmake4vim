@@ -4,7 +4,7 @@
 " Use dispatch to make command
 function! utils#exec#dispatch#run(cmd, open_qf, errFormat) abort
     let l:old_error = &l:errorformat
-    if a:errFormat !=# ''
+    if !empty(a:errFormat)
         let &l:errorformat = a:errFormat
     endif
     let l:old_make = &l:makeprg
@@ -15,7 +15,7 @@ function! utils#exec#dispatch#run(cmd, open_qf, errFormat) abort
     finally
         let &l:makeprg = l:old_make
     endtry
-    if a:errFormat !=# ''
+    if !empty(a:errFormat)
         let &l:errorformat = l:old_error
     endif
     return 0
