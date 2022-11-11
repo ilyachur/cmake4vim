@@ -290,8 +290,7 @@ function! cmake4vim#RunTarget(bang, ...) abort
     let l:build_command = cmake4vim#SelectTarget(g:cmake_build_target)
     let l:exec_path = utils#cmake#getBinaryPath()
     let l:conf = {
-                \ g:cmake_build_target:
-                \ {
+                \ g:cmake_build_target: {
                 \ 'app': l:exec_path,
                 \ 'args': l:args
                 \ } }
