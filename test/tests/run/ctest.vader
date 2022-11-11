@@ -130,7 +130,7 @@ Execute ([CTest] CTest with custom args):
         let g:cmake_ctest_args = '-j2 --output-on-failure --verbose'
         silent CTest -R "non-existant_pattern"
         silent copen
-        Assert w:quickfix_title =~# '-j2 --output-on-failure --verbose -R "non-existant_pattern"', 'Assert ' . w:quickfix_title
+        Assert w:quickfix_title =~# '-R "non-existant_pattern" -j2 --output-on-failure --verbose', 'Assert ' . w:quickfix_title
         silent cclose
     endif
 
