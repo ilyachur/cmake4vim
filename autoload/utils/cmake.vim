@@ -311,7 +311,9 @@ function! utils#cmake#getBinaryPath() abort
         endif
         if l:target['type'] !=# 'EXECUTABLE'
             let v:errmsg = 'Target ' . g:cmake_build_target . ' is not an executable'
-            call utils#common#Warning(v:errmsg)
+            if !a:0
+                call utils#common#Warning(v:errmsg)
+            endif
             return ''
         endif
         if !has('win32')

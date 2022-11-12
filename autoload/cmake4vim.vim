@@ -323,4 +323,45 @@ function! cmake4vim#CCMake(...) abort
     endif
     exec l:modes[l:mode] l:cmd
 endfunction
+
+function! cmake4vim#init() abort
+    let g:cmake_executable            = get(g:, 'cmake_executable'           , 'cmake'       )
+    let g:cmake_reload_after_save     = get(g:, 'cmake_reload_after_save'    , 0             )
+    let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )
+    let g:cmake_compile_commands      = get(g:, 'cmake_compile_commands'     , 0             )
+    let g:cmake_compile_commands_link = get(g:, 'cmake_compile_commands_link', ''            )
+    let g:cmake_vimspector_support    = get(g:, 'cmake_vimspector_support'   , 0             )
+    let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default_configuration', {
+                \ 'adapter': '',
+                \ 'configuration': {
+                \ 'request': 'launch',
+                \ 'cwd': '${workspaceRoot}',
+                \ 'Mimode': '',
+                \ 'args': [],
+                \ 'program': ''
+                \ }
+                \ })
+
+    " Optional variable allow to specify the build executor
+    " Possible values: 'job', 'dispatch', 'system', ''
+    let g:cmake_build_executor        = get(g:, 'cmake_build_executor'       , '')
+    let g:cmake_build_executor_height = get(g:, 'cmake_build_executor_height', 10)
+
+    " Build path
+    let g:cmake_build_path_pattern    = get(g:, 'cmake_build_path_pattern'   , ''            )
+    let g:cmake_build_dir             = get(g:, 'cmake_build_dir'            , ''            )
+    let g:cmake_build_dir_prefix      = get(g:, 'cmake_build_dir_prefix'     , 'cmake-build-')
+
+    " CMake build
+    let g:make_arguments              = get(g:, 'make_arguments'             , ''            )
+    let g:cmake_build_target          = get(g:, 'cmake_build_target'         , ''            )
+    let g:cmake_build_type            = get(g:, 'cmake_build_type'           , ''            )
+    let g:cmake_src_dir               = get(g:, 'cmake_src_dir'              , ''            )
+    let g:cmake_usr_args              = get(g:, 'cmake_usr_args'             , ''            )
+    let g:cmake_ctest_args            = get(g:, 'cmake_ctest_args'           , ''            )
+    let g:cmake_variants              = get(g:, 'cmake_variants'             , {}            )
+    let g:cmake_selected_kit          = get(g:, 'cmake_selected_kit'         , ''            )
+    let g:cmake_kits                  = get(g:, 'cmake_kits'                 , {}            )
+    let g:cmake_kits_global_path      = get(g:, 'cmake_kits_global_path'     , ''            )
+endfunction
 " }}} Public functions "
