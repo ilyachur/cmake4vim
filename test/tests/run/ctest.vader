@@ -134,6 +134,18 @@ Execute ([CTest] CTest with custom args):
         silent cclose
     endif
 
+Execute ([CTest] CTest with list of custom args):
+    if !has('win32')
+        Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
+        Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
+        Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
+        let g:cmake_ctest_args = ['-j2', '--output-on-failure', '--verbose']
+        silent CTest -R "non-existant_pattern"
+        silent copen
+        Assert w:quickfix_title =~# '-R "non-existant_pattern" -j2 --output-on-failure --verbose', 'Assert ' . w:quickfix_title
+        silent cclose
+    endif
+
 Execute ([CTest] CTest with custom args and a bang):
     if !has('win32')
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
