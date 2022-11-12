@@ -29,7 +29,7 @@ function! utils#gen#ninja#getTargets(build_dir) abort
             continue
         endif
 
-        if l:value !=# ''
+        if !empty(l:value)
             let l:target = split(l:value, ':')[0]
             let l:list_targets += [l:target]
         endif

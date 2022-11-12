@@ -60,7 +60,7 @@ function! utils#fs#fnameescape(file) abort
     " TODO: could this be replaced with shellescape()?
     if has('win32')
         let l:path = substitute(a:file, '\/', '\\', 'g')
-        if l:path !=# ''
+        if !empty(l:path)
             let l:path = '"' . l:path . '"'
         endif
         return l:path

@@ -152,7 +152,7 @@ Execute ([CMake kits] Call splitUserArgs with a dict):
 
 Execute ([CMake kits] Select a non-existing kit):
     call cmake4vim#SelectKit('nonexistant_key')
-    Assert g:cmake_selected_kit ==# ''
+    Assert empty(g:cmake_selected_kit)
 
 Execute ([CMake Kits] Find CMakeKit config in current folder):
     Assert !filereadable('.cmake-kits.json'), 'File already exists'

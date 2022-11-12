@@ -25,7 +25,7 @@ function! utils#gen#vs#getTargets(build_dir) abort
     endif
     let l:res = split(system('dir *.vcxproj /S /B'), "\n")
     for l:value in l:res
-        if l:value !=# ''
+        if !empty(l:value)
             let l:file = l:value[len(a:build_dir):]
             " Exclude projects from CMakeFiles folder
             if stridx(l:file, 'CMakeFiles') != -1

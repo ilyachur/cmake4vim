@@ -3,5 +3,3 @@ cmdargs:
     severity: style_problem
     stat: true
     color: true
-    env:
-        neovim: true

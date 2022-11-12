@@ -22,7 +22,7 @@ Execute ([Dispatch executor] Generate cmake project with default settings):
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         let iter = 0
-        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+        while iter < 100 && !filereadable("cmake-build-Release/CMakeCache.txt")
             sleep 2
             let iter += 1
         endwhile
@@ -41,7 +41,7 @@ Execute ([Dispatch executor] Build and run target):
         silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
         silent CMake
         let iter = 0
-        while iter < 30 && !filereadable("cmake-build-Release/CMakeCache.txt")
+        while iter < 100 && !filereadable("cmake-build-Release/CMakeCache.txt")
             sleep 2
             let iter += 1
         endwhile
@@ -49,7 +49,7 @@ Execute ([Dispatch executor] Build and run target):
         silent CMakeSelectTarget test_app
         silent CMakeRun --gtest_filter=Test*
         let iter = 0
-        while iter < 30 && !filereadable("cmake-build-Release/app/test_app")
+        while iter < 100 && !filereadable("cmake-build-Release/app/test_app")
             sleep 2
             let iter += 1
         endwhile

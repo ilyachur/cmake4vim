@@ -16,15 +16,15 @@ function! s:getReplyFolder(build_dir) abort
 endfunction
 
 function! s:createFile(filename, content) abort
-    silent call writefile( [ a:content ], a:filename )
+    silent call writefile([a:content], a:filename)
 endfunction
 
 function! s:createQuery() abort
     let l:query = {}
     let l:requests = []
-    let l:requests += [ { 'kind': 'codemodel', 'version': 2 } ]
-    let l:requests += [ { 'kind': 'cache', 'version': 2 } ]
-    let l:requests += [ { 'kind': 'cmakeFiles', 'version': 1 } ]
+    let l:requests += [{'kind': 'codemodel', 'version': 2}]
+    let l:requests += [{'kind': 'cache', 'version': 2}]
+    let l:requests += [{'kind': 'cmakeFiles', 'version': 1}]
     let l:query['requests'] = l:requests
     let l:query['client'] = {}
     return l:query
@@ -43,13 +43,13 @@ function! s:parseTarget(path) abort
 endfunction
 
 function! s:parseCodemodel(reply_folder, jsonFile, hash) abort
-    let l:codemodel = json_decode(join(readfile(a:reply_folder . '/' . a:jsonFile), ''))
+    let l:codemodel = json_decode(join(readfile(printf('%s/%s', a:reply_folder, a:jsonFile)), ''))
     let l:common = a:hash
     let l:targetsInfo = {}
     for l:configuration in l:codemodel['configurations']
         let l:targetsInfo[l:configuration['name']] = {}
         for l:target in l:configuration['targets']
-            let l:targetsInfo[l:configuration['name']][l:target['name']] = s:parseTarget(a:reply_folder . '/' . l:target['jsonFile'])
+            let l:targetsInfo[l:configuration['name']][l:target['name']] = s:parseTarget(printf('%s/%s', a:reply_folder, l:target['jsonFile']))
         endfor
     endfor
     let l:common['cmake']['build_dir'] = l:codemodel['paths']['build']
@@ -104,7 +104,7 @@ function! utils#cmake#fileapi#prepare(build_dir) abort
         return
     endif
     let l:reply_folder = s:getReplyFolder(a:build_dir)
-    if l:reply_folder !=# ''
+    if !empty(l:reply_folder)
         call utils#fs#removeDirectory(l:reply_folder)
     endif
     let l:client_folder = s:getClientFolder(a:build_dir)
@@ -113,11 +113,11 @@ endfunction
 
 function! utils#cmake#fileapi#parseReply(build_dir) abort
     let l:reply_folder = s:getReplyFolder(a:build_dir)
-    if l:reply_folder ==# ''
+    if empty(l:reply_folder)
         return {}
     endif
     let l:index_file = globpath(l:reply_folder, 'index*')
-    if l:index_file ==# ''
+    if empty(l:index_file)
         return {}
     endif
     let l:common =  s:parseAll(l:reply_folder, l:index_file)

@@ -34,7 +34,7 @@ endfunction
 
 " Completes CMake build types
 function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
-    return join( sort( keys( utils#cmake#getCMakeVariants() ), 'i' ), "\n")
+    return join(sort(keys(utils#cmake#getCMakeVariants()), 'i' ), "\n")
 endfunction
 
 function! cmake4vim#CompleteKit(arg_lead, cmd_line, cursor_pos) abort
@@ -44,7 +44,7 @@ endfunction
 " Method remove build directory and reset the cmake cache
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#findBuildDir()
-    if l:build_dir !=# ''
+    if !empty(l:build_dir)
         call utils#fs#removeDirectory(l:build_dir)
     endif
     call utils#cmake#common#resetCache()
@@ -63,7 +63,7 @@ function! cmake4vim#GenerateCMake(...) abort
     call utils#cmake#common#makeRequests(l:build_dir)
 
     " Generates a command for CMake
-    let l:cmake_cmd = utils#cmake#getCMakeGenerationCommand(join(a:000))
+    let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
 
     " For old CMake version need to change the directory to generate CMake project
     " -B option was introduced only in CMake 3.13
@@ -94,7 +94,7 @@ function! cmake4vim#ResetAndReloadCMake(...) abort
     " CMake 3.24 supports the same functionality
     " call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
     silent call cmake4vim#ResetCMakeCache()
-    call cmake4vim#GenerateCMake(join(a:000))
+    call call('cmake4vim#GenerateCMake', a:000)
 endfunction
 
 " The function is called when user saves cmake scripts
@@ -109,7 +109,7 @@ endfunction
 function! cmake4vim#CleanCMake() abort
     " Get generator specific clean target name
     let l:clean_target = utils#gen#common#getCleanTarget()
-    if l:clean_target ==# ''
+    if empty(l:clean_target)
         call utils#common#Warning('CMake generator is not supported!')
         return
     endif
@@ -122,7 +122,7 @@ endfunction
 " Returns all CMake targets
 function! cmake4vim#GetAllTargets() abort
     let l:build_dir = utils#cmake#findBuildDir()
-    if l:build_dir ==# ''
+    if empty(l:build_dir)
         call utils#common#Warning('CMake targets were not found!')
     endif
     return utils#gen#common#getTargets(l:build_dir)
@@ -132,7 +132,7 @@ endfunction
 " Returns command line for target build
 function! cmake4vim#SelectTarget(target) abort
     let l:build_dir = utils#cmake#findBuildDir()
-    if l:build_dir ==# ''
+    if empty(l:build_dir)
         call utils#common#Warning('CMake project was not found!')
         return ''
     endif
@@ -148,7 +148,7 @@ endfunction
 
 " Builds CMake project
 function! cmake4vim#CMakeBuild(...) abort
-    if empty( utils#cmake#findBuildDir() )
+    if empty(utils#cmake#findBuildDir())
         call utils#common#Warning('CMake project was not found!')
         return
     endif
@@ -161,24 +161,24 @@ function! cmake4vim#CMakeBuild(...) abort
 endfunction
 
 " Builds current source
-function! cmake4vim#CompileSource( ... ) abort
-    let l:source_name = get( a:, 1, expand('%') )
+function! cmake4vim#CompileSource(...) abort
+    let l:source_name = get(a:, 1, expand('%'))
     let l:extension = fnamemodify( l:source_name, ':e' )
-    if empty( l:extension ) || index( [ 'h', 'hpp' ], tolower( l:extension ) ) >= 0
-        call utils#common#Warning( 'Given file is not a source file!' )
+    if empty(l:extension) || index(['h', 'hpp'], tolower(l:extension)) >= 0
+        call utils#common#Warning('Given file is not a source file!')
         return
     endif
 
     let l:build_dir = utils#cmake#findBuildDir()
-    if empty( l:build_dir )
-        call utils#common#Warning( 'CMake project was not found!' )
+    if empty(l:build_dir)
+        call utils#common#Warning('CMake project was not found!')
         return
     endif
 
     " needed to detect the generator
-    let l:cache_info = utils#cmake#cache#collectInfo( l:build_dir )
+    let l:cache_info = utils#cmake#cache#collectInfo(l:build_dir)
     if empty( l:cache_info )
-        call utils#common#Warning( 'CMake cache was not found!' )
+        call utils#common#Warning('CMake cache was not found!')
         return
     endif
 
@@ -186,55 +186,64 @@ function! cmake4vim#CompileSource( ... ) abort
     " and with cmake v2.8.12.2 it doesn't work with absolute paths
     " TODO: find the middle point
 
-    let l:generator = l:cache_info[ 'cmake' ][ 'generator' ]
+    let l:generator = l:cache_info['cmake']['generator']
 
     let l:target_name = ''
-    if l:generator =~# 'Unix Makefiles' || utils#cmake#verNewerOrEq( [ 3, 14 ] )
-        let l:target_name = utils#gen#common#getSingleUnitTargetName( l:generator, l:source_name )
+    if l:generator =~# 'Unix Makefiles' || utils#cmake#verNewerOrEq([ 3, 14 ])
+        let l:target_name = utils#gen#common#getSingleUnitTargetName(l:generator, l:source_name)
     else
         let l:prefix = ''
-        let l:build_dir = l:cache_info[ 'cmake' ][ 'build_dir' ]
+        let l:build_dir = l:cache_info['cmake']['build_dir']
         " build folder is below getcwd()
-        if l:generator =~# 'Ninja' && stridx( l:build_dir, getcwd() ) == 0
-                let l:subfolders = split(trim( split( l:build_dir, getcwd() )[0], '/'), '/')
-                for i in range( len( l:subfolders ) )
+        if l:generator =~# 'Ninja' && stridx(l:build_dir, getcwd()) == 0
+                let l:subfolders = split(trim(split(l:build_dir, getcwd())[0], '/'), '/')
+                for i in range(len(l:subfolders))
                     let l:prefix .= '../'
                 endfor
-                if utils#cmake#verNewerOrEq( [ 3, 13 ] )
+                if utils#cmake#verNewerOrEq([3, 13])
                     let l:target_name = '"' . l:prefix . l:source_name . '^' . '"'
                 else
-                    let l:target_name = l:prefix . fnameescape( l:source_name ) . '^'
+                    let l:target_name = l:prefix . fnameescape(l:source_name) . '^'
                 endif
         endif
     endif
 
     " TODO: find the middle point
-    if !utils#cmake#verNewerOrEq( [ 3, 13 ] )
-        let l:target_name = printf( '"%s"', l:target_name )
+    if !utils#cmake#verNewerOrEq([ 3, 13 ])
+        let l:target_name = printf('"%s"', l:target_name)
     endif
 
-    let l:cmd = utils#cmake#getBuildCommand( l:build_dir, l:target_name )
-    call utils#common#executeCommand( l:cmd, 1 )
+    let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:target_name)
+    call utils#common#executeCommand(l:cmd, 1)
 endfunction
 
 " Run Ctest
 function! cmake4vim#CTest(bang, ...) abort
     let l:build_dir = utils#cmake#findBuildDir()
-    if l:build_dir ==# ''
+    if empty(l:build_dir)
         call utils#common#Warning('CMake project was not found!')
         return
     endif
     let l:cw_dir = getcwd()
-    let l:cmd = 'ctest '
+    let l:cmd = 'ctest'
+    let l:args = []
+    call extend(l:args, a:000)
+    if !a:bang
+        if type(g:cmake_ctest_args) == v:t_list
+            let l:args += g:cmake_ctest_args
+            call extend(l:args, g:cmake_ctest_args)
+        else
+            call extend(l:args, [g:cmake_ctest_args])
+        endif
+    endif
     if !utils#cmake#verNewerOrEq([3, 20])
         " Change work directory
         silent exec 'cd' l:build_dir
     else
-        let l:cmd .= '--test-dir ' . utils#fs#fnameescape(l:build_dir) . ' '
+        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
     endif
-    let l:cmd = printf('%s %s %s',l:cmd, a:bang ? '' : g:cmake_ctest_args, join(a:000))
     " Run
-    call utils#common#executeCommand(l:cmd, 1)
+    call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
     if !utils#cmake#verNewerOrEq([3, 20])
         " Change work directory to old work directory
         silent exec 'cd' l:cw_dir
@@ -242,8 +251,9 @@ function! cmake4vim#CTest(bang, ...) abort
 endfunction
 
 function! cmake4vim#CTestCurrent(bang, ...) abort
-    let l:args = printf('%s -R %s',join(a:000), g:cmake_build_target)
-    call cmake4vim#CTest(a:bang, l:args)
+    let l:args = [a:bang, '-R', g:cmake_build_target]
+    call extend(l:args, a:000)
+    call call('cmake4vim#CTest', l:args)
 endfunction
 
 " Functions allows to switch between build types
@@ -254,7 +264,7 @@ endfunction
 
 " Functions allows to switch between cmake kits
 function! cmake4vim#SelectKit(name) abort
-    if !has_key( utils#cmake#kits#getCMakeKits(), a:name )
+    if !has_key(utils#cmake#kits#getCMakeKits(), a:name)
         call utils#common#Warning(printf("CMake kit '%s' not found", a:name))
         return
     endif
@@ -265,7 +275,7 @@ function! cmake4vim#SelectKit(name) abort
 endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
-    if empty( g:cmake_build_target )
+    if empty(g:cmake_build_target)
         call utils#common#Warning('Please select target first!')
         return
     endif
