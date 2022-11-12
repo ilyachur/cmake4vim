@@ -39,6 +39,7 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 
  - [SantinoKeupp/telescope-cmake4vim.nvim](https://github.com/SantinoKeupp/telescope-cmake4vim.nvim) - [Telescope](https://github.com/nvim-telescope/telescope.nvim) integration.
  - [SantinoKeupp/lualine-cmake4vim.nvim](https://github.com/SantinoKeupp/lualine-cmake4vim.nvim) - Integration with [Lualine](https://github.com/nvim-lualine/lualine.nvim). Plugin adds information about elected kit, build type and build target.
+ - [ilyachur/gtest-vim](https://github.com/ilyachur/gtest-vim) - Integrates vim with gtest. Plugin has a dependency on *cmake4vim* and can use cmake4vim capabilities to detect gtest executables.
 
 ## Usage
 
