@@ -300,7 +300,7 @@ function! utils#cmake#getBuildDir() abort
     return l:build_dir
 endfunction
 
-function! utils#cmake#getBinaryPath() abort
+function! utils#cmake#getBinaryPath(...) abort
     let l:cmake_info = utils#cmake#common#getInfo()
     let l:build_type = s:detectCMakeBuildType()
     if has_key(l:cmake_info, 'targets') && has_key(l:cmake_info['targets'], l:build_type) && has_key(l:cmake_info['targets'][l:build_type], g:cmake_build_target)
