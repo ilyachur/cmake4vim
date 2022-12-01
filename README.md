@@ -2,7 +2,6 @@
 
 <p>
     <a href="#"><img src="https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg" alt="Build Status"/></a>
-    <a href="#"><img src="https://img.shields.io/github/workflow/status/ilyachur/cmake4vim/code-style?&logo=github&label=vint" alt="Code style"/></a>
     <a href="https://codecov.io/gh/ilyachur/cmake4vim"><img src="https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg" alt="Code coverage"/></a>
     <a href="https://github.com/ilyachur/cmake4vim/issues"><img src="https://img.shields.io/github/issues/ilyachur/cmake4vim" alt="Issues"/></a>
     <a href="https://github.com/ilyachur/cmake4vim/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"/></a>
