@@ -41,8 +41,8 @@ function! utils#common#executeCommands(cmds, open_result) abort
                 let l:cmd_line .= ' && '
             endif
             let l:cwd = l:cmd['cwd']
-            if !empty(l:cwd['errFormat'])
-                let l:errFormat = l:cwd['errFormat']
+            if !empty(l:cmd['errFormat'])
+                let l:errFormat = l:cmd['errFormat']
             endif
             if l:cwd != l:pcwd
                 let l:cmd_line .= 'cd ' . utils#fs#fnameescape(l:cwd) . ' && '
