@@ -118,6 +118,11 @@ VARIABLES                                                      *cmake-variables*
                                     Default is '' which evaluates to the
                                     current working directory.
 
+*g:cmake_build_path_pattern*          allows to set a pattern for build dir.
+                                    Expects two strings (format and args)
+                                    which are evaluated in a 'printf' call.
+                                    Default is ''.
+
 *g:cmake_build_dir_prefix*            allows to set cmake build directory prefix.
                                     Default is 'cmake-build-'.
 
