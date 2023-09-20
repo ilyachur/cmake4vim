@@ -22,7 +22,7 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
   * Visual Studio
   * Ninja
 * The plugin shows cmake results using quickfix list. If you have installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, plugin will use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window. In other case plugin will use `jobs` to async run if your Vim editor supports it.
-* The plugin allows to specify cmake targets in order to avoid building of all project.
+* The plugin shows cmake results using quickfix list. If you have installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, plugin will use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window. In other case plugin will use `jobs` to async run if your Vim editor supports it.  * The plugin allows to specify cmake targets in order to avoid building of all project.
 * The plugin has an integration with next fuzzy finder plugins:
    * **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)**
    * **[FZF](https://github.com/junegunn/fzf.vim)**
@@ -282,6 +282,11 @@ endfunction
 command! -nargs=1 -complete=custom,cmake4vim#CompleteKit CMakeSelectKit    call s:customSelectKit(<f-args>)
 command!                                                 FZFCMakeSelectKit call s:FZFSelectKit()
 ```
+
+## Supported CMake version
+
+The plugin supports all CMake versions since 2.8.
+Since CMake 3.14 versions the plugin uses file API, this feature helps to have more information about CMake project and implement a smart detection of executable files for `:CMakeRun` command.
 
 ## References
 
