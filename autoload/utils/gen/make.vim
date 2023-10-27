@@ -32,7 +32,7 @@ function! utils#gen#make#getTargets(build_dir) abort
 endfunction
 
 " Returns the cmake build command for CMake generator
-function! utils#gen#make#getBuildCommand(build_dir, target, make_arguments) abort
-    let l:cmd = g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' -- ' . a:make_arguments
+function! utils#gen#make#getBuildCommand(build_dir, target, cmake_build_args, make_arguments) abort
+    let l:cmd = g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' ' . a:cmake_build_args . ' -- ' . a:make_arguments
     return l:cmd
 endfunction

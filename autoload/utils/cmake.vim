@@ -195,7 +195,7 @@ function! utils#cmake#getBuildCommand(build_dir, target) abort
         call utils#fs#createLink(l:src, l:dst)
     endif
 
-    return utils#gen#common#getBuildCommand(a:build_dir, a:target, g:make_arguments)
+    return utils#gen#common#getBuildCommand(a:build_dir, a:target, g:cmake_build_args, g:make_arguments)
 endfunction
 
 " Generates the command line for CMake generator

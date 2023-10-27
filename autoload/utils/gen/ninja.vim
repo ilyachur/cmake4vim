@@ -38,8 +38,8 @@ function! utils#gen#ninja#getTargets(build_dir) abort
 endfunction
 
 " Returns the cmake build command for CMake generator
-function! utils#gen#ninja#getBuildCommand(build_dir, target, make_arguments) abort
-    let l:cmd = g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' -- '
+function! utils#gen#ninja#getBuildCommand(build_dir, target, cmake_build_args, make_arguments) abort
+    let l:cmd = g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target ' . a:target . ' ' . a:cmake_build_args . ' -- '
     if stridx(a:make_arguments, '-C ') == -1 && a:target !=# utils#gen#ninja#getCleanTarget()
         let l:cmd .= '-C ' . utils#fs#fnameescape(fnamemodify(a:build_dir, ':p:h')) . ' '
     endif
