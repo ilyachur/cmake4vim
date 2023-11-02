@@ -20,7 +20,7 @@ jobs:
     outputs:
       paths: ${{ steps.filter.outputs.paths }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -64,7 +64,7 @@ jobs:
 
     steps:
     - name: Clone CMake4Vim
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
@@ -97,7 +97,7 @@ jobs:
       run: |
         python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: coverage
         path: ./*.xml
@@ -109,9 +109,9 @@ jobs:
     if: ${{ needs.changes.outputs.paths == 'true' }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Download artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
           name: coverage
           path: ./cov_report
