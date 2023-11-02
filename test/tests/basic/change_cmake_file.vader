@@ -19,5 +19,6 @@ Execute ([Change CMake script] Changes in cmake file should call project generat
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     let g:cmake_reload_after_save=1
     :e CMakeLists.txt
+    :set ma
     :w
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
