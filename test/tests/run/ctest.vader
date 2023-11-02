@@ -2,9 +2,13 @@ Before:
     silent call OpenTestProject()
 
     silent call ResetPluginOptions()
-
-    let g:cmake_build_args='--parallel'
-
+    if utils#cmake#verNewerOrEq([3, 12])
+        let g:cmake_build_args='--parallel'
+    else
+        if !has('win32')
+            let g:make_arguments='-j8'
+        endif
+    endif
     let g:cmake_usr_args="-DENABLE_TESTS=ON"
     " Use on in order to close all windows and avoid E36 error
     silent on
