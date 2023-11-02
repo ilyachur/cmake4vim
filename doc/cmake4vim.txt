@@ -136,6 +136,9 @@ VARIABLES                                                      *cmake-variables*
                                     Default is empty and default value depends
                                     on CMake Generator
 
+*g:cmake_build_args*                  allows to set custom arguments for
+                                    cmake build command. Default is empty.
+
 *g:make_arguments*                    allows to set custom parameters for make
                                     command. Default is empty.
                                     If variable is empty, plugin launches make

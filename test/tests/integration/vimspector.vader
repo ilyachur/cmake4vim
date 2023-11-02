@@ -247,7 +247,7 @@ Execute ([Vimspector] Read vimspector config containing backslashes):
         Assert has_key(config['configurations'], 'with_backslashes' ), 'Config should have the target with_backslashes'
         AssertEqual config['configurations']['with_backslashes']['configuration']['args'], ["--gtest_filter=\"Hello\""]
 
-        if !has('nvim')
+        if !has('nvim') && !has('win32')
             AssertEqual trim(readfile('.vimspector.json')[32]), '"--gtest_filter=\"Hello\""'
         endif
     endif

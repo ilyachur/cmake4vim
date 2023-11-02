@@ -161,6 +161,7 @@ The list contains variables which allow to configure CMake build.
  - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CONAN_PATH' : '~/.conan' } }`
  - **`g:cmake_build_target`** set the target name for build. Default is empty and default value depends on CMake Generator
  - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty. It can be either a string or a dictionary.
+ - **`g:cmake_build_args`** allows to set custom cmake build arguments (for example `--parallel`). Default is empty.
  - **`g:make_arguments`** allows to set custom parameters for make command. Default is empty. If variable is empty, plugin launches `make` without arguments.
  - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
  - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
