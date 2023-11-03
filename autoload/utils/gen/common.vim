@@ -72,14 +72,14 @@ endfunction
 
 " Returns the cmake build command for CMake generator
 " Returns empty string if CMake generator is not supported
-function! utils#gen#common#getBuildCommand(build_dir, target, make_arguments) abort
+function! utils#gen#common#getBuildCommand(build_dir, target, cmake_build_args, make_arguments) abort
     let l:cmake_gen = s:restoreCMakeGenerator()
     if stridx(l:cmake_gen, utils#gen#vs#getGeneratorName()) != -1
-        return utils#gen#vs#getBuildCommand(a:build_dir, a:target, a:make_arguments)
+        return utils#gen#vs#getBuildCommand(a:build_dir, a:target, a:cmake_build_args, a:make_arguments)
     elseif stridx(l:cmake_gen, utils#gen#ninja#getGeneratorName()) != -1
-        return utils#gen#ninja#getBuildCommand(a:build_dir, a:target, a:make_arguments)
+        return utils#gen#ninja#getBuildCommand(a:build_dir, a:target, a:cmake_build_args, a:make_arguments)
     elseif stridx(l:cmake_gen, utils#gen#make#getGeneratorName()) != -1
-        return utils#gen#make#getBuildCommand(a:build_dir, a:target, a:make_arguments)
+        return utils#gen#make#getBuildCommand(a:build_dir, a:target, a:cmake_build_args, a:make_arguments)
     endif
 endfunction
 

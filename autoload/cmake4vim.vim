@@ -364,6 +364,7 @@ function! cmake4vim#init() abort
 
     " CMake build
     let g:make_arguments              = get(g:, 'make_arguments'             , ''            )
+    let g:cmake_build_args            = get(g:, 'cmake_build_args'           , ''            )
     let g:cmake_build_target          = get(g:, 'cmake_build_target'         , ''            )
     let g:cmake_build_type            = get(g:, 'cmake_build_type'           , ''            )
     let g:cmake_src_dir               = get(g:, 'cmake_src_dir'              , ''            )

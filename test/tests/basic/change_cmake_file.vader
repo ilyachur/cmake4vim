@@ -16,8 +16,10 @@ Execute ([Change CMake script] Changes in cmake file shouldn't call project gene
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
 
 Execute ([Change CMake script] Changes in cmake file should call project generation):
-    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-    let g:cmake_reload_after_save=1
-    :e CMakeLists.txt
-    :w
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    if !has('win32') " Skip for Windows
+        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+        let g:cmake_reload_after_save=1
+        :e CMakeLists.txt
+        :w
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    endif
