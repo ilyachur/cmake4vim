@@ -81,7 +81,7 @@ The current version of the plugin supports next commands:
 
 #### Integration
 
- - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'vsplit' - vertical mode, 'hsplit' - horizontal mode, 'tab' - open ccmake in the new tab (by default the horizontal mode is used).
+ - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'vsplit' - vertical mode, 'split' - horizontal mode, 'tab' - open ccmake in the new tab (by default the executor window split mode is used).
 
 #### FZF plugins
 
@@ -141,7 +141,11 @@ The options below allow to change plugin behavior.
     - 'dispatch' uses [vim-dispatch](https://github.com/tpope/vim-dispatch) plugin to asynchronous build
     - 'system' uses synchronous build
     - '' uses automatic detection of supported modes (the priority is `dispatch`, `job`, `term`, `system`)
- - **`g:cmake_build_executor_height`** defines the height (in rows) of the build window and quickfixlist window showing the results. Default is 10.
+ - **`g:cmake_build_executor_window_size`** defines the size of build window and quickfixlist. Default is 10.
+ - **`g:cmake_build_executor_split_mode`** Allows to configure split mode for build window and quickfixlist. Avaulable values are:
+    - 'sp' enables horizontal mode. It is the default value.
+    - 'vsp' enables vertical mode.
+ - **`g:cmake_build_executor_height`** defines the height (in rows) of the build window and quickfixlist window showing the results. **The option was deprecated, please use `let g:cmake_build_executor_window_size=<size>` instead.** Default is 10.
 
 #### Build path
 

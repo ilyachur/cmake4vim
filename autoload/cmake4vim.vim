@@ -303,7 +303,7 @@ endfunction
 
 " Complete CCMake window modes
 function! cmake4vim#CompleteCCMakeModes(arg_lead, cmd_line, cursor_pos) abort
-    let l:modes = ['hsplit', 'vsplit', 'tab']
+    let l:modes = ['split', 'vsplit', 'tab']
     return join(l:modes, "\n")
 endfunction
 
@@ -313,7 +313,7 @@ function! cmake4vim#CCMake(...) abort
     " * empty, h - Open ccmake in horizontal split
     " * v - Open ccmake in vertical split
     " * t - Open ccmake in new tab
-    let l:mode = a:0 ? a:1 : 'hsplit'
+    let l:mode = a:0 ? a:1 : g:cmake_build_executor_split_mode ==# 'sp' ? 'split' : 'vsplit',
     let l:supported_modes = split(cmake4vim#CompleteCCMakeModes(0, 0, 0), '\n')
 
     if index(l:supported_modes, l:mode) == -1
@@ -327,14 +327,15 @@ function! cmake4vim#CCMake(...) abort
     endif
     let l:cmd .= 'ccmake ' . utils#fs#fnameescape(utils#cmake#getBuildDir())
     if has('nvim')
-        let l:modes = { 'hsplit': 'vsp | ', 'vsplit': 'sp ', 'tab': 'tabnew | ' }
+        let l:modes = { 'split': 'sp ', 'vsplit': 'vsp | ', 'tab': 'tabnew | ' }
     else
-        let l:modes = { 'hsplit': '', 'vsplit': 'vertical ', 'tab': 'tab ' }
+        let l:modes = { 'split': '', 'vsplit': 'vertical ', 'tab': 'tab ' }
     endif
     exec l:modes[l:mode] l:cmd
 endfunction
 
 function! cmake4vim#init() abort
+    " Common properties
     let g:cmake_executable            = get(g:, 'cmake_executable'           , 'cmake'       )
     let g:cmake_reload_after_save     = get(g:, 'cmake_reload_after_save'    , 0             )
     let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )
@@ -353,9 +354,18 @@ function! cmake4vim#init() abort
                 \ })
 
     " Optional variable allow to specify the build executor
-    " Possible values: 'job', 'dispatch', 'system', ''
-    let g:cmake_build_executor        = get(g:, 'cmake_build_executor'       , '')
-    let g:cmake_build_executor_height = get(g:, 'cmake_build_executor_height', 10)
+    " Possible values: 'job', 'dispatch', 'system', 'term', ''
+    let g:cmake_build_executor                =  get(g:, 'cmake_build_executor'           , '')
+
+    " Possible values: sp - horizontal mode, vsp - vertical mode
+    let g:cmake_build_executor_split_mode     =  get(g:, 'cmake_build_executor_split_mode', 'sp')
+    if exists('g:cmake_build_executor_height') && g:cmake_build_executor_height !=# '' && !exists('g:cmake_build_executor_window_size')
+        call utils#common#Warning('g:cmake_cxx_compiler option is deprecated and will be removed at the April of 2024 year!' .
+                            \ ' Please use `let g:cmake_build_executor_window_size=<size>` instead.')
+        let g:cmake_build_executor_window_size = g:cmake_build_executor_height
+    else
+        let g:cmake_build_executor_window_size = get(g:, 'cmake_build_executor_window_size', 10)
+    endif
 
     " Build path
     let g:cmake_build_path_pattern    = get(g:, 'cmake_build_path_pattern'   , ''            )

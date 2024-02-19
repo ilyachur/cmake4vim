@@ -77,10 +77,10 @@ COMMANDS                                                        *cmake-commands*
 
 :CCMake                                                                *:CCMake*
     Allows to use *ccmake* command inside vim.
-    The command supports next open modes (by default the horizontal mode
-                                          is used):
+    The command supports next open modes (by default the executor window split
+                                          mode is used):
         * 'vsplit' - vertical mode
-        * 'hsplit' - horizontal mode
+        * 'split' - horizontal mode
         * 'tab' - open ccmake in the new tab
 
 :CMakeCompileSource                                        *:CMakeCompileSource*
@@ -169,8 +169,13 @@ g:cmake_build_executor              allows to force set the build executor.
                                     Available values are 'job', 'term', 'dispatch',
                                     'system' and ''. Default is empty.
 
-g:cmake_build_executor_height       defines the height (in rows) of the
-                                    build window and quickfixlist window showing
+g:cmake_build_executor_split_mode   defines the split mode for executor window.
+                                    'sp' is used by default and means
+                                    horizontal mode.
+                                    Use 'vsp' for vertical split mode.
+
+g:cmake_build_executor_window_size  defines the size of the build window and
+                                    quickfixlist window showing
                                     the results. Default is 10.
 
 g:cmake_vimspector_support          enables support of vimspector config.
@@ -201,5 +206,13 @@ g:cmake_kits                        enables predefined cmake kits in the form
 
 g:cmake_selected_kit                currently selected cmake kit.
                                     Default is empty.
+
+DEPRECATED VARIABLES                                                  *cmake-deprecated-variables*
+
+g:cmake_build_executor_height       defines the height (in rows) of the
+                                    build window and quickfixlist window showing
+                                    the results. Default is 10.
+                                    Will be removed at the April of 2022.
+                                    Please use `let g:cmake_build_executor_window_size=<size>` instead.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help
