@@ -355,17 +355,11 @@ function! cmake4vim#init() abort
 
     " Optional variable allow to specify the build executor
     " Possible values: 'job', 'dispatch', 'system', 'term', ''
-    let g:cmake_build_executor                =  get(g:, 'cmake_build_executor'           , '')
+    let g:cmake_build_executor                = get(g:, 'cmake_build_executor'            , '')
 
     " Possible values: sp - horizontal mode, vsp - vertical mode
-    let g:cmake_build_executor_split_mode     =  get(g:, 'cmake_build_executor_split_mode', 'sp')
-    if exists('g:cmake_build_executor_height') && g:cmake_build_executor_height !=# '' && !exists('g:cmake_build_executor_window_size')
-        call utils#common#Warning('g:cmake_cxx_compiler option is deprecated and will be removed at the April of 2024 year!' .
-                            \ ' Please use `let g:cmake_build_executor_window_size=<size>` instead.')
-        let g:cmake_build_executor_window_size = g:cmake_build_executor_height
-    else
-        let g:cmake_build_executor_window_size = get(g:, 'cmake_build_executor_window_size', 10)
-    endif
+    let g:cmake_build_executor_split_mode     = get(g:, 'cmake_build_executor_split_mode' , 'sp')
+    let g:cmake_build_executor_window_size    = get(g:, 'cmake_build_executor_window_size', 10)
 
     " Build path
     let g:cmake_build_path_pattern    = get(g:, 'cmake_build_path_pattern'   , ''            )

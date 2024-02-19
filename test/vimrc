@@ -56,6 +56,8 @@ function! ResetPluginOptions()
     let g:cmake_selected_kit = ''
     let g:cmake_kits = {}
     let g:cmake_kits_global_path = ''
+    let g:cmake_build_executor_height = ''
+    let g:cmake_build_executor_window_size = 10
 
     let g:cmake_vimspector_default_configuration = {
                 \ 'adapter': '',

@@ -27,7 +27,7 @@ function! utils#window#OpenCMakeInfoWindow() abort
     let wcmd = s:cmake_info_win_name
     let s:cmake_info_prev_win_id = winnr()
 
-    silent execute printf('botright %d %s %s', g:cmake_build_executor_window_size, g:cmake_build_executor_split_mode, wcmd)
+    silent execute printf('botright %d %s %s', utils#common#getWindowSize(), g:cmake_build_executor_split_mode, wcmd)
 endfunction
 
 function! utils#window#GotoCMakeInfoWindow() abort

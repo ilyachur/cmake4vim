@@ -48,9 +48,9 @@ function! s:vimClose(channel, status) abort
     call s:createQuickFix()
 
     if l:open_qf == 0
-        silent execute printf('%sbotright %d cwindow', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ',  g:cmake_build_executor_window_size)
+        silent execute printf('%sbotright %d cwindow', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
     else
-        silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ',  g:cmake_build_executor_window_size)
+        silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
     endif
     cbottom
 
@@ -86,7 +86,7 @@ function! s:nVimExit(job_id, data, event) abort
     call s:createQuickFix()
 
     if a:data != 0 || l:open_qf != 0
-        silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ',  g:cmake_build_executor_window_size)
+        silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
     endif
     if a:data == 0
         silent echon 'Success! ' . l:cmd
@@ -118,7 +118,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                 \ 'err_fmt': a:err_fmt
                 \ }
     if has('nvim')
-        execute g:cmake_build_executor_window_size . g:cmake_build_executor_split_mode
+        execute utils#common#getWindowSize() . g:cmake_build_executor_split_mode
         execute 'enew'
         let l:job = termopen(a:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
@@ -130,18 +130,22 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
         let l:termbufnr = bufnr()
     else
         let l:cmd = has('win32') ? a:cmd : [&shell, '-c', a:cmd]
-        silent execute printf('keepalt botright %d %s', g:cmake_build_executor_window_size, g:cmake_build_executor_split_mode)
-        let l:job = term_start(l:cmd, {
+        silent execute printf('keepalt botright %d %s', utils#common#getWindowSize(), g:cmake_build_executor_split_mode)
+        let l:options = {
                     \ 'term_name': l:cmake4vim_term,
                     \ 'exit_cb': function('s:vimClose'),
                     \ 'out_cb': function('s:vimOut'),
                     \ 'term_finish': 'close',
+                    \ g:cmake_build_executor_split_mode ==# 'sp' ? 'term_rows' : 'term_cols': utils#common#getWindowSize(),
                     \ 'out_modifiable' : 0,
                     \ 'err_modifiable' : 0,
                     \ 'norestore': 1,
                     \ 'curwin': 1,
                     \ 'cwd': a:cwd
-                    \ })
+                    \ }
+        call utils#common#Warning(l:options)
+    call utils#common#Warning(g:cmake_build_executor_height)
+        let l:job = term_start(l:cmd, l:options)
     endif
     if has('nvim')
         let s:cmake4vim_term['termbuf'] = l:termbufnr
