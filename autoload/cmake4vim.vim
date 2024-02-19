@@ -313,7 +313,7 @@ function! cmake4vim#CCMake(...) abort
     " * empty, h - Open ccmake in horizontal split
     " * v - Open ccmake in vertical split
     " * t - Open ccmake in new tab
-    let l:mode = a:0 ? a:1 : g:cmake_build_executor_split_mode ==# 'sp' ? 'split' : 'vsplit',
+    let l:mode = a:0 ? a:1 : g:cmake_build_executor_split_mode ==# 'sp' ? 'split' : 'vsplit'
     let l:supported_modes = split(cmake4vim#CompleteCCMakeModes(0, 0, 0), '\n')
 
     if index(l:supported_modes, l:mode) == -1
@@ -325,7 +325,7 @@ function! cmake4vim#CCMake(...) abort
     if !has('nvim')
         let l:cmd .= '++close '
     endif
-    let l:cmd .= 'ccmake ' . utils#fs#fnameescape(utils#cmake#getBuildDir())
+    let l:cmd .= 'ccmake -B ' . utils#fs#fnameescape(utils#cmake#getBuildDir())
     if has('nvim')
         let l:modes = { 'split': 'sp ', 'vsplit': 'vsp | ', 'tab': 'tabnew | ' }
     else
