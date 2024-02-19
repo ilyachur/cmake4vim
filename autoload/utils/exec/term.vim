@@ -143,8 +143,6 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                     \ 'curwin': 1,
                     \ 'cwd': a:cwd
                     \ }
-        call utils#common#Warning(l:options)
-    call utils#common#Warning(g:cmake_build_executor_height)
         let l:job = term_start(l:cmd, l:options)
     endif
     if has('nvim')
