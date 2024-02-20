@@ -10,7 +10,7 @@ After:
     silent call RemoveCMakeDirs()
 
 Execute ([CCMake] Get ccmake modes):
-    let ref_modes = ['hsplit', 'vsplit', 'tab']
+    let ref_modes = ['split', 'vsplit', 'tab']
     let modes = split(cmake4vim#CompleteCCMakeModes(0,0,0), "\n")
     AssertEqual len(modes), len(ref_modes), printf("Number of targets: %d List: %s", len(modes), join(modes))
     AssertEqual ref_modes, modes
@@ -25,7 +25,7 @@ Execute ([CCMake] Run ccmake in default mode):
 Execute ([CCMake] Run ccmake in horizontal mode):
     if !has('win32')
         silent CMake
-        CCMake hsplit
+        CCMake split
     endif
 
 Execute ([CCMake] Run ccmake in vertical mode):
