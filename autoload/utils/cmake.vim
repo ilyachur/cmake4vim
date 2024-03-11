@@ -300,7 +300,8 @@ function! utils#cmake#getBuildDir() abort
 endfunction
 
 function! utils#cmake#getBinaryPath(...) abort
-    let l:cmake_info = utils#cmake#common#getInfo()
+    let l:build_dir = utils#cmake#getBuildDir()
+    let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
     let l:build_type = s:detectCMakeBuildType()
     if has_key(l:cmake_info, 'targets') && has_key(l:cmake_info['targets'], l:build_type) && has_key(l:cmake_info['targets'][l:build_type], g:cmake_build_target)
         if !has('win32')
@@ -319,7 +320,7 @@ function! utils#cmake#getBinaryPath(...) abort
             let l:exec_path = ''
             " Check absolute path /...
             if l:target['pathes'][0][0] !=# '/'
-                let l:exec_path = utils#cmake#getBuildDir() . '/'
+                let l:exec_path = l:build_dir . '/'
             endif
             let l:exec_path .= l:target['pathes'][0]
             return l:exec_path
@@ -329,7 +330,7 @@ function! utils#cmake#getBinaryPath(...) abort
                     let l:exec_path = ''
                     " Check absolute path C:...
                     if l:path[1] !=# ':'
-                        let l:exec_path = utils#cmake#getBuildDir() . '/'
+                        let l:exec_path = l:build_dir . '/'
                     endif
                     let l:exec_path .= l:path
                     return l:exec_path
@@ -344,7 +345,7 @@ function! utils#cmake#getBinaryPath(...) abort
         let l:exec_filename = g:cmake_build_target
     endif
 
-    let l:exec_path = findfile(exec_filename, utils#fs#fnameescape(utils#cmake#getBuildDir()) . '/**')
+    let l:exec_path = findfile(exec_filename, utils#fs#fnameescape(l:build_dir) . '/**')
     if !empty(l:exec_path)
         let l:exec_path = fnamemodify(l:exec_path, ':p')
     endif
