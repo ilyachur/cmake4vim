@@ -32,7 +32,9 @@ function! utils#cmake#common#getInfo(...) abort
     if exists('a:1') && !empty(a:1)
         let l:build_dir = a:1
     endif
-    if !empty(l:build_dir) && empty(s:cmake_cache_info)
+    " Recall collecting information if cmake info doesn't contain information
+    " about targets
+    if !empty(l:build_dir) && (empty(s:cmake_cache_info) || !has_key(s:cmake_cache_info, 'targets'))
         call utils#cmake#common#collectCMakeInfo(l:build_dir)
     endif
     if !executable('cmake') || empty(s:cmake_cache_info)
