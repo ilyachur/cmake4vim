@@ -100,13 +100,13 @@ jobs:
     #     path: ./*.xml
     #     if-no-files-found: error
 
-  # Report:
-  #   runs-on: ubuntu-latest
-  #   needs: [tests]
-  #   if: ${{ needs.changes.outputs.paths == 'true' }}
-  # 
-  #   steps:
-  #   - uses: actions/checkout@v6
+  Report:
+    runs-on: ubuntu-latest
+    needs: [tests]
+    if: ${{ needs.changes.outputs.paths == 'true' }}
+
+    steps:
+    - uses: actions/checkout@v6
   #   - name: Download artifacts
   #     uses: actions/download-artifact@v8
   #     with:
