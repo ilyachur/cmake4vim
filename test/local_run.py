@@ -57,8 +57,8 @@ if __name__ == '__main__':
 
         if args.profile:
             os.chdir(os.path.join(current_dir, '..'))
-            subprocess.run([sys.executable, '-m', 'covimerage', 'write_coverage', os.environ['VIM_PROFILE_FILE']])
-            subprocess.run([sys.executable, '-m', 'coverage', 'xml'])
+            subprocess.run(['covimerage', 'write_coverage', os.environ['VIM_PROFILE_FILE']])
+            subprocess.run(['coverage', 'xml'])
             os.rename('coverage.xml', os.path.join(out_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.xml'))
             os.chdir(current_dir)
 
