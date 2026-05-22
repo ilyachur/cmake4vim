@@ -69,12 +69,9 @@ jobs:
       uses: actions/setup-python@master
       with:
           python-version: 3.11
-    - name: Install covimerage
-      run: |
-          pip3 install "click<7.1"
-          pip3 install "coverage<5.0"
-          pip3 install covimerage
-          pip3 install coveralls
+    # - name: Install covimerage
+    #   run: |
+    #       pip3 install 'click<7.1' 'coverage<5.0a6' covimerage
     - name: Install vim
       uses: rhysd/action-setup-vim@v1
       with:
@@ -95,28 +92,28 @@ jobs:
           ninja --version
     - name: Run tests
       run: |
-        python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage
-        path: ./*.xml
-        if-no-files-found: error
+        python test/local_run.py --editor ${{ matrix.vim_executable }} --out_dir . # --profile
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: coverage
+    #     path: ./*.xml
+    #     if-no-files-found: error
 
-  Report:
-    runs-on: ubuntu-latest
-    needs: [tests]
-    if: ${{ needs.changes.outputs.paths == 'true' }}
-
-    steps:
-    - uses: actions/checkout@v6
-    - name: Download artifacts
-      uses: actions/download-artifact@v8
-      with:
-          name: coverage
-          path: ./cov_report
-    - name: Upload coverage to Codecov
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
-      run: |
-        bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
+  # Report:
+  #   runs-on: ubuntu-latest
+  #   needs: [tests]
+  #   if: ${{ needs.changes.outputs.paths == 'true' }}
+  # 
+  #   steps:
+  #   - uses: actions/checkout@v6
+  #   - name: Download artifacts
+  #     uses: actions/download-artifact@v8
+  #     with:
+  #         name: coverage
+  #         path: ./cov_report
+  #   - name: Upload coverage to Codecov
+  #     env:
+  #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
+  #     run: |
+  #       bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
