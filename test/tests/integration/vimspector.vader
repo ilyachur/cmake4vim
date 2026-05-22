@@ -96,7 +96,7 @@ Execute ([Vimspector] Change correct vimspector config to incorrect data):
     endif
 
 Execute ([Vimspector] Run test_app target and change vimspector config with default config):
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget test_app
         silent CMakeBuild
@@ -124,7 +124,7 @@ Execute ([Vimspector] Run test_app target and change vimspector config with defa
     endif
 
 Execute ([Vimspector] Run test_app target and change vimspector config with custom config):
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         let g:cmake_vimspector_default_configuration = {
                     \ 'adapter': 'CodeLLDB',
                     \ 'configuration': {
@@ -169,7 +169,7 @@ Expect ([Vimspector] See '1 2 3 F1 test proj' result in quickfix):
   || 1 2 3 F1 test proj
 
 Execute ([Vimspector] Run test_app target with vimspector args):
-    if !has('win32') && utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
         silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
@@ -200,7 +200,7 @@ Expect ([Vimspector] See '1 2 3* 4 F1' result in quickfix):
   || 1 2 3* 4 F1 app
 
 Execute ([Vimspector] Run test_app target with reset vimspector args):
-    if !has('win32') && utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create incorrect config
         silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
@@ -231,7 +231,7 @@ Expect ([Vimspector] See 'F1' result in quickfix):
   || F1 app
 
 Execute ([Vimspector] Read vimspector config containing backslashes):
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         " Create config
         silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
@@ -253,7 +253,7 @@ Execute ([Vimspector] Read vimspector config containing backslashes):
     endif
 
 Execute ([Vimspector] Run all target and check vimspector config):
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget all
         silent CMakeBuild

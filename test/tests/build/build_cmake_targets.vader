@@ -11,7 +11,7 @@ After:
 
 Execute ([CMake targets] Generate cmake project with default settings):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -29,7 +29,7 @@ Execute ([CMake targets] Generate cmake project with default settings):
 
 Execute ([CMake targets] Generate cmake project with custom options):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         let g:cmake_usr_args='-DCUSTOM_OP=ON'
         silent CMake
@@ -50,7 +50,7 @@ Execute ([CMake targets] Generate cmake project with custom options):
 
 Execute ([CMake targets] Generate cmake project with custom options as argument):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake -DCUSTOM_OP=ON
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -70,7 +70,7 @@ Execute ([CMake targets] Generate cmake project with custom options as argument)
 
 Execute ([CMake targets] Check CMake generator):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -86,7 +86,7 @@ Execute ([CMake targets] Check CMake generator):
 
 Execute ([CMake targets] Check CMakeClean):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -110,7 +110,7 @@ Execute ([CMake targets] Check CMakeClean):
 
 Execute ([CMake targets] Build only library with arguments):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -127,7 +127,7 @@ Execute ([CMake targets] Build only library with arguments):
 
 Execute ([CMake targets] CMakeBuild for test library):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         " Check that make command works with changed build command
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake
@@ -145,7 +145,7 @@ Execute ([CMake targets] CMakeBuild for test library):
 
 Execute ([CMake targets] Check all targets):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = cmake4vim#GetAllTargets()
@@ -154,7 +154,7 @@ Execute ([CMake targets] Check all targets):
 
 Execute ([CMake targets] Get cmake targets):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -219,7 +219,7 @@ Execute ([CMake targets] Get default build types):
 
 Execute ([CMake targets] Check all targets for empty project):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         let targets = cmake4vim#GetAllTargets()
         AssertEqual len(targets), 0, 'CMake targets should be empty but: ' . join(targets, ' ')
@@ -227,7 +227,7 @@ Execute ([CMake targets] Check all targets for empty project):
 
 Execute ([CMake targets] Check clean target for empty project):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         let default = utils#gen#common#getCleanTarget()
         AssertEqual default, ''
@@ -235,7 +235,7 @@ Execute ([CMake targets] Check clean target for empty project):
 
 Execute ([CMake targets] Check default target for empty project):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         let default = utils#gen#common#getDefaultTarget()
         AssertNotEqual default, ''
@@ -243,7 +243,7 @@ Execute ([CMake targets] Check default target for empty project):
 
 Execute ([CMake targets] Select all targets for empty project):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         let cmd = cmake4vim#SelectTarget('all')
         AssertEqual cmd, ''
@@ -252,7 +252,7 @@ Execute ([CMake targets] Select all targets for empty project):
 
 Execute ([CMake targets] Call CMakeBuild for empty project):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         silent CMakeBuild
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
@@ -260,7 +260,7 @@ Execute ([CMake targets] Call CMakeBuild for empty project):
 
 Execute ([CMake targets] Check CMakeClean for empty project):
     " enable tests for windows with last cmake
-    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         CMakeClean
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
