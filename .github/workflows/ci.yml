@@ -68,7 +68,7 @@ jobs:
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
-          python-version: 3.7
+          python-version: 3.11
     - name: Install covimerage
       run: |
           pip3 install 'click<8.0.0'
@@ -97,7 +97,7 @@ jobs:
       run: |
         python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage
         path: ./*.xml
@@ -111,7 +111,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
           name: coverage
           path: ./cov_report
