@@ -13,7 +13,7 @@ Execute ([CMakeRun] Should not find non-binary target):
     AssertEqual result, ''
 
 Execute ([CMakeRun] Should not find library target):
-    if utils#cmake#verNewerOrEq([3, 14])
+    if utils#cmake#version#verNewerOrEq([3, 14])
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         CMakeSelectTarget test_lib
         let result = utils#cmake#getBinaryPath()
@@ -27,7 +27,7 @@ Execute ([CMakeRun] Should find binary target):
     if !has('win32')
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
     else
-        if utils#cmake#verNewerOrEq([3, 14])
+        if utils#cmake#version#verNewerOrEq([3, 14])
             Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
         endif
     endif
@@ -35,7 +35,7 @@ Execute ([CMakeRun] Should find binary target):
     if !has('win32')
         AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/test_app')
     else
-        if utils#cmake#verNewerOrEq([3, 14])
+        if utils#cmake#version#verNewerOrEq([3, 14])
             AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Debug/test_app.exe')
         endif
     endif
@@ -45,7 +45,7 @@ Execute ([CMakeRun] Run for empty target):
     silent CMakeRun
 
 Execute ([CMakeRun] Run test_app target and open quickfix):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
         silent CMakeSelectTarget test_app
         silent CMakeBuild
         silent CMakeRun
@@ -63,7 +63,7 @@ Execute ([CMakeRun] Run non-binary target and open quickfix):
     AssertEqual v:errmsg , 'Executable "all" was not found'
 
 Execute ([CMakeRun] Run test_app target with mask arguments):
-    if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32') || utils#cmake#version#verNewerOrEq([3, 14])
         silent CMakeSelectTarget test_app
         silent CMakeRun --gtest_filter=Test*
     else
@@ -75,7 +75,7 @@ Execute ([CMakeRun] Run test_app target with mask arguments):
     AssertEqual '--gtest_filter=Test* F1 test proj', output[0]['text']
 
 Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
-    if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
+    if !has('win32') && utils#cmake#version#verNewerOrEq([3, 14])
         silent CMake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/tmp
         silent CMakeSelectTarget test_app
         silent CMakeBuild
@@ -89,7 +89,7 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     AssertEqual '123 F1 test proj', output[0]['text']
 
 Execute ([CMakeRun] run command builds and executes target):
-    if utils#cmake#verNewerOrEq([3, 14])
+    if utils#cmake#version#verNewerOrEq([3, 14])
         silent CMakeResetAndReload
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         if !has('win32')
