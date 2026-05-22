@@ -141,16 +141,6 @@ function! utils#cmake#getDefaultBuildTypes() abort
     return ['Release', 'Debug', 'RelWithDebInfo', 'MinSizeRel', '']
 endfunction
 
-" Returns the path to build directory if directory was found and returns empty string in other case.
-" Use build directory from the cmake cache or try to find it at the current folder
-" Creates directory if it doesn't exist
-function! utils#cmake#getBuildDir() abort
-    let l:build_dir = s:detectCMakeBuildDir()
-    let l:build_dir = utils#fs#makeDir(l:build_dir)
-    let l:build_dir = fnamemodify(l:build_dir, ':p:h')
-    return l:build_dir
-endfunction
-
 " Return the names of possible builds, includes default CMake build types
 function! utils#cmake#getCMakeVariants() abort
     call s:populateDefaultCMakeVariants()
@@ -170,7 +160,20 @@ function! utils#cmake#getVersion() abort
     return l:version
 endfunction
 
-
+" Return 1 if cmake version is newer or equal to passed value
+function! utils#cmake#verNewerOrEq(cmake_version) abort
+    let l:i = 0
+    let l:cmake_ver = utils#cmake#getVersion()
+    while l:i < len(a:cmake_version) && l:i < len(l:cmake_ver)
+        if a:cmake_version[l:i] > l:cmake_ver[l:i]
+            return 0
+        elseif a:cmake_version[l:i] < l:cmake_ver[l:i]
+            return 1
+        endif
+        let l:i += 1
+    endwhile
+    return 1
+endfunction
 
 " Set CMake build target
 function! utils#cmake#setBuildTarget(build_dir, target) abort
@@ -255,13 +258,10 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:cmake_args += l:cmake_variant_usr_args + get(l:, 'cmake_kit_usr_args', [])
     let l:cmake_args += a:000
 
-    " Check that we have at least CMake 3.13 for -B option, fallback for older versions
-    let l:has_b_option = utils#cmake#version#verNewerOrEq([3, 13])
-    
-    if l:has_b_option
+    " CMake -B option was introduced in the 3.13 version
+    if utils#cmake#verNewerOrEq([3, 13])
         let l:cmake_args += ['-B', utils#fs#fnameescape(l:build_dir), '-S', utils#fs#fnameescape(l:src_dir)]
     else
-        " For older CMake versions, use the current directory as source
         let l:cmake_args += [utils#fs#fnameescape(getcwd())]
     endif
 
