@@ -231,20 +231,23 @@ function! cmake4vim#CTest(bang, ...) abort
     if !a:bang
         if type(g:cmake_ctest_args) == v:t_list
             let l:args += g:cmake_ctest_args
-            call extend(l:args, g:cmake_ctest_args)
         else
             call extend(l:args, [g:cmake_ctest_args])
         endif
     endif
-    if !utils#cmake#verNewerOrEq([3, 20])
+    
+    " Use --test-dir for modern CMake versions, otherwise use directory change
+    if utils#cmake#version#verNewerOrEq([3, 20])
+        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
+    else
         " Change work directory
         silent exec 'cd' l:build_dir
-    else
-        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
     endif
+    
     " Run
     call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
-    if !utils#cmake#verNewerOrEq([3, 20])
+    
+    if !utils#cmake#version#verNewerOrEq([3, 20])
         " Change work directory to old work directory
         silent exec 'cd' l:cw_dir
     endif
