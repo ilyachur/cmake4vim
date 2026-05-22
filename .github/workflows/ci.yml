@@ -71,6 +71,8 @@ jobs:
           python-version: 3.11
     - name: Install covimerage
       run: |
+          pip3 install "click<7.1"
+          pip3 install "coverage<5.0"
           pip3 install covimerage
           pip3 install coveralls
     - name: Install vim
