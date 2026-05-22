@@ -46,7 +46,7 @@ Execute ([Term executor] Append job to empty pool):
 
 Execute ([Term executor] Run test_app target with mask arguments with term executor):
     if !has('win32')   " Skip for Windows
-        if utils#cmake#verNewerOrEq([3, 14])
+        if utils#cmake#version#verNewerOrEq([3, 14])
             silent CMake
             call WaitForJob()
             silent CMakeSelectTarget test_app
