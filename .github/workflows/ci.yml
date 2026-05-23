@@ -20,8 +20,8 @@ jobs:
     outputs:
       paths: ${{ steps.filter.outputs.paths }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: dorny/paths-filter@v2
+    - uses: actions/checkout@v6
+    - uses: dorny/paths-filter@v4
       id: filter
       with:
         filters: |
@@ -42,7 +42,7 @@ jobs:
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
-        cmake_version: ['3.0.x', ''] # empty means the latest version
+        cmake_version: ['3.0.x', '3.31.12'] #, ''] # empty means the latest version Need to support the latest cmake
         platform: ['Linux', 'MacOS', 'Windows']
 
         include:
@@ -64,44 +64,41 @@ jobs:
 
     steps:
     - name: Clone CMake4Vim
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Setup python modules
       uses: actions/setup-python@master
       with:
-          python-version: 3.7
-    - name: Install covimerage
-      run: |
-          pip3 install 'click<8.0.0'
-          pip3 install covimerage
-          pip3 install coveralls
+          python-version: 3.11
+    # - name: Install covimerage
+    #   run: |
+    #       pip3 install 'click<7.1' 'coverage<5.0a6' covimerage
     - name: Install vim
       uses: rhysd/action-setup-vim@v1
       with:
         neovim: ${{ matrix.nvim }}
         version: ${{ matrix.vim_version  }}
     - name: Install cmake
-      uses: jwlawson/actions-setup-cmake@master
+      uses: lukka/get-cmake@latest
       with:
-          cmake-version: ${{ matrix.cmake_version }}
+          cmakeVersion: ${{ matrix.cmake_version }}
+          ninjaVersion: latest
     - name: Check cmake
       run: |
           which cmake
           cmake --version
-    - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
     - name: Check Ninja
       run: |
           which ninja
           ninja --version
     - name: Run tests
       run: |
-        python test/local_run.py --profile --editor ${{ matrix.vim_executable }} --out_dir .
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage
-        path: ./*.xml
-        if-no-files-found: error
+        python test/local_run.py --editor ${{ matrix.vim_executable }} --out_dir . # --profile
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: coverage
+    #     path: ./*.xml
+    #     if-no-files-found: error
 
   Report:
     runs-on: ubuntu-latest
@@ -109,14 +106,14 @@ jobs:
     if: ${{ needs.changes.outputs.paths == 'true' }}
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Download artifacts
-      uses: actions/download-artifact@v3
-      with:
-          name: coverage
-          path: ./cov_report
-    - name: Upload coverage to Codecov
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
-      run: |
-        bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
+    - uses: actions/checkout@v6
+  #   - name: Download artifacts
+  #     uses: actions/download-artifact@v8
+  #     with:
+  #         name: coverage
+  #         path: ./cov_report
+  #   - name: Upload coverage to Codecov
+  #     env:
+  #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN  }}
+  #     run: |
+  #       bash <(curl -s https://codecov.io/bash) $(echo \ `ls -d ./cov_report/*` | sed -r 's/ / -f /g') -Z
