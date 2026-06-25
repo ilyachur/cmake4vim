@@ -9,6 +9,10 @@ function! s:findCacheVar(data, variable) abort
             return l:split_res[1]
         endif
     endfor
+    " Return an empty string when the variable is missing or has an empty
+    " value. Without an explicit return Vim would yield the number 0, which
+    " later breaks dictionary lookups (e.g. getCMakeVariants()[build_type]).
+    return ''
 endfunction
 
 function! s:getCache(dir) abort
