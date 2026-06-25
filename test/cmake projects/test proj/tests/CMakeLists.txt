@@ -24,6 +24,11 @@ if (NOT GTEST_FOUND)
     # settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
+    # googletest release-1.11.0 still declares a cmake_minimum_required below
+    # 3.5, which CMake 4 refuses to honour. Relax the policy version just for
+    # the bundled googletest configure so it keeps building with modern CMake.
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
