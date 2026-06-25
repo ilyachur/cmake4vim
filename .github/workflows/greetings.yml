@@ -3,7 +3,10 @@ name: Greetings
 on: [pull_request_target, issues]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # For pull_request_target github.ref is the base branch (e.g. master), so a
+  # plain github.ref would put every PR/issue into one group and let them cancel
+  # each other. Scope the group per PR/issue instead, falling back to github.ref.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
