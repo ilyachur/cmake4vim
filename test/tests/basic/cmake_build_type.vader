@@ -1,0 +1,57 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
+
+    silent call ResetPluginOptions()
+    " Use on in order to close all windows and avoid E36 error
+    silent on
+
+After:
+    silent call RemoveCMakeDirs()
+
+# Regression test for the flaky CCMake failure:
+#   Vim(let):E716: Key not present in Dictionary: "0"
+# When the CMake cache is read without a CMAKE_BUILD_TYPE entry (e.g. while a
+# concurrent ccmake reconfigure rewrites the build directory) s:findCacheVar
+# used to fall through without an explicit return and yield the number 0
+# instead of an empty string. That 0 propagated as the build type and broke
+# getCMakeVariants()[build_type].
+Execute ([CMake build type] Missing CMAKE_BUILD_TYPE in cache returns an empty string, not 0):
+    call mkdir('cmake-build-Release', 'p')
+    call writefile([
+                \ '# This is the CMakeCache file.',
+                \ 'CMAKE_GENERATOR:INTERNAL=Unix Makefiles',
+                \ 'CMAKE_PROJECT_NAME:STATIC=test_proj',
+                \ ], 'cmake-build-Release/CMakeCache.txt')
+
+    let info = utils#cmake#cache#collectInfo('cmake-build-Release')
+    AssertEqual type(info['cmake']['build_type']), type(''), 'build_type must be a string, not a number'
+    AssertEqual info['cmake']['build_type'], '', 'build_type must be an empty string when CMAKE_BUILD_TYPE is absent'
+
+Execute ([CMake build type] Empty CMAKE_BUILD_TYPE value in cache returns an empty string, not 0):
+    call mkdir('cmake-build-Release', 'p')
+    call writefile([
+                \ 'CMAKE_BUILD_TYPE:STRING=',
+                \ 'CMAKE_GENERATOR:INTERNAL=Unix Makefiles',
+                \ ], 'cmake-build-Release/CMakeCache.txt')
+
+    let info = utils#cmake#cache#collectInfo('cmake-build-Release')
+    AssertEqual type(info['cmake']['build_type']), type(''), 'build_type must be a string, not a number'
+    AssertEqual info['cmake']['build_type'], '', 'empty CMAKE_BUILD_TYPE must stay an empty string'
+
+# End-to-end guard: even when build type detection sees an empty/absent build
+# type (the cache-fallback path that the ccmake race triggers), generating the
+# CMake command must not throw E716 and must resolve to a valid variant.
+Execute ([CMake build type] Generation command survives empty build type from the cache fallback):
+    " Prepare a build directory the plugin will discover, holding a cache
+    " without CMAKE_BUILD_TYPE and no file-api reply, so the cache fallback is
+    " used - exactly the state observed during the ccmake reconfigure race.
+    call mkdir('cmake-build-Release', 'p')
+    call writefile([
+                \ 'CMAKE_GENERATOR:INTERNAL=Unix Makefiles',
+                \ 'CMAKE_PROJECT_NAME:STATIC=test_proj',
+                \ ], 'cmake-build-Release/CMakeCache.txt')
+
+    let gen_cmd = utils#cmake#getCMakeGenerationCommand()
+    Assert !empty(gen_cmd), 'generation command should not be empty'
+    Assert gen_cmd =~# '-DCMAKE_BUILD_TYPE=', 'generation command should contain a build type'

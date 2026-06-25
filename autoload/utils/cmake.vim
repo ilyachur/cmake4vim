@@ -10,7 +10,7 @@ function! s:detectCMakeBuildType() abort
         return g:cmake_build_type
     endif
     let l:cmake_info = utils#cmake#common#getInfo()
-    if !empty(l:cmake_info)
+    if !empty(l:cmake_info) && !empty(get(l:cmake_info['cmake'], 'build_type', ''))
         return l:cmake_info['cmake']['build_type']
     endif
     " WA for recursive DetectBuildDir, try to find the first valid cmake directory
