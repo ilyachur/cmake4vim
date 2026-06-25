@@ -32,29 +32,37 @@ function! s:createQuickFix() abort
     " just to be sure all messages were processed
     sleep 100m
     let l:bufnr = bufnr(s:cmake4vim_buf)
-    if l:bufnr == -1
-        return
-    endif
-    let l:old_error = &errorformat
-    if !empty(s:cmake4vim_job['err_fmt'])
-        let &errorformat = s:cmake4vim_job['err_fmt']
-    endif
+    try
+        " The output buffer may be gone (e.g. closed by a window command) - in
+        " that case there is nothing to collect, but we must still finalize the
+        " job below so the async status does not dangle.
+        if l:bufnr != -1
+            let l:old_error = &errorformat
+            if !empty(s:cmake4vim_job['err_fmt'])
+                let &errorformat = s:cmake4vim_job['err_fmt']
+            endif
 
-    call setbufvar(l:bufnr, '&modifiable', 1)
-    call s:removeANSI(l:bufnr)
-    call setbufvar(l:bufnr, '&modifiable', 0)
-    silent execute 'cgetbuffer ' . l:bufnr
-    silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
-    if !empty(s:cmake4vim_job['err_fmt'])
-        let &errorformat = l:old_error
-    endif
-    " Remove cmake4vim job
-    let s:cmake4vim_job = {}
-    call s:closeBuffer()
-    if !empty(s:cmake4vim_jobs_pool)
-        let [l:next_job; s:cmake4vim_jobs_pool] = s:cmake4vim_jobs_pool
-        call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
-    endif
+            call setbufvar(l:bufnr, '&modifiable', 1)
+            call s:removeANSI(l:bufnr)
+            call setbufvar(l:bufnr, '&modifiable', 0)
+            silent execute 'cgetbuffer ' . l:bufnr
+            silent call setqflist( [], 'a', { 'title' : s:cmake4vim_job[ 'cmd' ] } )
+            if !empty(s:cmake4vim_job['err_fmt'])
+                let &errorformat = l:old_error
+            endif
+        endif
+    finally
+        " Always remove the cmake4vim job and advance the pool, even if the
+        " output buffer disappeared or quickfix population threw. Otherwise the
+        " job status would never clear and callers waiting for completion (e.g.
+        " WaitForJob in the tests, or a chained run target) would hang.
+        let s:cmake4vim_job = {}
+        call s:closeBuffer()
+        if !empty(s:cmake4vim_jobs_pool)
+            let [l:next_job; s:cmake4vim_jobs_pool] = s:cmake4vim_jobs_pool
+            call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
+        endif
+    endtry
 endfunction
 
 function! s:vimClose(channel) abort
