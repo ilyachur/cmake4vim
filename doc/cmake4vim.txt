@@ -45,6 +45,23 @@ COMMANDS                                                        *cmake-commands*
     Change to the CMakeBuildType with the argument passed,
     and will call :CMake after.
 
+:CMakeSelectConfigurePreset {name}                  *:CMakeSelectConfigurePreset*
+    Selects a configure preset from CMakePresets.json / CMakeUserPresets.json
+    and configures the project with `cmake --preset {name}`.  The plugin points
+    itself at the preset binary directory so target selection, building and
+    running keep working.
+
+:CMakeSelectBuildPreset {name}                          *:CMakeSelectBuildPreset*
+    Selects a build preset.  When set, :CMakeBuild builds with
+    `cmake --build --preset {name}`.
+
+:CMakeSelectTestPreset {name}                            *:CMakeSelectTestPreset*
+    Selects a test preset.  When set, :CTest runs `ctest --preset {name}`.
+
+:CMakeWorkflow {name}                                             *:CMakeWorkflow*
+    Runs a workflow preset with `cmake --workflow --preset {name}`
+    (requires CMake 3.25 or newer).
+
 :CMakeInfo                                                         *:CMakeInfo*
     Creates a window with some CMake parameters
 
@@ -218,5 +235,32 @@ g:cmake_kits                        enables predefined cmake kits in the form
 
 g:cmake_selected_kit                currently selected cmake kit.
                                     Default is empty.
+
+g:cmake_configure_preset            currently selected configure preset. When
+                                    not empty, :CMake configures the project
+                                    with `cmake --preset <name>`. Default is
+                                    empty.
+
+g:cmake_build_preset                currently selected build preset. When not
+                                    empty, :CMakeBuild uses
+                                    `cmake --build --preset <name>`. Default is
+                                    empty.
+
+g:cmake_test_preset                 currently selected test preset. When not
+                                    empty, :CTest uses `ctest --preset <name>`.
+                                    Default is empty.
+
+CMAKE PRESETS                                                    *cmake-presets*
+
+The plugin supports CMakePresets.json and CMakeUserPresets.json. Preset names
+are enumerated with `cmake --list-presets`, so CMake resolves `hidden`,
+`inherits` and `condition` itself. Select a configure preset with
+|:CMakeSelectConfigurePreset|; the project is then configured through
+`cmake --preset` and the plugin uses the preset binary directory. Build and
+test presets are optional and used by :CMakeBuild and :CTest when selected.
+
+Kits and variants remain available for projects without preset files. The
+`include` field of preset files is not expanded when resolving the binary
+directory.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help
