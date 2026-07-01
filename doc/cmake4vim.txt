@@ -250,6 +250,22 @@ g:cmake_test_preset                 currently selected test preset. When not
                                     empty, :CTest uses `ctest --preset <name>`.
                                     Default is empty.
 
+STATUS LINE                                                  *cmake-statusline*
+
+The plugin exposes lightweight getters (cheap enough to call on redraw) for
+status line integration:
+
+    cmake4vim#statusline#Status()               compact summary string
+    cmake4vim#statusline#IsCMakeProject()       1 for a CMake project
+    cmake4vim#statusline#GetBuildTarget()       selected target
+    cmake4vim#statusline#GetBuildType()         selected/detected build type
+    cmake4vim#statusline#GetKit()               selected kit
+    cmake4vim#statusline#GetConfigurePreset()   selected configure preset
+
+Example (native status line): >
+    set statusline+=%{cmake4vim#statusline#Status()}
+<
+
 CMAKE PRESETS                                                    *cmake-presets*
 
 The plugin supports CMakePresets.json and CMakeUserPresets.json. Preset names

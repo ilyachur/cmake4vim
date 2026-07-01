@@ -1,0 +1,36 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
+    silent call ResetPluginOptions()
+    silent on
+
+After:
+    silent call ResetPluginOptions()
+    silent call RemoveCMakeDirs()
+
+Execute ([Statusline] Detect CMake project):
+    Assert cmake4vim#statusline#IsCMakeProject(), 'test project has CMakeLists.txt'
+
+Execute ([Statusline] Getters reflect selection):
+    let g:cmake_build_target = 'test_app'
+    let g:cmake_build_type = 'Debug'
+    let g:cmake_selected_kit = 'MyKit'
+    AssertEqual cmake4vim#statusline#GetBuildTarget(), 'test_app'
+    AssertEqual cmake4vim#statusline#GetBuildType(), 'Debug'
+    AssertEqual cmake4vim#statusline#GetKit(), 'MyKit'
+
+Execute ([Statusline] Status string with kit):
+    let g:cmake_build_target = 'test_app'
+    let g:cmake_build_type = 'Debug'
+    let g:cmake_selected_kit = 'MyKit'
+    let status = cmake4vim#statusline#Status()
+    Assert status =~# 'kit:MyKit', status
+    Assert status =~# 'Debug', status
+    Assert status =~# 'test_app', status
+
+Execute ([Statusline] Preset takes priority over kit in status):
+    let g:cmake_selected_kit = 'MyKit'
+    let g:cmake_configure_preset = 'default'
+    let status = cmake4vim#statusline#Status()
+    Assert status =~# 'preset:default', status
+    Assert status !~# 'kit:MyKit', status
