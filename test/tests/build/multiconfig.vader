@@ -17,6 +17,13 @@ Execute ([CMake multiconfig] isMultiConfig helper):
     Assert !utils#gen#common#isMultiConfig('Ninja'), 'Ninja should be single-config'
     Assert !utils#gen#common#isMultiConfig('Unix Makefiles'), 'Make should be single-config'
 
+Execute ([CMake multiconfig] supportsCompileCommands helper):
+    Assert utils#gen#common#supportsCompileCommands('Unix Makefiles'), 'Make should support compile_commands'
+    Assert utils#gen#common#supportsCompileCommands('Ninja'), 'Ninja should support compile_commands'
+    Assert utils#gen#common#supportsCompileCommands('Ninja Multi-Config'), 'Ninja Multi-Config should support compile_commands'
+    Assert !utils#gen#common#supportsCompileCommands('Visual Studio 17 2022'), 'VS should not support compile_commands'
+    Assert !utils#gen#common#supportsCompileCommands('Xcode'), 'Xcode should not support compile_commands'
+
 Execute ([CMake multiconfig] build command uses --config for Ninja Multi-Config):
     silent CMakeSelectKit NMC
     silent CMakeSelectBuildType Release

@@ -42,6 +42,12 @@ function! utils#gen#common#isMultiConfig(generator) abort
                 \ || a:generator =~# 'Multi-Config'
 endfunction
 
+" Returns 1 if the generator can emit compile_commands.json. Only the
+" Makefile and Ninja generators support CMAKE_EXPORT_COMPILE_COMMANDS.
+function! utils#gen#common#supportsCompileCommands(generator) abort
+    return a:generator =~# 'Makefiles' || a:generator =~# 'Ninja'
+endfunction
+
 " Returns the default target for current CMake generator
 " If Generator is not supported returns default target for Unix Makefiles
 " Returns empty string if CMake generator is not supported

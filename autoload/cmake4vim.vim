@@ -71,6 +71,15 @@ function! cmake4vim#GenerateCMake(...) abort
     " Collect CMake Information
     call utils#cmake#common#collectCMakeInfo(l:build_dir)
 
+    " Warn if a compilation database was requested but the generator cannot
+    " produce one (only Makefile and Ninja generators support it)
+    if g:cmake_compile_commands
+        let l:generator = utils#gen#common#getGenerator()
+        if !utils#gen#common#supportsCompileCommands(l:generator)
+            call utils#common#Warning(printf('compile_commands.json is not produced by the "%s" generator. Use a Makefile or Ninja generator.', l:generator))
+        endif
+    endif
+
     " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
         silent call cmake4vim#SelectTarget(g:cmake_build_target)
