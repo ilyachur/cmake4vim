@@ -18,7 +18,11 @@ endfunction
 
 " Returns the list of targets for CMake generator
 function! utils#gen#ninja#getTargets(build_dir) abort
-    let l:res = split(system(g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target help'), "\n")
+    let l:out = system(g:cmake_executable . ' --build ' . utils#fs#fnameescape(a:build_dir) . ' --target help')
+    if v:shell_error != 0
+        return []
+    endif
+    let l:res = split(l:out, "\n")
     let l:list_targets = []
     let l:targets_found = 0
     for l:value in l:res

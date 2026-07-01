@@ -70,11 +70,22 @@ The current version of the plugin supports next commands:
  - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
  - **`:CMakeCompileSource`** compiles source file in current buffer.
 
+#### CMake presets
+
+The plugin understands `CMakePresets.json` / `CMakeUserPresets.json`. Preset names are listed via `cmake --list-presets`, so CMake resolves `hidden`, `inherits` and `condition`. Kits and variants keep working for projects without preset files.
+
+ - **`:CMakeSelectConfigurePreset {name}`** selects a configure preset and configures the project with `cmake --preset {name}`. The plugin uses the preset binary directory for target selection, building and running.
+ - **`:CMakeSelectBuildPreset {name}`** selects a build preset; `:CMakeBuild` then uses `cmake --build --preset {name}`.
+ - **`:CMakeSelectTestPreset {name}`** selects a test preset; `:CTest` then uses `ctest --preset {name}`.
+ - **`:CMakeWorkflow {name}`** runs a workflow preset with `cmake --workflow --preset {name}` (CMake 3.25+).
+
+All of these commands complete preset names with `<Tab>`.
+
 #### Execute
 
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file.
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config.
- - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
+ - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`. Any CTest flag can be forwarded, e.g. run failing tests verbosely in parallel and filter by name/label: `:CTest --output-on-failure -j8 -R MyTest` or `:CTest -L integration`. On multi-config generators the selected configuration is passed automatically via `-C`, and the build directory is passed via `--test-dir`.
  - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
  - **`:CTestCurrent`** same as `:CTest` but run tests with `-R current_cmake_target`.
  - **`:CTestCurrent!`** same as `:CTest!` but run tests with `-R current_cmake_target`.
@@ -121,6 +132,10 @@ The options below allow to change plugin behavior.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
+ - **`g:cmake_compat_policy_version`** if not empty, its value is passed as `-DCMAKE_POLICY_VERSION_MINIMUM` (e.g. `'3.5'`). Use it to configure old projects with CMake 4.x, which removed compatibility with `cmake_minimum_required()` below 3.5. Default is empty.
+ - **`g:cmake_configure_preset`** currently selected configure preset. When not empty, `:CMake` configures with `cmake --preset <name>`. Default is empty.
+ - **`g:cmake_build_preset`** currently selected build preset. When not empty, `:CMakeBuild` uses `cmake --build --preset <name>`. Default is empty.
+ - **`g:cmake_test_preset`** currently selected test preset. When not empty, `:CTest` uses `ctest --preset <name>`. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0.
  - **`g:cmake_vimspector_default_configuration`** is a default configuration for new vimspector target. Default is:
  ```
@@ -145,7 +160,6 @@ The options below allow to change plugin behavior.
  - **`g:cmake_build_executor_split_mode`** Allows to configure split mode for build window and quickfixlist. Avaulable values are:
     - 'sp' enables horizontal mode. It is the default value.
     - 'vsp' enables vertical mode.
- - **`g:cmake_build_executor_height`** defines the height (in rows) of the build window and quickfixlist window showing the results. **The option was deprecated, please use `let g:cmake_build_executor_window_size=<size>` instead.** Default is 10.
 
 #### Build path
 
@@ -290,10 +304,10 @@ command!                                                 FZFCMakeSelectKit call 
 
 ## Supported CMake version
 
-The plugin supports all CMake versions since 2.8.
+The plugin requires CMake 3.21 or newer.
 
-Since the CMake 3.14 version the plugin uses file API, this feature helps to have more information about CMake project and implement a smart
-detection of executable files for `:CMakeRun` command.
+The plugin uses the CMake file API, this feature helps to have more information about the CMake project and implements a smart
+detection of executable files for the `:CMakeRun` command.
 
 ## References
 
