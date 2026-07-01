@@ -18,10 +18,9 @@ function! utils#window#CloseCMakeInfoWindow() abort
 endfunction
 
 function! utils#window#OpenCMakeInfoWindow() abort
-    let bufnum = bufnr(s:cmake_info_win_name)
-    let bufwinnum = bufwinnr(s:cmake_info_win_name)
+    let l:bufnum = bufnr(s:cmake_info_win_name)
 
-    if bufnum != -1 && bufwinnum != -1
+    if l:bufnum != -1 && !empty(win_findbuf(l:bufnum))
         return
     endif
     let wcmd = s:cmake_info_win_name
@@ -35,12 +34,14 @@ function! utils#window#GotoCMakeInfoWindow() abort
         return
     endif
 
-    let l:cmake_info_winnr = bufwinnr(s:cmake_info_win_name)
-    if l:cmake_info_winnr == -1
+    let l:win_ids = win_findbuf(bufnr(s:cmake_info_win_name))
+    if empty(l:win_ids)
         call utils#window#OpenCMakeInfoWindow()
-        let l:cmake_info_winnr = bufwinnr(s:cmake_info_win_name)
+        let l:win_ids = win_findbuf(bufnr(s:cmake_info_win_name))
     endif
-    exec l:cmake_info_winnr . 'wincmd w'
+    if !empty(l:win_ids)
+        call win_gotoid(l:win_ids[0])
+    endif
 endfunction
 
 function! utils#window#PrepareInfo(cache) abort
