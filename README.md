@@ -90,6 +90,20 @@ All of these commands complete preset names with `<Tab>`.
  - **`:CTestCurrent`** same as `:CTest` but run tests with `-R current_cmake_target`.
  - **`:CTestCurrent!`** same as `:CTest!` but run tests with `-R current_cmake_target`.
 
+#### Status line
+
+The plugin exposes lightweight getters (cheap enough to call on redraw) for status line integration: `cmake4vim#statusline#Status()`, `IsCMakeProject()`, `GetBuildTarget()`, `GetBuildType()`, `GetKit()`, `GetConfigurePreset()`.
+
+```vim
+" native status line
+set statusline+=%{cmake4vim#statusline#Status()}
+```
+
+```lua
+-- lualine.nvim
+sections = { lualine_x = { { function() return vim.fn['cmake4vim#statusline#Status']() end } } }
+```
+
 #### Integration
 
  - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'vsplit' - vertical mode, 'split' - horizontal mode, 'tab' - open ccmake in the new tab (by default the executor window split mode is used).
