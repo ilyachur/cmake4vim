@@ -250,6 +250,12 @@ g:cmake_test_preset                 currently selected test preset. When not
                                     empty, :CTest uses `ctest --preset <name>`.
                                     Default is empty.
 
+HEALTH CHECK                                                      *cmake-health*
+
+On Neovim run `:checkhealth cmake4vim` to verify the environment: it checks
+that cmake (>= 3.21) and ctest are available, whether ninja is installed, and
+reports the active kit/preset and target.
+
 STATUS LINE                                                  *cmake-statusline*
 
 The plugin exposes lightweight getters (cheap enough to call on redraw) for

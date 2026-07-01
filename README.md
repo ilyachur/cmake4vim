@@ -316,6 +316,10 @@ command! -nargs=1 -complete=custom,cmake4vim#CompleteKit CMakeSelectKit    call 
 command!                                                 FZFCMakeSelectKit call s:FZFSelectKit()
 ```
 
+## Health check
+
+On Neovim run `:checkhealth cmake4vim` to verify your environment: it checks that `cmake` (>= 3.21) and `ctest` are available, whether `ninja` is installed, and reports the active kit/preset and target.
+
 ## Supported CMake version
 
 The plugin supports all CMake versions since 2.8.
