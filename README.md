@@ -44,10 +44,21 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 
 ### Installation
 
-You can use VimPlug for installation:
+[lazy.nvim](https://github.com/folke/lazy.nvim) (Neovim):
+```lua
+{ 'ilyachur/cmake4vim', cmd = { 'CMake', 'CMakeBuild', 'CMakeRun', 'CTest' } }
+```
+
+[vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
 Plug 'ilyachur/cmake4vim'
 ```
+
+Neovim's built-in package manager (`vim.pack`):
+```lua
+vim.pack.add({ 'https://github.com/ilyachur/cmake4vim' })
+```
+
 Or Pathogen:
 ```sh
 cd ~/.vim/bundle
