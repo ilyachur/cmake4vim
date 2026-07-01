@@ -20,11 +20,13 @@ function! s:getCache(dir) abort
     if !filereadable(l:cache_file)
         return []
     endif
-    if has('win32')
-        return split(system('type ' . utils#fs#fnameescape(l:cache_file)), '\n')
-    else
-        return split(system('cat ' . utils#fs#fnameescape(l:cache_file)), '\n')
-    endif
+    " Read the file directly instead of shelling out to cat/type: it avoids
+    " an unguarded external process and works the same on every platform.
+    try
+        return readfile(l:cache_file)
+    catch
+        return []
+    endtry
 endfunction
 " }}} Private functions "
 

@@ -23,7 +23,11 @@ function! utils#gen#vs#getTargets(build_dir) abort
     if !isdirectory(a:build_dir)
         return l:list_targets
     endif
-    let l:res = split(system('dir *.vcxproj /S /B'), "\n")
+    let l:out = system('dir *.vcxproj /S /B')
+    if v:shell_error != 0
+        return l:list_targets
+    endif
+    let l:res = split(l:out, "\n")
     for l:value in l:res
         if !empty(l:value)
             let l:file = l:value[len(a:build_dir):]
