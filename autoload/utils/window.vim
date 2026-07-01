@@ -57,6 +57,11 @@ function! utils#window#PrepareInfo(cache) abort
         let l:info += ['    build type:         ' . a:cache['cmake']['build_type']]
         let l:info += ['    build directory:    ' . a:cache['cmake']['build_dir']]
         let l:info += ['    generator:          ' . a:cache['cmake']['generator']]
+        if has_key(a:cache, 'toolchains') && !empty(a:cache['toolchains'])
+            for l:lang in sort(keys(a:cache['toolchains']))
+                let l:info += [printf('    %-8s compiler:   %s', l:lang, a:cache['toolchains'][l:lang])]
+            endfor
+        endif
         let l:info += ['    generation command: ' . utils#cmake#getCMakeGenerationCommand()]
         let l:info += ['    build command:      ' . utils#cmake#getBuildCommand(a:cache['cmake']['build_dir'], g:cmake_build_target)]
     endif
