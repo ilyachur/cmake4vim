@@ -37,7 +37,7 @@ function! utils#cmake#cache#collectInfo(build_dir) abort
     let l:common = {}
 
     let l:common['cmake'] = {
-                \ 'version': join(utils#cmake#getVersion(), '.'),
+                \ 'version': join(utils#cmake#version#getVersion(), '.'),
                 \ 'generator': s:findCacheVar(l:cmake_cache, 'CMAKE_GENERATOR'),
                 \ 'build_type': s:findCacheVar(l:cmake_cache, 'CMAKE_BUILD_TYPE'),
                 \ 'project_name': s:findCacheVar(l:cmake_cache, 'CMAKE_PROJECT_NAME'),

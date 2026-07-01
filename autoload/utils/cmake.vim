@@ -159,15 +159,10 @@ endfunction
 
 " Gets CMake version
 " Returns array [major, minor, patch]
+" Kept as a thin wrapper for backward compatibility; the implementation
+" (with caching) lives in utils#cmake#version#getVersion().
 function! utils#cmake#getVersion() abort
-    let l:version_out = system(g:cmake_executable . ' --version')
-    let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
-    let l:version_exp = split(l:version_str, '\.')
-    let l:version = []
-    for l:val in l:version_exp
-        let l:version += [str2nr(l:val)]
-    endfor
-    return l:version
+    return utils#cmake#version#getVersion()
 endfunction
 
 
