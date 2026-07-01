@@ -80,10 +80,14 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    " CMake 3.24 supports the same functionality
-    " call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
-    silent call cmake4vim#ResetCMakeCache()
-    call call('cmake4vim#GenerateCMake', a:000)
+    " CMake 3.24+ can wipe the cache in place with --fresh, which is faster
+    " than removing and recreating the whole build directory.
+    if utils#cmake#version#verNewerOrEq([3, 24])
+        call call('cmake4vim#GenerateCMake', ['--fresh'] + a:000)
+    else
+        silent call cmake4vim#ResetCMakeCache()
+        call call('cmake4vim#GenerateCMake', a:000)
+    endif
 endfunction
 
 " The function is called when user saves cmake scripts

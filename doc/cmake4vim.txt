@@ -25,8 +25,10 @@ COMMANDS                                                        *cmake-commands*
     project.  All arguments are directly passed on to CMake.
 
 :CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
-    Removes cmake cache and re-generates cmake project.  All arguments are
-    directly passed on to CMake.
+    Resets the cmake cache and re-generates the cmake project.  On CMake 3.24
+    and newer it reconfigures in place with `--fresh` (previously built
+    artifacts are kept); on older versions it removes the build directory
+    first.  All arguments are directly passed on to CMake.
 
 :CMakeReset                                                        *:CMakeReset*
     Removes cmake cache (this command removes the cmake build directory).
