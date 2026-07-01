@@ -289,16 +289,6 @@ function! utils#cmake#findSrcDir() abort
     return l:src_dir
 endfunction
 
-" Returs the path to build directory if directory was found and returns empty string in other case.
-" Use build directory from the cmake cache or try to find it at the current folder
-" Creates directory if it doesn't exist
-function! utils#cmake#getBuildDir() abort
-    let l:build_dir = s:detectCMakeBuildDir()
-    let l:build_dir = utils#fs#makeDir(l:build_dir)
-    let l:build_dir = fnamemodify(l:build_dir, ':p:h')
-    return l:build_dir
-endfunction
-
 function! utils#cmake#getBinaryPath(...) abort
     let l:build_dir = utils#cmake#getBuildDir()
     let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
