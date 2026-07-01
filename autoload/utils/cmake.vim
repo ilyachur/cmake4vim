@@ -141,6 +141,11 @@ function! utils#cmake#getDefaultBuildTypes() abort
     return ['Release', 'Debug', 'RelWithDebInfo', 'MinSizeRel', '']
 endfunction
 
+" Returns the currently selected/detected CMake build type (configuration)
+function! utils#cmake#getBuildType() abort
+    return s:detectCMakeBuildType()
+endfunction
+
 " Returns the path to build directory if directory was found and returns empty string in other case.
 " Use build directory from the cmake cache or try to find it at the current folder
 " Creates directory if it doesn't exist
@@ -187,7 +192,15 @@ function! utils#cmake#getBuildCommand(build_dir, target) abort
         call utils#fs#createLink(l:src, l:dst)
     endif
 
-    return utils#gen#common#getBuildCommand(a:build_dir, a:target, g:cmake_build_args, g:make_arguments)
+    " For multi-config generators the build type is selected at build time via
+    " --config, since CMAKE_BUILD_TYPE is ignored at configure time.
+    let l:build_args = g:cmake_build_args
+    let l:build_type = s:detectCMakeBuildType()
+    if utils#gen#common#isMultiConfig(utils#gen#common#getGenerator()) && !empty(l:build_type)
+        let l:build_args = trim(printf('--config %s %s', l:build_type, l:build_args))
+    endif
+
+    return utils#gen#common#getBuildCommand(a:build_dir, a:target, l:build_args, g:make_arguments)
 endfunction
 
 " Generates the command line for CMake generator
@@ -282,11 +295,7 @@ function! utils#cmake#getBinaryPath(...) abort
     let l:cmake_info = utils#cmake#common#getInfo(l:build_dir)
     let l:build_type = s:detectCMakeBuildType()
     if has_key(l:cmake_info, 'targets') && has_key(l:cmake_info['targets'], l:build_type) && has_key(l:cmake_info['targets'][l:build_type], g:cmake_build_target)
-        if !has('win32')
-            let l:target = l:cmake_info['targets'][l:build_type][g:cmake_build_target]
-        else
-            let l:target = l:cmake_info['targets']['Debug'][g:cmake_build_target]
-        endif
+        let l:target = l:cmake_info['targets'][l:build_type][g:cmake_build_target]
         if l:target['type'] !=# 'EXECUTABLE'
             let v:errmsg = 'Target ' . g:cmake_build_target . ' is not an executable'
             if !a:0

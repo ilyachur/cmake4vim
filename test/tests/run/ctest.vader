@@ -31,9 +31,9 @@ Execute ([CTest] Build project with gtest):
             Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Release/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Release/test_lib.lib"), "test_lib should be built"
         endif
     endif
 
@@ -47,9 +47,9 @@ Execute ([CTest] Run tests with default settings):
             silent call system("cmake-build-Release/tests/unit_tests")
             AssertEqual 0, v:shell_error
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Release/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Release/test_lib.lib"), "test_lib should be built"
         endif
     endif
 
@@ -61,9 +61,9 @@ Execute ([CTest] CTest with default settings):
             Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Release/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Release/test_lib.lib"), "test_lib should be built"
         endif
         silent CTest
     endif
@@ -79,9 +79,9 @@ Execute ([CTest] CTest check target):
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
         else
             AssertEqual g:cmake_build_target, 'ALL_BUILD'
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Release/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Release/test_lib.lib"), "test_lib should be built"
         endif
         silent CTest
         if !has('win32')
@@ -105,9 +105,9 @@ Execute ([CTest] Run tests with custom settings):
             silent call system("cmake-build-Release/tests/unit_tests")
             AssertEqual 1, v:shell_error
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Release/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Release/test_lib.lib"), "test_lib should be built"
         endif
     endif
 
@@ -119,9 +119,9 @@ Execute ([CTest] CTest with custom settings):
             Assert filereadable("cmake-build-Release/tests/unit_tests"), "unit_tests should be built"
             Assert filereadable("cmake-build-Release/lib/libtest_lib.a"), "test_lib should be built"
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
-            Assert filereadable("cmake-build-Release/tests/Debug/unit_tests.exe"), "unit_tests should be built"
-            Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/tests/Release/unit_tests.exe"), "unit_tests should be built"
+            Assert filereadable("cmake-build-Release/lib/Release/test_lib.lib"), "test_lib should be built"
         endif
         silent CTest
     endif

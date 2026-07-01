@@ -200,6 +200,12 @@ function! cmake4vim#CTest(bang, ...) abort
     " --test-dir is available since CMake 3.20
     call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
 
+    " Multi-config generators need the configuration selected explicitly
+    let l:build_type = utils#cmake#getBuildType()
+    if utils#gen#common#isMultiConfig(utils#gen#common#getGenerator()) && !empty(l:build_type)
+        call extend(l:args, ['-C', l:build_type])
+    endif
+
     " Run
     call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
 endfunction

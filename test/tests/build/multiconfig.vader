@@ -1,0 +1,33 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
+    silent call ResetPluginOptions()
+    let g:cmake_kits = { "NMC": { "generator": "Ninja Multi-Config" } }
+    silent on
+
+After:
+    silent call RemoveFile(".cmake-kits.json")
+    silent call ResetPluginOptions()
+    silent call RemoveCMakeDirs()
+
+Execute ([CMake multiconfig] isMultiConfig helper):
+    Assert utils#gen#common#isMultiConfig('Ninja Multi-Config'), 'Ninja Multi-Config should be multi-config'
+    Assert utils#gen#common#isMultiConfig('Visual Studio 17 2022'), 'VS should be multi-config'
+    Assert utils#gen#common#isMultiConfig('Xcode'), 'Xcode should be multi-config'
+    Assert !utils#gen#common#isMultiConfig('Ninja'), 'Ninja should be single-config'
+    Assert !utils#gen#common#isMultiConfig('Unix Makefiles'), 'Make should be single-config'
+
+Execute ([CMake multiconfig] build command uses --config for Ninja Multi-Config):
+    silent CMakeSelectKit NMC
+    silent CMakeSelectBuildType Release
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
+    Assert build_cmd =~# '--config Release', 'Build command should contain --config Release: ' . build_cmd
+    silent CMakeBuild
+    Assert isdirectory("cmake-build-Release/app/Release") || filereadable("cmake-build-Release/app/Release/test_app"), "Release config dir should exist"
+
+Execute ([CMake multiconfig] single-config generator does not use --config):
+    silent CMakeSelectBuildType Release
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
+    Assert build_cmd !~# '--config', 'Single-config build command should not contain --config: ' . build_cmd
