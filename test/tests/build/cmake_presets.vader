@@ -1,0 +1,82 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
+    silent call ResetPluginOptions()
+    silent call RemoveDirectory('cmake-build-presets')
+
+    let s:presets = {
+        \ 'version': 3,
+        \ 'cmakeMinimumRequired': { 'major': 3, 'minor': 21, 'patch': 0 },
+        \ 'configurePresets': [
+        \   { 'name': 'default', 'displayName': 'Default Ninja', 'generator': 'Ninja',
+        \     'binaryDir': '${sourceDir}/cmake-build-presets/${presetName}' },
+        \   { 'name': 'debug', 'inherits': 'default',
+        \     'cacheVariables': { 'CMAKE_BUILD_TYPE': 'Debug' } }
+        \ ],
+        \ 'buildPresets': [ { 'name': 'default', 'configurePreset': 'default' } ],
+        \ 'testPresets': [ { 'name': 'default', 'configurePreset': 'default' } ]
+        \ }
+    silent call writefile([json_encode(s:presets)], 'CMakePresets.json')
+    silent on
+
+After:
+    silent call RemoveFile('CMakePresets.json')
+    silent call RemoveDirectory('cmake-build-presets')
+    silent call ResetPluginOptions()
+    silent call RemoveCMakeDirs()
+
+Execute ([CMake presets] Detect preset files):
+    Assert utils#cmake#presets#hasPresets(), 'CMakePresets.json should be detected'
+
+Execute ([CMake presets] List configure presets):
+    " `cmake --list-presets` requires CMake >= 3.21 (presets file version 3)
+    if utils#cmake#version#verNewerOrEq([3, 21])
+        let presets = utils#cmake#presets#getConfigurePresets()
+        Assert index(presets, 'default') >= 0, 'default preset should be listed: ' . join(presets, ',')
+        Assert index(presets, 'debug') >= 0, 'debug preset should be listed: ' . join(presets, ',')
+    endif
+
+Execute ([CMake presets] Configure preset completion):
+    " Completion is backed by `cmake --list-presets` (CMake >= 3.21)
+    if utils#cmake#version#verNewerOrEq([3, 21])
+        let comp = split(cmake4vim#CompleteConfigurePreset(0, 0, 0), "\n")
+        Assert index(comp, 'default') >= 0, 'completion should contain default'
+    endif
+
+Execute ([CMake presets] Resolve binary dir with macros and inherits):
+    let bdir = utils#cmake#presets#getConfigureBinaryDir('default')
+    Assert bdir =~# 'cmake-build-presets/default$', 'binaryDir should expand macros: ' . bdir
+    " debug inherits binaryDir template from default
+    let bdir_dbg = utils#cmake#presets#getConfigureBinaryDir('debug')
+    Assert bdir_dbg =~# 'cmake-build-presets/debug$', 'inherited binaryDir should expand: ' . bdir_dbg
+
+Execute ([CMake presets] Preset generation command):
+    let g:cmake_configure_preset = 'default'
+    let cmd = utils#cmake#getActiveGenerationCommand()
+    Assert cmd =~# '--preset default', 'generation command should use the preset: ' . cmd
+
+Execute ([CMake presets] Select and configure with preset):
+    " Configuring with `--preset` requires CMake >= 3.21
+    if utils#cmake#version#verNewerOrEq([3, 21])
+        silent CMakeSelectConfigurePreset default
+        AssertEqual g:cmake_configure_preset, 'default'
+        Assert filereadable('cmake-build-presets/default/CMakeCache.txt'), 'CMakeCache.txt should be generated in the preset binary dir'
+        Assert g:cmake_build_dir =~# 'cmake-build-presets/default$', 'build dir should point at the preset binary dir: ' . g:cmake_build_dir
+    endif
+
+Execute ([CMake presets] Build preset drives the build command):
+    let g:cmake_build_preset = 'default'
+    let build_cmd = utils#cmake#getBuildCommand('whatever', 'all')
+    Assert build_cmd =~# '--build --preset default', 'build command should use the build preset: ' . build_cmd
+    Assert build_cmd =~# '--target all', 'build command should keep the target: ' . build_cmd
+
+Execute ([CMake presets] Test preset drives ctest):
+    " ctest with `--preset` requires CMake >= 3.21
+    if utils#cmake#version#verNewerOrEq([3, 21])
+        silent CMakeSelectConfigurePreset default
+        let g:cmake_test_preset = 'default'
+        silent CTest
+        silent copen
+        Assert w:quickfix_title =~# '--preset default', 'ctest should use the test preset: ' . w:quickfix_title
+        silent cclose
+    endif

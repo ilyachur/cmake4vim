@@ -70,6 +70,17 @@ The current version of the plugin supports next commands:
  - **`:CMakeClean`** cleans the project (it is equal of the execution `make clean`).
  - **`:CMakeCompileSource`** compiles source file in current buffer.
 
+#### CMake presets
+
+The plugin understands `CMakePresets.json` / `CMakeUserPresets.json`. Preset names are listed via `cmake --list-presets`, so CMake resolves `hidden`, `inherits` and `condition`. Kits and variants keep working for projects without preset files.
+
+ - **`:CMakeSelectConfigurePreset {name}`** selects a configure preset and configures the project with `cmake --preset {name}`. The plugin uses the preset binary directory for target selection, building and running.
+ - **`:CMakeSelectBuildPreset {name}`** selects a build preset; `:CMakeBuild` then uses `cmake --build --preset {name}`.
+ - **`:CMakeSelectTestPreset {name}`** selects a test preset; `:CTest` then uses `ctest --preset {name}`.
+ - **`:CMakeWorkflow {name}`** runs a workflow preset with `cmake --workflow --preset {name}` (CMake 3.25+).
+
+All of these commands complete preset names with `<Tab>`.
+
 #### Execute
 
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file.
@@ -122,6 +133,9 @@ The options below allow to change plugin behavior.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_compat_policy_version`** if not empty, its value is passed as `-DCMAKE_POLICY_VERSION_MINIMUM` (e.g. `'3.5'`). Use it to configure old projects with CMake 4.x, which removed compatibility with `cmake_minimum_required()` below 3.5. Default is empty.
+ - **`g:cmake_configure_preset`** currently selected configure preset. When not empty, `:CMake` configures with `cmake --preset <name>`. Default is empty.
+ - **`g:cmake_build_preset`** currently selected build preset. When not empty, `:CMakeBuild` uses `cmake --build --preset <name>`. Default is empty.
+ - **`g:cmake_test_preset`** currently selected test preset. When not empty, `:CTest` uses `ctest --preset <name>`. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0.
  - **`g:cmake_vimspector_default_configuration`** is a default configuration for new vimspector target. Default is:
  ```

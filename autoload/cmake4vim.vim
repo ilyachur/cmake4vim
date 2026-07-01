@@ -56,14 +56,22 @@ endfunction
 function! cmake4vim#GenerateCMake(...) abort
     " Reset old cmake cache
     call utils#cmake#common#resetCache()
-    " Creates build directory
-    let l:build_dir = utils#cmake#getBuildDir()
 
-    " Prepare requests to CMake system
-    call utils#cmake#common#makeRequests(l:build_dir)
+    " When a configure preset is selected drive CMake through it
+    if !empty(g:cmake_configure_preset)
+        let l:build_dir = utils#cmake#getBuildDir()
+        call utils#cmake#common#makeRequests(l:build_dir)
+        let l:cmake_cmd = call('utils#cmake#getCMakePresetGenerationCommand', a:000)
+    else
+        " Creates build directory
+        let l:build_dir = utils#cmake#getBuildDir()
 
-    " Generates a command for CMake
-    let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
+        " Prepare requests to CMake system
+        call utils#cmake#common#makeRequests(l:build_dir)
+
+        " Generates a command for CMake
+        let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
+    endif
 
     " For old CMake versions the directory must be changed to generate the
     " project, since the -B option was introduced only in CMake 3.13
@@ -242,17 +250,23 @@ function! cmake4vim#CTest(bang, ...) abort
         endif
     endif
 
-    " --test-dir is available since CMake 3.20; on older versions ctest must be
-    " run from inside the build directory instead.
     let l:has_test_dir = utils#cmake#version#verNewerOrEq([3, 20])
-    if l:has_test_dir
-        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
-    endif
+    if !empty(g:cmake_test_preset)
+        " The test preset already carries the test directory and configuration
+        call insert(l:args, g:cmake_test_preset)
+        call insert(l:args, '--preset')
+    else
+        " --test-dir is available since CMake 3.20; on older versions ctest must
+        " be run from inside the build directory instead.
+        if l:has_test_dir
+            call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
+        endif
 
-    " Multi-config generators need the configuration selected explicitly
-    let l:build_type = utils#cmake#getBuildType()
-    if utils#gen#common#isMultiConfig(utils#gen#common#getGenerator()) && !empty(l:build_type)
-        call extend(l:args, ['-C', l:build_type])
+        " Multi-config generators need the configuration selected explicitly
+        let l:build_type = utils#cmake#getBuildType()
+        if utils#gen#common#isMultiConfig(utils#gen#common#getGenerator()) && !empty(l:build_type)
+            call extend(l:args, ['-C', l:build_type])
+        endif
     endif
 
     " Run
@@ -288,6 +302,76 @@ function! cmake4vim#SelectKit(name) abort
     call utils#cmake#unsetEnv(g:cmake_selected_kit)
     call utils#cmake#setEnv(a:name)
     let g:cmake_selected_kit = a:name
+endfunction
+
+" CMakePresets completion {{{ "
+function! cmake4vim#CompleteConfigurePreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getConfigurePresets(), "\n")
+endfunction
+
+function! cmake4vim#CompleteBuildPreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getBuildPresets(), "\n")
+endfunction
+
+function! cmake4vim#CompleteTestPreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getTestPresets(), "\n")
+endfunction
+
+function! cmake4vim#CompleteWorkflowPreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getWorkflowPresets(), "\n")
+endfunction
+" }}} CMakePresets completion "
+
+" Selects a configure preset and configures the project through it
+function! cmake4vim#SelectConfigurePreset(name) abort
+    if index(utils#cmake#presets#getConfigurePresets(), a:name) == -1
+        call utils#common#Warning(printf("CMake configure preset '%s' not found", a:name))
+        return
+    endif
+    let l:binary_dir = utils#cmake#presets#getConfigureBinaryDir(a:name)
+    if empty(l:binary_dir)
+        call utils#common#Warning(printf("Cannot resolve binary directory for preset '%s'", a:name))
+        return
+    endif
+    let g:cmake_configure_preset = a:name
+    " Point the plugin at the preset's binary directory so target detection,
+    " building and running keep working.
+    let g:cmake_build_dir = l:binary_dir
+    call cmake4vim#GenerateCMake()
+endfunction
+
+" Selects a build preset used by :CMakeBuild
+function! cmake4vim#SelectBuildPreset(name) abort
+    if index(utils#cmake#presets#getBuildPresets(), a:name) == -1
+        call utils#common#Warning(printf("CMake build preset '%s' not found", a:name))
+        return
+    endif
+    let g:cmake_build_preset = a:name
+    echon 'CMake build preset: ' . a:name . ' selected!'
+endfunction
+
+" Selects a test preset used by :CTest
+function! cmake4vim#SelectTestPreset(name) abort
+    if index(utils#cmake#presets#getTestPresets(), a:name) == -1
+        call utils#common#Warning(printf("CMake test preset '%s' not found", a:name))
+        return
+    endif
+    let g:cmake_test_preset = a:name
+    echon 'CMake test preset: ' . a:name . ' selected!'
+endfunction
+
+" Runs a workflow preset (cmake --workflow --preset, CMake 3.25+)
+function! cmake4vim#CMakeWorkflow(...) abort
+    let l:name = a:0 ? a:1 : ''
+    if empty(l:name)
+        call utils#common#Warning('Please specify a workflow preset name!')
+        return
+    endif
+    if index(utils#cmake#presets#getWorkflowPresets(), l:name) == -1
+        call utils#common#Warning(printf("CMake workflow preset '%s' not found", l:name))
+        return
+    endif
+    call utils#common#executeCommand(printf('%s --workflow --preset %s', g:cmake_executable, l:name), 0, getcwd(), s:getCMakeErrorFormat())
 endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
@@ -398,5 +482,12 @@ function! cmake4vim#init() abort
     let g:cmake_selected_kit          = get(g:, 'cmake_selected_kit'         , ''            )
     let g:cmake_kits                  = get(g:, 'cmake_kits'                 , {}            )
     let g:cmake_kits_global_path      = get(g:, 'cmake_kits_global_path'     , ''            )
+
+    " CMakePresets.json support. When a configure preset is selected the
+    " project is configured with `cmake --preset`; the build/test presets are
+    " used by :CMakeBuild / :CTest when set.
+    let g:cmake_configure_preset      = get(g:, 'cmake_configure_preset'     , ''            )
+    let g:cmake_build_preset          = get(g:, 'cmake_build_preset'         , ''            )
+    let g:cmake_test_preset           = get(g:, 'cmake_test_preset'          , ''            )
 endfunction
 " }}} Public functions "
