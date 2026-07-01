@@ -207,12 +207,4 @@ g:cmake_kits                        enables predefined cmake kits in the form
 g:cmake_selected_kit                currently selected cmake kit.
                                     Default is empty.
 
-DEPRECATED VARIABLES                                                  *cmake-deprecated-variables*
-
-g:cmake_build_executor_height       defines the height (in rows) of the
-                                    build window and quickfixlist window showing
-                                    the results. Default is 10.
-                                    Will be removed at the April of 2022.
-                                    Please use `let g:cmake_build_executor_window_size=<size>` instead.
-
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help

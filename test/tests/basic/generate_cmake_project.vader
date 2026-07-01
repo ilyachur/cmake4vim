@@ -184,8 +184,8 @@ Execute ([CMake generate] Create incorrect folder):
     call utils#fs#makeDir('custom-folder')
     Assert !isdirectory("custom-folder"), "Build directory shouldn't exist"
 
-Execute ([CMake generate] Verify deprecated warning):
-    let g:cmake_build_executor_height = 10
+Execute ([CMake generate] Custom window size does not break generation):
+    let g:cmake_build_executor_window_size = 15
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
