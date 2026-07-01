@@ -31,10 +31,10 @@ function! health#cmake4vim#check() abort
     endif
     let l:version = utils#cmake#version#getVersion()
     let l:version_str = join(l:version, '.')
-    if utils#cmake#version#verNewerOrEq([3, 21])
-        call s:ok(printf('cmake %s (>= 3.21 required)', l:version_str))
+    if utils#cmake#version#verNewerOrEq([3, 6])
+        call s:ok(printf('cmake %s (>= 3.6 required)', l:version_str))
     else
-        call s:warn(printf('cmake %s is older than the required 3.21', l:version_str))
+        call s:warn(printf('cmake %s is older than the required 3.6', l:version_str))
     endif
 
     " ctest ships with cmake but check explicitly
