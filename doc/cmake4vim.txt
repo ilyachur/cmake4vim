@@ -63,7 +63,10 @@ COMMANDS                                                        *cmake-commands*
 
 :CTest[{Args}]                                                         *:CTest*
     Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest
-    arguments.
+    arguments, e.g. `:CTest --output-on-failure -j8 -R MyTest` or
+    `:CTest -L integration`.
+    The build directory is passed via --test-dir and, for multi-config
+    generators, the selected configuration is passed via -C.
 
 :CTest![{Args}]                                                         *:CTest!*
     Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest
