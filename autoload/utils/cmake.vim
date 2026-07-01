@@ -250,15 +250,8 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     let l:cmake_args += l:cmake_variant_usr_args + get(l:, 'cmake_kit_usr_args', [])
     let l:cmake_args += a:000
 
-    " Check that we have at least CMake 3.13 for -B option, fallback for older versions
-    let l:has_b_option = utils#cmake#version#verNewerOrEq([3, 13])
-    
-    if l:has_b_option
-        let l:cmake_args += ['-B', utils#fs#fnameescape(l:build_dir), '-S', utils#fs#fnameescape(l:src_dir)]
-    else
-        " For older CMake versions, use the current directory as source
-        let l:cmake_args += [utils#fs#fnameescape(getcwd())]
-    endif
+    " -B/-S are available since CMake 3.13 (see the minimum supported version)
+    let l:cmake_args += ['-B', utils#fs#fnameescape(l:build_dir), '-S', utils#fs#fnameescape(l:src_dir)]
 
     " Generates the command line
     return printf('%s %s', g:cmake_executable, join(l:cmake_args))

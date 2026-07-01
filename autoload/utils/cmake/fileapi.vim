@@ -100,9 +100,6 @@ endfunction
 " }}} Private functions "
 
 function! utils#cmake#fileapi#prepare(build_dir) abort
-    if !(utils#cmake#version#verNewerOrEq([3, 14]))
-        return
-    endif
     let l:reply_folder = s:getReplyFolder(a:build_dir)
     if !empty(l:reply_folder)
         call utils#fs#removeDirectory(l:reply_folder)
