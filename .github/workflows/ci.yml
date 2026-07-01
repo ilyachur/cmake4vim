@@ -32,6 +32,22 @@ jobs:
             - 'plugin/**'
             - 'test/**'
 
+  lint:
+    name: 'Lint (vint)'
+    needs:
+      - changes
+    if: ${{ needs.changes.outputs.paths == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@master
+      with:
+          python-version: 3.11
+    - name: Install vint
+      run: pip3 install 'setuptools<81' vim-vint
+    - name: Run vint
+      run: vint autoload plugin after
+
   tests:
     name: '${{ matrix.vim_type  }} ${{ matrix.vim_version  }} on ${{ matrix.platform  }} with cmake ${{ matrix.cmake_version }}'
     needs:
