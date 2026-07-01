@@ -159,15 +159,10 @@ endfunction
 
 " Gets CMake version
 " Returns array [major, minor, patch]
+" Kept as a thin wrapper for backward compatibility; the implementation
+" (with caching) lives in utils#cmake#version#getVersion().
 function! utils#cmake#getVersion() abort
-    let l:version_out = system(g:cmake_executable . ' --version')
-    let l:version_str = matchstr(l:version_out, '\v\d+.\d+.\d+')
-    let l:version_exp = split(l:version_str, '\.')
-    let l:version = []
-    for l:val in l:version_exp
-        let l:version += [str2nr(l:val)]
-    endfor
-    return l:version
+    return utils#cmake#version#getVersion()
 endfunction
 
 
@@ -287,16 +282,6 @@ function! utils#cmake#findSrcDir() abort
         let l:src_dir = fnamemodify(l:src_dir, ':p:h')
     endif
     return l:src_dir
-endfunction
-
-" Returs the path to build directory if directory was found and returns empty string in other case.
-" Use build directory from the cmake cache or try to find it at the current folder
-" Creates directory if it doesn't exist
-function! utils#cmake#getBuildDir() abort
-    let l:build_dir = s:detectCMakeBuildDir()
-    let l:build_dir = utils#fs#makeDir(l:build_dir)
-    let l:build_dir = fnamemodify(l:build_dir, ':p:h')
-    return l:build_dir
 endfunction
 
 function! utils#cmake#getBinaryPath(...) abort

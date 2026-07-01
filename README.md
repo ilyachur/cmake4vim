@@ -145,7 +145,6 @@ The options below allow to change plugin behavior.
  - **`g:cmake_build_executor_split_mode`** Allows to configure split mode for build window and quickfixlist. Avaulable values are:
     - 'sp' enables horizontal mode. It is the default value.
     - 'vsp' enables vertical mode.
- - **`g:cmake_build_executor_height`** defines the height (in rows) of the build window and quickfixlist window showing the results. **The option was deprecated, please use `let g:cmake_build_executor_window_size=<size>` instead.** Default is 10.
 
 #### Build path
 
