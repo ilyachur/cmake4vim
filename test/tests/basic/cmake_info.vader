@@ -13,8 +13,20 @@ Execute ([CMake info] Get CMake info):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let result = utils#window#PrepareInfo(utils#cmake#common#getInfo())
-    Assert len(result) == 10, "test project should contain 10 lines with cmake info"
+    let info = utils#cmake#common#getInfo()
+    let result = utils#window#PrepareInfo(info)
+    " One extra line per detected compiler when the toolchains file API object
+    " is available (CMake 3.27+)
+    let expected = 10 + (has_key(info, 'toolchains') ? len(info['toolchains']) : 0)
+    Assert len(result) == expected, "test project should contain " . expected . " lines with cmake info, got " . len(result)
+
+Execute ([CMake info] Toolchains compilers are detected on CMake 3.27+):
+    if utils#cmake#version#verNewerOrEq([3, 27])
+        silent CMake
+        let info = utils#cmake#common#getInfo()
+        Assert has_key(info, 'toolchains'), "toolchains info should be present"
+        Assert has_key(info['toolchains'], 'CXX'), "CXX compiler should be detected"
+    endif
 
 Execute ([CMake info] Get CMake info for empty project):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
