@@ -20,11 +20,13 @@ function! s:getCache(dir) abort
     if !filereadable(l:cache_file)
         return []
     endif
-    if has('win32')
-        return split(system('type ' . utils#fs#fnameescape(l:cache_file)), '\n')
-    else
-        return split(system('cat ' . utils#fs#fnameescape(l:cache_file)), '\n')
-    endif
+    " Read the file directly instead of shelling out to cat/type: it avoids
+    " an unguarded external process and works the same on every platform.
+    try
+        return readfile(l:cache_file)
+    catch
+        return []
+    endtry
 endfunction
 " }}} Private functions "
 
@@ -37,7 +39,7 @@ function! utils#cmake#cache#collectInfo(build_dir) abort
     let l:common = {}
 
     let l:common['cmake'] = {
-                \ 'version': join(utils#cmake#getVersion(), '.'),
+                \ 'version': join(utils#cmake#version#getVersion(), '.'),
                 \ 'generator': s:findCacheVar(l:cmake_cache, 'CMAKE_GENERATOR'),
                 \ 'build_type': s:findCacheVar(l:cmake_cache, 'CMAKE_BUILD_TYPE'),
                 \ 'project_name': s:findCacheVar(l:cmake_cache, 'CMAKE_PROJECT_NAME'),

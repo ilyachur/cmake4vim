@@ -12,11 +12,11 @@ At the current moment plugins supports next CMake generators:
   * Visual Studio
   * Ninja
 
-The plugin supports all CMake versions since 2.8.
+The plugin requires CMake 3.21 or newer.
 
-Since the CMake 3.14 version the plugin uses file API, this feature helps to have
-more information about CMake project and implement a smart detection of
-executable files for `:CMakeRun` command.
+The plugin uses the CMake file API, this feature helps to have more information
+about the CMake project and implement a smart detection of executable files for
+the `:CMakeRun` command.
 
 COMMANDS                                                        *cmake-commands*
 
@@ -25,8 +25,10 @@ COMMANDS                                                        *cmake-commands*
     project.  All arguments are directly passed on to CMake.
 
 :CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
-    Removes cmake cache and re-generates cmake project.  All arguments are
-    directly passed on to CMake.
+    Resets the cmake cache and re-generates the cmake project.  On CMake 3.24
+    and newer it reconfigures in place with `--fresh` (previously built
+    artifacts are kept); on older versions it removes the build directory
+    first.  All arguments are directly passed on to CMake.
 
 :CMakeReset                                                        *:CMakeReset*
     Removes cmake cache (this command removes the cmake build directory).
@@ -42,6 +44,23 @@ COMMANDS                                                        *cmake-commands*
 :CMakeSelectBuildType[{Args}]                            *:CMakeSelectBuildType*
     Change to the CMakeBuildType with the argument passed,
     and will call :CMake after.
+
+:CMakeSelectConfigurePreset {name}                  *:CMakeSelectConfigurePreset*
+    Selects a configure preset from CMakePresets.json / CMakeUserPresets.json
+    and configures the project with `cmake --preset {name}`.  The plugin points
+    itself at the preset binary directory so target selection, building and
+    running keep working.
+
+:CMakeSelectBuildPreset {name}                          *:CMakeSelectBuildPreset*
+    Selects a build preset.  When set, :CMakeBuild builds with
+    `cmake --build --preset {name}`.
+
+:CMakeSelectTestPreset {name}                            *:CMakeSelectTestPreset*
+    Selects a test preset.  When set, :CTest runs `ctest --preset {name}`.
+
+:CMakeWorkflow {name}                                             *:CMakeWorkflow*
+    Runs a workflow preset with `cmake --workflow --preset {name}`
+    (requires CMake 3.25 or newer).
 
 :CMakeInfo                                                         *:CMakeInfo*
     Creates a window with some CMake parameters
@@ -61,7 +80,10 @@ COMMANDS                                                        *cmake-commands*
 
 :CTest[{Args}]                                                         *:CTest*
     Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest
-    arguments.
+    arguments, e.g. `:CTest --output-on-failure -j8 -R MyTest` or
+    `:CTest -L integration`.
+    The build directory is passed via --test-dir and, for multi-config
+    generators, the selected configuration is passed via -C.
 
 :CTest![{Args}]                                                         *:CTest!*
     Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest
@@ -165,6 +187,13 @@ VARIABLES                                                      *cmake-variables*
                                     base using the path from this variable.
                                     Default is empty.
 
+*g:cmake_compat_policy_version*       if this variable is not empty, the value
+                                    is passed as -DCMAKE_POLICY_VERSION_MINIMUM.
+                                    Use it (e.g. '3.5') to configure old
+                                    projects with CMake 4.x, which removed
+                                    compatibility with cmake_minimum_required()
+                                    below 3.5. Default is empty.
+
 g:cmake_build_executor              allows to force set the build executor.
                                     Available values are 'job', 'term', 'dispatch',
                                     'system' and ''. Default is empty.
@@ -207,12 +236,53 @@ g:cmake_kits                        enables predefined cmake kits in the form
 g:cmake_selected_kit                currently selected cmake kit.
                                     Default is empty.
 
-DEPRECATED VARIABLES                                                  *cmake-deprecated-variables*
+g:cmake_configure_preset            currently selected configure preset. When
+                                    not empty, :CMake configures the project
+                                    with `cmake --preset <name>`. Default is
+                                    empty.
 
-g:cmake_build_executor_height       defines the height (in rows) of the
-                                    build window and quickfixlist window showing
-                                    the results. Default is 10.
-                                    Will be removed at the April of 2022.
-                                    Please use `let g:cmake_build_executor_window_size=<size>` instead.
+g:cmake_build_preset                currently selected build preset. When not
+                                    empty, :CMakeBuild uses
+                                    `cmake --build --preset <name>`. Default is
+                                    empty.
+
+g:cmake_test_preset                 currently selected test preset. When not
+                                    empty, :CTest uses `ctest --preset <name>`.
+                                    Default is empty.
+
+HEALTH CHECK                                                      *cmake-health*
+
+On Neovim run `:checkhealth cmake4vim` to verify the environment: it checks
+that cmake (>= 3.21) and ctest are available, whether ninja is installed, and
+reports the active kit/preset and target.
+
+STATUS LINE                                                  *cmake-statusline*
+
+The plugin exposes lightweight getters (cheap enough to call on redraw) for
+status line integration:
+
+    cmake4vim#statusline#Status()               compact summary string
+    cmake4vim#statusline#IsCMakeProject()       1 for a CMake project
+    cmake4vim#statusline#GetBuildTarget()       selected target
+    cmake4vim#statusline#GetBuildType()         selected/detected build type
+    cmake4vim#statusline#GetKit()               selected kit
+    cmake4vim#statusline#GetConfigurePreset()   selected configure preset
+
+Example (native status line): >
+    set statusline+=%{cmake4vim#statusline#Status()}
+<
+
+CMAKE PRESETS                                                    *cmake-presets*
+
+The plugin supports CMakePresets.json and CMakeUserPresets.json. Preset names
+are enumerated with `cmake --list-presets`, so CMake resolves `hidden`,
+`inherits` and `condition` itself. Select a configure preset with
+|:CMakeSelectConfigurePreset|; the project is then configured through
+`cmake --preset` and the plugin uses the preset binary directory. Build and
+test presets are optional and used by :CMakeBuild and :CTest when selected.
+
+Kits and variants remain available for projects without preset files. The
+`include` field of preset files is not expanded when resolving the binary
+directory.
 
  vim: tw=79 ts=8 sw=4 sts=4 et ft=help

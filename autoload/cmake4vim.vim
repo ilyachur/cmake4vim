@@ -56,31 +56,37 @@ endfunction
 function! cmake4vim#GenerateCMake(...) abort
     " Reset old cmake cache
     call utils#cmake#common#resetCache()
-    " Creates build directory
-    let l:build_dir = utils#cmake#getBuildDir()
 
-    " Prepare requests to CMake system
-    call utils#cmake#common#makeRequests(l:build_dir)
+    " When a configure preset is selected drive CMake through it
+    if !empty(g:cmake_configure_preset)
+        let l:build_dir = utils#cmake#getBuildDir()
+        call utils#cmake#common#makeRequests(l:build_dir)
+        let l:cmake_cmd = call('utils#cmake#getCMakePresetGenerationCommand', a:000)
+    else
+        " Creates build directory
+        let l:build_dir = utils#cmake#getBuildDir()
 
-    " Generates a command for CMake
-    let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
+        " Prepare requests to CMake system
+        call utils#cmake#common#makeRequests(l:build_dir)
 
-    " For old CMake version need to change the directory to generate CMake project
-    " -B option was introduced only in CMake 3.13
-    let l:cw_dir = getcwd()
-    if !utils#cmake#version#verNewerOrEq([3, 13])
-        " Change work directory
-        silent exec 'cd' l:build_dir
+        " Generates a command for CMake
+        let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
     endif
-    " Generates CMake project
+
+    " Generates CMake project (uses -B/-S, available since CMake 3.13)
     call utils#common#executeCommand(l:cmake_cmd, 0, getcwd(), s:getCMakeErrorFormat())
-    if !utils#cmake#version#verNewerOrEq([3, 13])
-        " Change work directory to old work directory
-        silent exec 'cd' l:cw_dir
-    endif
 
     " Collect CMake Information
     call utils#cmake#common#collectCMakeInfo(l:build_dir)
+
+    " Warn if a compilation database was requested but the generator cannot
+    " produce one (only Makefile and Ninja generators support it)
+    if g:cmake_compile_commands
+        let l:generator = utils#gen#common#getGenerator()
+        if !utils#gen#common#supportsCompileCommands(l:generator)
+            call utils#common#Warning(printf('compile_commands.json is not produced by the "%s" generator. Use a Makefile or Ninja generator.', l:generator))
+        endif
+    endif
 
     " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
@@ -91,10 +97,14 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    " CMake 3.24 supports the same functionality
-    " call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
-    silent call cmake4vim#ResetCMakeCache()
-    call call('cmake4vim#GenerateCMake', a:000)
+    " CMake 3.24+ can wipe the cache in place with --fresh, which is faster
+    " than removing and recreating the whole build directory.
+    if utils#cmake#version#verNewerOrEq([3, 24])
+        call call('cmake4vim#GenerateCMake', ['--fresh'] + a:000)
+    else
+        silent call cmake4vim#ResetCMakeCache()
+        call call('cmake4vim#GenerateCMake', a:000)
+    endif
 endfunction
 
 " The function is called when user saves cmake scripts
@@ -182,36 +192,9 @@ function! cmake4vim#CompileSource(...) abort
         return
     endif
 
-    " it seems ninja doesn't work with relative paths with newest cmake
-    " and with cmake v2.8.12.2 it doesn't work with absolute paths
-    " TODO: find the middle point
-
+    " Detect the generator and build a single translation unit
     let l:generator = l:cache_info['cmake']['generator']
-
-    let l:target_name = ''
-    if l:generator =~# 'Unix Makefiles' || utils#cmake#version#verNewerOrEq([ 3, 14 ])
-        let l:target_name = utils#gen#common#getSingleUnitTargetName(l:generator, l:source_name)
-    else
-        let l:prefix = ''
-        let l:build_dir = l:cache_info['cmake']['build_dir']
-        " build folder is below getcwd()
-        if l:generator =~# 'Ninja' && stridx(l:build_dir, getcwd()) == 0
-                let l:subfolders = split(trim(split(l:build_dir, getcwd())[0], '/'), '/')
-                for i in range(len(l:subfolders))
-                    let l:prefix .= '../'
-                endfor
-                if utils#cmake#version#verNewerOrEq([3, 13])
-                    let l:target_name = '"' . l:prefix . l:source_name . '^' . '"'
-                else
-                    let l:target_name = l:prefix . fnameescape(l:source_name) . '^'
-                endif
-        endif
-    endif
-
-    " TODO: find the middle point
-    if !utils#cmake#version#verNewerOrEq([ 3, 13 ])
-        let l:target_name = printf('"%s"', l:target_name)
-    endif
+    let l:target_name = utils#gen#common#getSingleUnitTargetName(l:generator, l:source_name)
 
     let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:target_name)
     call utils#common#executeCommand(l:cmd, 1)
@@ -224,7 +207,6 @@ function! cmake4vim#CTest(bang, ...) abort
         call utils#common#Warning('CMake project was not found!')
         return
     endif
-    let l:cw_dir = getcwd()
     let l:cmd = 'ctest'
     let l:args = []
     call extend(l:args, a:000)
@@ -236,21 +218,23 @@ function! cmake4vim#CTest(bang, ...) abort
         endif
     endif
 
-    " Use --test-dir for modern CMake versions, otherwise use directory change
-    if utils#cmake#version#verNewerOrEq([3, 20])
-        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
+    if !empty(g:cmake_test_preset)
+        " The test preset already carries the test directory and configuration
+        call insert(l:args, g:cmake_test_preset)
+        call insert(l:args, '--preset')
     else
-        " Change work directory
-        silent exec 'cd' l:build_dir
+        " --test-dir is available since CMake 3.20
+        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
+
+        " Multi-config generators need the configuration selected explicitly
+        let l:build_type = utils#cmake#getBuildType()
+        if utils#gen#common#isMultiConfig(utils#gen#common#getGenerator()) && !empty(l:build_type)
+            call extend(l:args, ['-C', l:build_type])
+        endif
     endif
 
     " Run
     call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
-
-    if !utils#cmake#version#verNewerOrEq([3, 20])
-        " Change work directory to old work directory
-        silent exec 'cd' l:cw_dir
-    endif
 endfunction
 
 function! cmake4vim#CTestCurrent(bang, ...) abort
@@ -275,6 +259,76 @@ function! cmake4vim#SelectKit(name) abort
     call utils#cmake#unsetEnv(g:cmake_selected_kit)
     call utils#cmake#setEnv(a:name)
     let g:cmake_selected_kit = a:name
+endfunction
+
+" CMakePresets completion {{{ "
+function! cmake4vim#CompleteConfigurePreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getConfigurePresets(), "\n")
+endfunction
+
+function! cmake4vim#CompleteBuildPreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getBuildPresets(), "\n")
+endfunction
+
+function! cmake4vim#CompleteTestPreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getTestPresets(), "\n")
+endfunction
+
+function! cmake4vim#CompleteWorkflowPreset(arg_lead, cmd_line, cursor_pos) abort
+    return join(utils#cmake#presets#getWorkflowPresets(), "\n")
+endfunction
+" }}} CMakePresets completion "
+
+" Selects a configure preset and configures the project through it
+function! cmake4vim#SelectConfigurePreset(name) abort
+    if index(utils#cmake#presets#getConfigurePresets(), a:name) == -1
+        call utils#common#Warning(printf("CMake configure preset '%s' not found", a:name))
+        return
+    endif
+    let l:binary_dir = utils#cmake#presets#getConfigureBinaryDir(a:name)
+    if empty(l:binary_dir)
+        call utils#common#Warning(printf("Cannot resolve binary directory for preset '%s'", a:name))
+        return
+    endif
+    let g:cmake_configure_preset = a:name
+    " Point the plugin at the preset's binary directory so target detection,
+    " building and running keep working.
+    let g:cmake_build_dir = l:binary_dir
+    call cmake4vim#GenerateCMake()
+endfunction
+
+" Selects a build preset used by :CMakeBuild
+function! cmake4vim#SelectBuildPreset(name) abort
+    if index(utils#cmake#presets#getBuildPresets(), a:name) == -1
+        call utils#common#Warning(printf("CMake build preset '%s' not found", a:name))
+        return
+    endif
+    let g:cmake_build_preset = a:name
+    echon 'CMake build preset: ' . a:name . ' selected!'
+endfunction
+
+" Selects a test preset used by :CTest
+function! cmake4vim#SelectTestPreset(name) abort
+    if index(utils#cmake#presets#getTestPresets(), a:name) == -1
+        call utils#common#Warning(printf("CMake test preset '%s' not found", a:name))
+        return
+    endif
+    let g:cmake_test_preset = a:name
+    echon 'CMake test preset: ' . a:name . ' selected!'
+endfunction
+
+" Runs a workflow preset (cmake --workflow --preset, CMake 3.25+)
+function! cmake4vim#CMakeWorkflow(...) abort
+    let l:name = a:0 ? a:1 : ''
+    if empty(l:name)
+        call utils#common#Warning('Please specify a workflow preset name!')
+        return
+    endif
+    if index(utils#cmake#presets#getWorkflowPresets(), l:name) == -1
+        call utils#common#Warning(printf("CMake workflow preset '%s' not found", l:name))
+        return
+    endif
+    call utils#common#executeCommand(printf('%s --workflow --preset %s', g:cmake_executable, l:name), 0, getcwd(), s:getCMakeErrorFormat())
 endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
@@ -344,6 +398,10 @@ function! cmake4vim#init() abort
     let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )
     let g:cmake_compile_commands      = get(g:, 'cmake_compile_commands'     , 0             )
     let g:cmake_compile_commands_link = get(g:, 'cmake_compile_commands_link', ''            )
+    " Value for -DCMAKE_POLICY_VERSION_MINIMUM. Useful to configure old
+    " projects (cmake_minimum_required < 3.5) with CMake 4.x, which otherwise
+    " errors out. Empty means the flag is not passed.
+    let g:cmake_compat_policy_version = get(g:, 'cmake_compat_policy_version', ''            )
     let g:cmake_vimspector_support    = get(g:, 'cmake_vimspector_support'   , 0             )
     let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default_configuration', {
                 \ 'adapter': '',
@@ -381,5 +439,12 @@ function! cmake4vim#init() abort
     let g:cmake_selected_kit          = get(g:, 'cmake_selected_kit'         , ''            )
     let g:cmake_kits                  = get(g:, 'cmake_kits'                 , {}            )
     let g:cmake_kits_global_path      = get(g:, 'cmake_kits_global_path'     , ''            )
+
+    " CMakePresets.json support. When a configure preset is selected the
+    " project is configured with `cmake --preset`; the build/test presets are
+    " used by :CMakeBuild / :CTest when set.
+    let g:cmake_configure_preset      = get(g:, 'cmake_configure_preset'     , ''            )
+    let g:cmake_build_preset          = get(g:, 'cmake_build_preset'         , ''            )
+    let g:cmake_test_preset           = get(g:, 'cmake_test_preset'          , ''            )
 endfunction
 " }}} Public functions "

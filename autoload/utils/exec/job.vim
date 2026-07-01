@@ -12,10 +12,10 @@ function! s:closeBuffer() abort
         return
     endif
 
-    let l:winnr = bufwinnr(l:bufnr)
-    if l:winnr != -1
-        exec l:winnr.'wincmd c'
-    endif
+    for l:winid in win_findbuf(l:bufnr)
+        call win_gotoid(l:winid)
+        silent! close
+    endfor
 
     silent exec 'bwipeout ' . l:bufnr
 endfunction

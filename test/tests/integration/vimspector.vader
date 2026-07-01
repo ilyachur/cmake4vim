@@ -111,7 +111,7 @@ Execute ([Vimspector] Run test_app target and change vimspector config with defa
         if !has('win32')
             AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
         else
-            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Release/test_app.exe'
         endif
         Assert has_key(config['configurations']['test_app']['configuration'], 'type'), "Test_app configuration should have type"
         AssertEqual config['configurations']['test_app']['configuration']['type'], ''
@@ -150,7 +150,7 @@ Execute ([Vimspector] Run test_app target and change vimspector config with cust
         if !has('win32')
             AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
         else
-            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Release/test_app.exe'
         endif
         Assert has_key(config['configurations']['test_app']['configuration'], 'type'), "Test_app configuration should have type"
         AssertEqual config['configurations']['test_app']['configuration']['type'], 'lldb'
@@ -188,7 +188,7 @@ Execute ([Vimspector] Run test_app target with vimspector args):
         if !has('win32')
             AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
         else
-            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Release/test_app.exe'
         endif
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
     else
@@ -219,7 +219,7 @@ Execute ([Vimspector] Run test_app target with reset vimspector args):
         if !has('win32')
             AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/test_app'
         else
-            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Debug/test_app.exe'
+            AssertEqual config['configurations']['test_app']['configuration']['program'], utils#cmake#getBuildDir() . '/app/Release/test_app.exe'
         endif
         AssertEqual len(config['configurations']['test_app']['configuration']['args']), 0
     else
