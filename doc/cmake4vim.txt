@@ -167,6 +167,13 @@ VARIABLES                                                      *cmake-variables*
                                     base using the path from this variable.
                                     Default is empty.
 
+*g:cmake_compat_policy_version*       if this variable is not empty, the value
+                                    is passed as -DCMAKE_POLICY_VERSION_MINIMUM.
+                                    Use it (e.g. '3.5') to configure old
+                                    projects with CMake 4.x, which removed
+                                    compatibility with cmake_minimum_required()
+                                    below 3.5. Default is empty.
+
 g:cmake_build_executor              allows to force set the build executor.
                                     Available values are 'job', 'term', 'dispatch',
                                     'system' and ''. Default is empty.

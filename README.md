@@ -121,6 +121,7 @@ The options below allow to change plugin behavior.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
+ - **`g:cmake_compat_policy_version`** if not empty, its value is passed as `-DCMAKE_POLICY_VERSION_MINIMUM` (e.g. `'3.5'`). Use it to configure old projects with CMake 4.x, which removed compatibility with `cmake_minimum_required()` below 3.5. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0.
  - **`g:cmake_vimspector_default_configuration`** is a default configuration for new vimspector target. Default is:
  ```

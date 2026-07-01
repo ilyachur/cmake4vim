@@ -257,6 +257,12 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
         let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
     endif
 
+    " Allow configuring old projects with CMake 4.x, which removed
+    " compatibility with cmake_minimum_required() below 3.5
+    if !empty(g:cmake_compat_policy_version)
+        let l:cmake_args += ['-DCMAKE_POLICY_VERSION_MINIMUM=' . g:cmake_compat_policy_version]
+    endif
+
     " Add user arguments
     let l:cmake_variant_usr_args = [utils#cmake#joinUserArgs(l:cmake_variant['cmake_usr_args'])]
 

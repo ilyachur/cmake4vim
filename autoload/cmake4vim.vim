@@ -305,6 +305,10 @@ function! cmake4vim#init() abort
     let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )
     let g:cmake_compile_commands      = get(g:, 'cmake_compile_commands'     , 0             )
     let g:cmake_compile_commands_link = get(g:, 'cmake_compile_commands_link', ''            )
+    " Value for -DCMAKE_POLICY_VERSION_MINIMUM. Useful to configure old
+    " projects (cmake_minimum_required < 3.5) with CMake 4.x, which otherwise
+    " errors out. Empty means the flag is not passed.
+    let g:cmake_compat_policy_version = get(g:, 'cmake_compat_policy_version', ''            )
     let g:cmake_vimspector_support    = get(g:, 'cmake_vimspector_support'   , 0             )
     let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default_configuration', {
                 \ 'adapter': '',
