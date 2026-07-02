@@ -12,11 +12,11 @@ At the current moment plugins supports next CMake generators:
   * Visual Studio
   * Ninja
 
-The plugin supports all CMake versions since 2.8.
+The plugin requires CMake 3.21 or newer.
 
-Since the CMake 3.14 version the plugin uses file API, this feature helps to have
-more information about CMake project and implement a smart detection of
-executable files for `:CMakeRun` command.
+The plugin uses the CMake file API, this feature helps to have more information
+about the CMake project and implement a smart detection of executable files for
+the `:CMakeRun` command.
 
 COMMANDS                                                        *cmake-commands*
 
@@ -25,8 +25,10 @@ COMMANDS                                                        *cmake-commands*
     project.  All arguments are directly passed on to CMake.
 
 :CMakeResetAndReload[{Args}]                              *:CMakeResetAndReload*
-    Removes cmake cache and re-generates cmake project.  All arguments are
-    directly passed on to CMake.
+    Resets the cmake cache and re-generates the cmake project.  On CMake 3.24
+    and newer it reconfigures in place with `--fresh` (previously built
+    artifacts are kept); on older versions it removes the build directory
+    first.  All arguments are directly passed on to CMake.
 
 :CMakeReset                                                        *:CMakeReset*
     Removes cmake cache (this command removes the cmake build directory).
@@ -61,7 +63,10 @@ COMMANDS                                                        *cmake-commands*
 
 :CTest[{Args}]                                                         *:CTest*
     Runs tests. Uses g:cmake_ctest_args. You can pass additional ctest
-    arguments.
+    arguments, e.g. `:CTest --output-on-failure -j8 -R MyTest` or
+    `:CTest -L integration`.
+    The build directory is passed via --test-dir and, for multi-config
+    generators, the selected configuration is passed via -C.
 
 :CTest![{Args}]                                                         *:CTest!*
     Runs tests. Ignores g:cmake_ctest_args. You can pass additional ctest
@@ -164,6 +169,13 @@ VARIABLES                                                      *cmake-variables*
                                     plugin will create a link on generated data
                                     base using the path from this variable.
                                     Default is empty.
+
+*g:cmake_compat_policy_version*       if this variable is not empty, the value
+                                    is passed as -DCMAKE_POLICY_VERSION_MINIMUM.
+                                    Use it (e.g. '3.5') to configure old
+                                    projects with CMake 4.x, which removed
+                                    compatibility with cmake_minimum_required()
+                                    below 3.5. Default is empty.
 
 g:cmake_build_executor              allows to force set the build executor.
                                     Available values are 'job', 'term', 'dispatch',

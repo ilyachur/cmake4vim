@@ -25,6 +25,11 @@ function! s:createQuery() abort
     let l:requests += [{'kind': 'codemodel', 'version': 2}]
     let l:requests += [{'kind': 'cache', 'version': 2}]
     let l:requests += [{'kind': 'cmakeFiles', 'version': 1}]
+    " The toolchains object exposes the per-language compilers without
+    " scraping the cache. It is available since CMake 3.27.
+    if utils#cmake#version#verNewerOrEq([3, 27])
+        let l:requests += [{'kind': 'toolchains', 'version': 1}]
+    endif
     let l:query['requests'] = l:requests
     let l:query['client'] = {}
     return l:query
@@ -54,6 +59,22 @@ function! s:parseCodemodel(reply_folder, jsonFile, hash) abort
     endfor
     let l:common['cmake']['build_dir'] = l:codemodel['paths']['build']
     let l:common['targets'] = l:targetsInfo
+    return l:common
+endfunction
+
+function! s:parseToolchains(path, hash) abort
+    let l:toolchains = json_decode(join(readfile(a:path), ''))
+    let l:common = a:hash
+    let l:compilers = {}
+    for l:toolchain in get(l:toolchains, 'toolchains', [])
+        let l:compiler = get(l:toolchain, 'compiler', {})
+        if has_key(l:toolchain, 'language') && has_key(l:compiler, 'path')
+            let l:compilers[l:toolchain['language']] = l:compiler['path']
+        endif
+    endfor
+    if !empty(l:compilers)
+        let l:common['toolchains'] = l:compilers
+    endif
     return l:common
 endfunction
 
@@ -94,15 +115,15 @@ function! s:parseAll(reply_folder, index) abort
         if l:resp['kind'] ==# 'cmakeFiles'
             let l:common = s:parseCMakeFiles(a:reply_folder . '/' . l:resp['jsonFile'], l:common)
         endif
+        if l:resp['kind'] ==# 'toolchains'
+            let l:common = s:parseToolchains(a:reply_folder . '/' . l:resp['jsonFile'], l:common)
+        endif
     endfor
     return l:common
 endfunction
 " }}} Private functions "
 
 function! utils#cmake#fileapi#prepare(build_dir) abort
-    if !(utils#cmake#version#verNewerOrEq([3, 14]))
-        return
-    endif
     let l:reply_folder = s:getReplyFolder(a:build_dir)
     if !empty(l:reply_folder)
         call utils#fs#removeDirectory(l:reply_folder)
@@ -120,7 +141,11 @@ function! utils#cmake#fileapi#parseReply(build_dir) abort
     if empty(l:index_file)
         return {}
     endif
-    let l:common =  s:parseAll(l:reply_folder, l:index_file)
-
-    return l:common
+    " A malformed or partial reply (e.g. an error-*.json produced by a failed
+    " generation) must not throw and abort the calling command.
+    try
+        return s:parseAll(l:reply_folder, l:index_file)
+    catch
+        return {}
+    endtry
 endfunction

@@ -28,7 +28,7 @@ Execute ([CMakeRun] Should find binary target):
         Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
     else
         if utils#cmake#version#verNewerOrEq([3, 14])
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
         endif
     endif
     let result = utils#cmake#getBinaryPath()
@@ -36,7 +36,7 @@ Execute ([CMakeRun] Should find binary target):
         AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/test_app')
     else
         if utils#cmake#version#verNewerOrEq([3, 14])
-            AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Debug/test_app.exe')
+            AssertEqual utils#fs#fnameescape(result), utils#fs#fnameescape(utils#cmake#getBuildDir() . '/app/Release/test_app.exe')
         endif
     endif
 
@@ -90,18 +90,21 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
 
 Execute ([CMakeRun] run command builds and executes target):
     if utils#cmake#version#verNewerOrEq([3, 14])
+        " CMakeResetAndReload uses --fresh on CMake 3.24+, which keeps already
+        " built artifacts, so remove the build dir first for a clean slate.
+        silent CMakeReset
         silent CMakeResetAndReload
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         if !has('win32')
             Assert !filereadable("cmake-build-Release/app/test_app"), "app should not be built"
         else
-            Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should not be built"
+            Assert !filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should not be built"
         endif
         CMakeSelectTarget test_app
         silent CMakeRun
         if !has('win32')
             Assert filereadable("cmake-build-Release/app/test_app"), "app should be built"
         else
-            Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
+            Assert filereadable("cmake-build-Release/app/Release/test_app.exe"), "app should be built"
         endif
     endif

@@ -38,6 +38,7 @@ function! ResetPluginOptions()
     let g:cmake_change_build_command=1
     let g:cmake_compile_commands=0
     let g:cmake_compile_commands_link=''
+    let g:cmake_compat_policy_version = ''
     let g:cmake_vimspector_support = 0
 
     let g:cmake_build_executor = 'system'
