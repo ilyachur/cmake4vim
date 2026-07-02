@@ -32,7 +32,7 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 * Supports work with multiple build types
 * For CMake newer than 3.13 the plugin uses the CMake file API
 * Plugin allows to find and run executable file for selected target.
-* Plugin supports [Vimspector](https://github.com/puremourning/vimspector) plugin. Plugin can generate and modify Vimspector configuration file in order to save command line arguments and allows to debug application.
+* Plugin supports [Vimspector](https://github.com/puremourning/vimspector) plugin. Plugin can generate and modify Vimspector configuration file in order to save command line arguments and allows to debug application. `//` and `/* */` comments in the Vimspector config are supported: they are ignored while reading and, when Vim is built with `+python3`, carried over when the plugin rewrites the file.
 
 ## Extensions
 

@@ -65,6 +65,240 @@ Execute ([Vimspector] Read correct vimspector config):
         Assert has_key(config['configurations'], 'something_else'), "Config should have something_else"
     endif
 
+Execute ([Vimspector] Read vimspector config with comments):
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " Create config containing '//' and '/* */' comments (allowed by vimspector)
+        silent call writefile( [
+            \ '{',
+            \ '    "configurations": {',
+            \ '        // a whole-line comment',
+            \ '        /* a block comment',
+            \ '           spanning several lines */',
+            \ '        "test_app": {',
+            \ '            "adapter": "CodeLLDB", // an inline comment',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg", /* inline block */',
+            \ '                "request": "launch",',
+            \ '                "program": "http://example.com/test_app",',
+            \ '                "args": ["1", "2", "3", "4"],',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        }',
+            \ '    }',
+            \ '}',
+            \ ], '.vimspector.json')
+
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations']['test_app'], 'configuration'), "Test_app should have configuration"
+        " Comment markers inside a string (the URL) must be preserved
+        AssertEqual config['configurations']['test_app']['configuration']['program'], "http://example.com/test_app"
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
+    endif
+
+Execute ([Vimspector] Read vimspector config with a commented out section):
+    if !has('win32')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        " A whole target commented out with a block comment (containing '//'
+        " comments inside), another target commented out line by line, and a
+        " value that merely looks like a comment
+        silent call writefile( [
+            \ '{',
+            \ '    "configurations": {',
+            \ '        "test_app": {',
+            \ '            "adapter": "CodeLLDB",',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg",',
+            \ '                "request": "launch",',
+            \ '                "program": "${workspaceRoot}/test_app",',
+            \ '                "args": ["1", "2", "3", "4"],',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        },',
+            \ '        /*',
+            \ '        "disabled_block": {',
+            \ '            "adapter": "CodeLLDB", // adapter comment inside the block',
+            \ '            "configuration": {',
+            \ '                // program below is intentionally disabled',
+            \ '                "program": "http://example.com/disabled",',
+            \ '                "args": ["should", "not", "appear"]',
+            \ '            }',
+            \ '        },',
+            \ '        */',
+            \ '        // "disabled_line": {',
+            \ '        //     "adapter": "CodeLLDB", // inline within a line-commented block',
+            \ '        //     "configuration": { "program": "nope://x" }',
+            \ '        // },',
+            \ '        "keep_slashes": {',
+            \ '            "adapter": "CodeLLDB",',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg",',
+            \ '                "request": "launch",',
+            \ '                "program": "/*literal*/ // not a comment",',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        }',
+            \ '    }',
+            \ '}',
+            \ ], '.vimspector.json')
+
+        Assert filereadable(".vimspector.json"), "Vimspector config should be generated"
+        let config = utils#config#vimspector#updateConfig({})
+        Assert has_key(config, 'configurations'), "Config should have configurations"
+        " Active targets are parsed
+        Assert has_key(config['configurations'], 'test_app'), "Config should have test_app"
+        Assert has_key(config['configurations'], 'keep_slashes'), "Config should have keep_slashes"
+        AssertEqual len(config['configurations']['test_app']['configuration']['args']), 4
+        " Commented out targets must be ignored
+        Assert !has_key(config['configurations'], 'disabled_block'), "Block-commented target must be ignored"
+        Assert !has_key(config['configurations'], 'disabled_line'), "Line-commented target must be ignored"
+        " Comment markers inside a string value must survive untouched
+        AssertEqual config['configurations']['keep_slashes']['configuration']['program'], "/*literal*/ // not a comment"
+    endif
+
+Execute ([Vimspector] Preserve comments when writing config):
+    if !has('win32') && has('python3')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        silent call writefile( [
+            \ '{',
+            \ '    "configurations": {',
+            \ '        // leading comment for test_app',
+            \ '        "test_app": {',
+            \ '            "adapter": "CodeLLDB", // inline adapter comment',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg",',
+            \ '                "request": "launch",',
+            \ '                "program": "${workspaceRoot}/test_app",',
+            \ '                "args": ["1", "2"],',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        }',
+            \ '    }',
+            \ '}',
+            \ ], '.vimspector.json')
+
+        " A non-empty config triggers a write back to disk
+        let config = utils#config#vimspector#updateConfig({'test_app': {'app': 'new_bin/test_app', 'args': ['a']}})
+        AssertEqual config['configurations']['test_app']['configuration']['program'], "new_bin/test_app"
+
+        let written = map(readfile('.vimspector.json'), 'trim(v:val)')
+        Assert index(written, '// leading comment for test_app') >= 0, "Leading comment should be preserved"
+        Assert index(written, '"adapter": "CodeLLDB", // inline adapter comment') >= 0, "Inline comment should be preserved"
+        " The written config must still be valid JSON (comments stripped on read)
+        let reread = utils#config#vimspector#updateConfig({})
+        AssertEqual reread['configurations']['test_app']['configuration']['program'], "new_bin/test_app"
+    endif
+
+Execute ([Vimspector] Preserve a commented out section when writing config):
+    if !has('win32') && has('python3')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        silent call writefile( [
+            \ '{',
+            \ '    "configurations": {',
+            \ '        "test_app": {',
+            \ '            "adapter": "CodeLLDB",',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg",',
+            \ '                "request": "launch",',
+            \ '                "program": "${workspaceRoot}/test_app",',
+            \ '                "args": ["1", "2"],',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        },',
+            \ '        /*',
+            \ '        "disabled_block": {',
+            \ '            "adapter": "CodeLLDB", // adapter comment inside the block',
+            \ '',
+            \ '            "configuration": { "program": "http://example.com/disabled" }',
+            \ '        },',
+            \ '        */',
+            \ '        // "disabled_line": { "adapter": "CodeLLDB" },',
+            \ '        "keep_slashes": {',
+            \ '            "adapter": "CodeLLDB",',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg",',
+            \ '                "request": "launch",',
+            \ '                "program": "${workspaceRoot}/test_app",',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        }',
+            \ '    }',
+            \ '}',
+            \ ], '.vimspector.json')
+
+        " A non-empty config triggers a write back to disk
+        let config = utils#config#vimspector#updateConfig({'test_app': {'app': 'new_bin/test_app', 'args': ['a']}})
+        AssertEqual config['configurations']['test_app']['configuration']['program'], "new_bin/test_app"
+
+        " Commented out sections are carried over as text
+        let raw_lines = readfile('.vimspector.json')
+        let written = join(raw_lines, "\n")
+        Assert stridx(written, 'disabled_block') >= 0, "Block-commented section should be preserved"
+        Assert stridx(written, 'disabled_line') >= 0, "Line-commented section should be preserved"
+        " The relative indentation inside the block is kept (the block base is
+        " aligned to the key at 8 spaces, the nested line stays 4 spaces deeper)
+        let adapter_idx = index(raw_lines, '            "adapter": "CodeLLDB", // adapter comment inside the block')
+        Assert adapter_idx >= 0, "Relative indentation inside the block should be preserved"
+        " The blank line inside the block keeps the block formatting intact
+        AssertEqual raw_lines[adapter_idx + 1], '', "Blank line inside the block should be preserved"
+
+        " The rewritten file must still parse and keep ignoring commented out targets
+        let reread = utils#config#vimspector#updateConfig({})
+        Assert has_key(reread['configurations'], 'test_app'), "test_app should still be present"
+        Assert has_key(reread['configurations'], 'keep_slashes'), "keep_slashes should still be present"
+        Assert !has_key(reread['configurations'], 'disabled_block'), "Block-commented target must stay commented after rewrite"
+        Assert !has_key(reread['configurations'], 'disabled_line'), "Line-commented target must stay commented after rewrite"
+    endif
+
+Execute ([Vimspector] Preserve structural-line and trailing comments when writing config):
+    if !has('win32') && has('python3')
+        Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
+        silent call writefile( [
+            \ '{',
+            \ '    "configurations": {',
+            \ '        "test_app": {',
+            \ '            "adapter": "CodeLLDB",',
+            \ '            "configuration": {',
+            \ '                "type": "cppdbg",',
+            \ '                "request": "launch",',
+            \ '                "program": "${workspaceRoot}/test_app",',
+            \ '                "args": ["1", "2"],',
+            \ '                "cwd": "${workspaceRoot}"',
+            \ '            }',
+            \ '        }, // trailing comment after test_app',
+            \ '        "other_app": {',
+            \ '            "adapter": "CodeLLDB",',
+            \ '            "configuration": {',
+            \ '                "program": "${workspaceRoot}/other"',
+            \ '            }',
+            \ '        }',
+            \ '        // note at the end of configurations',
+            \ '    }',
+            \ '}',
+            \ ], '.vimspector.json')
+
+        " A non-empty config triggers a write back to disk
+        let config = utils#config#vimspector#updateConfig({'test_app': {'app': 'new_bin/test_app', 'args': ['a']}})
+        AssertEqual config['configurations']['test_app']['configuration']['program'], "new_bin/test_app"
+
+        let written = map(readfile('.vimspector.json'), 'trim(v:val)')
+        " A comment sharing a line with a closing brace must be kept on that line
+        Assert index(written, '}, // trailing comment after test_app') >= 0, "Structural-line comment should be preserved"
+        " A comment after the last member must stay in that object, not migrate
+        let note_idx = index(written, '// note at the end of configurations')
+        let other_idx = index(written, '"other_app": {')
+        Assert note_idx >= 0, "Trailing comment should be preserved"
+        Assert note_idx > other_idx, "Trailing comment should stay inside configurations after other_app"
+
+        " The rewritten file must still parse and keep both targets
+        let reread = utils#config#vimspector#updateConfig({})
+        Assert has_key(reread['configurations'], 'test_app'), "test_app should still be present"
+        Assert has_key(reread['configurations'], 'other_app'), "other_app should still be present"
+    endif
+
 Execute ([Vimspector] Change correct vimspector config):
     if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
@@ -247,8 +481,15 @@ Execute ([Vimspector] Read vimspector config containing backslashes):
         Assert has_key(config['configurations'], 'with_backslashes' ), 'Config should have the target with_backslashes'
         AssertEqual config['configurations']['with_backslashes']['configuration']['args'], ["--gtest_filter=\"Hello\""]
 
-        if !has('nvim') && !has('win32')
-            AssertEqual trim(readfile('.vimspector.json')[32]), '"--gtest_filter=\"Hello\""'
+        if !has('nvim') && !has('win32') && has('python3')
+            let written = map(readfile('.vimspector.json'), 'trim(v:val)')
+            " The escaped arg must survive verbatim on its own line ...
+            let filter_idx = index(written, '"--gtest_filter=\"Hello\""')
+            Assert filter_idx >= 0, "Backslashes should be preserved in the written config"
+            " ... and it must stay inside the with_backslashes target rather than
+            " migrate to another target or nesting level on rewrite.
+            let wb_idx = index(written, '"with_backslashes": {')
+            Assert wb_idx >= 0 && filter_idx > wb_idx, "Escaped arg should live inside the with_backslashes target"
         endif
     endif
 
