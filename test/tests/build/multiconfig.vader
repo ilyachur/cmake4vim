@@ -1,0 +1,47 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveCMakeDirs()
+    silent call ResetPluginOptions()
+    let g:cmake_kits = { "NMC": { "generator": "Ninja Multi-Config" }, "NJ": { "generator": "Ninja" } }
+    silent on
+
+After:
+    silent call RemoveFile(".cmake-kits.json")
+    silent call ResetPluginOptions()
+    silent call RemoveCMakeDirs()
+
+Execute ([CMake multiconfig] isMultiConfig helper):
+    Assert utils#gen#common#isMultiConfig('Ninja Multi-Config'), 'Ninja Multi-Config should be multi-config'
+    Assert utils#gen#common#isMultiConfig('Visual Studio 17 2022'), 'VS should be multi-config'
+    Assert utils#gen#common#isMultiConfig('Xcode'), 'Xcode should be multi-config'
+    Assert !utils#gen#common#isMultiConfig('Ninja'), 'Ninja should be single-config'
+    Assert !utils#gen#common#isMultiConfig('Unix Makefiles'), 'Make should be single-config'
+
+Execute ([CMake multiconfig] supportsCompileCommands helper):
+    Assert utils#gen#common#supportsCompileCommands('Unix Makefiles'), 'Make should support compile_commands'
+    Assert utils#gen#common#supportsCompileCommands('Ninja'), 'Ninja should support compile_commands'
+    Assert utils#gen#common#supportsCompileCommands('Ninja Multi-Config'), 'Ninja Multi-Config should support compile_commands'
+    Assert !utils#gen#common#supportsCompileCommands('Visual Studio 17 2022'), 'VS should not support compile_commands'
+    Assert !utils#gen#common#supportsCompileCommands('Xcode'), 'Xcode should not support compile_commands'
+
+Execute ([CMake multiconfig] build command uses --config for Ninja Multi-Config):
+    " The Ninja Multi-Config generator is only available since CMake 3.17
+    if utils#cmake#version#verNewerOrEq([3, 17])
+        silent CMakeSelectKit NMC
+        silent CMakeSelectBuildType Release
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
+        Assert build_cmd =~# '--config Release', 'Build command should contain --config Release: ' . build_cmd
+        silent CMakeBuild
+        Assert isdirectory("cmake-build-Release/app/Release") || filereadable("cmake-build-Release/app/Release/test_app"), "Release config dir should exist"
+    endif
+
+Execute ([CMake multiconfig] single-config generator does not use --config):
+    " Pick a single-config generator explicitly. The platform default differs
+    " (e.g. Visual Studio on Windows is multi-config), so relying on it would
+    " make this assertion platform dependent.
+    silent CMakeSelectKit NJ
+    silent CMakeSelectBuildType Release
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
+    Assert build_cmd !~# '--config', 'Single-config build command should not contain --config: ' . build_cmd

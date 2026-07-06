@@ -74,7 +74,7 @@ The current version of the plugin supports next commands:
 
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file.
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config.
- - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`
+ - **`:CTest`** run `ctest`. The command allows to specify CTest arguments and default arguments can be set in `g:cmake_ctest_args`. Any CTest flag can be forwarded, e.g. run failing tests verbosely in parallel and filter by name/label: `:CTest --output-on-failure -j8 -R MyTest` or `:CTest -L integration`. On multi-config generators the selected configuration is passed automatically via `-C`, and the build directory is passed via `--test-dir`.
  - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
  - **`:CTestCurrent`** same as `:CTest` but run tests with `-R current_cmake_target`.
  - **`:CTestCurrent!`** same as `:CTest!` but run tests with `-R current_cmake_target`.
@@ -121,6 +121,7 @@ The options below allow to change plugin behavior.
  - **`g:cmake_change_build_command`** if this variable is not equal 0, plugin will change the make command. Default is 1.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
+ - **`g:cmake_compat_policy_version`** if not empty, its value is passed as `-DCMAKE_POLICY_VERSION_MINIMUM` (e.g. `'3.5'`). Use it to configure old projects with CMake 4.x, which removed compatibility with `cmake_minimum_required()` below 3.5. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0.
  - **`g:cmake_vimspector_default_configuration`** is a default configuration for new vimspector target. Default is:
  ```
@@ -291,8 +292,8 @@ command!                                                 FZFCMakeSelectKit call 
 
 The plugin supports all CMake versions since 2.8.
 
-Since the CMake 3.14 version the plugin uses file API, this feature helps to have more information about CMake project and implement a smart
-detection of executable files for `:CMakeRun` command.
+The plugin uses the CMake file API, this feature helps to have more information about the CMake project and implements a smart
+detection of executable files for the `:CMakeRun` command.
 
 ## References
 

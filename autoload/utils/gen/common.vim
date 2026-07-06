@@ -28,6 +28,27 @@ function! s:restoreCMakeGenerator() abort
 endfunction
 " }}} Private functions "
 
+" Returns the CMake generator that is (or will be) used, falling back to the
+" platform default when it cannot be detected yet
+function! utils#gen#common#getGenerator() abort
+    return s:restoreCMakeGenerator()
+endfunction
+
+" Returns 1 if the generator is a multi-config one (build type is chosen at
+" build time via --config, not at configure time via CMAKE_BUILD_TYPE)
+function! utils#gen#common#isMultiConfig(generator) abort
+    return a:generator =~# 'Visual Studio'
+                \ || a:generator ==# 'Xcode'
+                \ || a:generator =~# 'Multi-Config'
+endfunction
+
+" Returns 1 if the generator can emit compile_commands.json. Only the
+" Makefile and Ninja generators support CMAKE_EXPORT_COMPILE_COMMANDS. Match
+" 'Make' (not 'Makefiles') so the generic make fallback name is covered too.
+function! utils#gen#common#supportsCompileCommands(generator) abort
+    return a:generator =~# 'Make' || a:generator =~# 'Ninja'
+endfunction
+
 " Returns the default target for current CMake generator
 " If Generator is not supported returns default target for Unix Makefiles
 " Returns empty string if CMake generator is not supported
@@ -85,10 +106,11 @@ endfunction
 
 " Returns the cmake target for a single source file
 function! utils#gen#common#getSingleUnitTargetName( generator, filename ) abort
-    if a:generator ==# 'Unix Makefiles'
+    if a:generator =~# 'Unix Makefiles'
         " make replaces all spaces with underscores in filepaths when creating build targets
         return fnameescape( substitute( fnamemodify( a:filename, ':r' ) . '.o', ' ', '_', 'g' ) )
-    elseif a:generator ==# 'Ninja'
+    elseif a:generator =~# 'Ninja'
+        " Matches both 'Ninja' and the multi-config 'Ninja Multi-Config'
         return fnameescape( fnamemodify( a:filename, ':p' ) . '^' )
     endif
 

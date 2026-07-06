@@ -120,5 +120,10 @@ endfunction
 
 " Returns the size of the build/quickfix window
 function! utils#common#getWindowSize() abort
+    if exists('g:cmake_build_executor_height') && g:cmake_build_executor_height !=# ''
+        call utils#common#Warning('g:cmake_build_executor_height option is deprecated and will be removed at the April of 2024 year!' .
+                                    \ ' Please use `let g:cmake_build_executor_window_size=<size>` instead.')
+        let g:cmake_build_executor_window_size = g:cmake_build_executor_height
+    endif
     return g:cmake_build_executor_window_size
 endfunction

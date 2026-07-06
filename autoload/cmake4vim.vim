@@ -65,22 +65,29 @@ function! cmake4vim#GenerateCMake(...) abort
     " Generates a command for CMake
     let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
 
-    " For old CMake version need to change the directory to generate CMake project
-    " -B option was introduced only in CMake 3.13
+    " For old CMake versions the directory must be changed to generate the
+    " project, since the -B option was introduced only in CMake 3.13
     let l:cw_dir = getcwd()
     if !utils#cmake#version#verNewerOrEq([3, 13])
-        " Change work directory
-        silent exec 'cd' l:build_dir
+        silent exec 'cd' fnameescape(l:build_dir)
     endif
     " Generates CMake project
     call utils#common#executeCommand(l:cmake_cmd, 0, getcwd(), s:getCMakeErrorFormat())
     if !utils#cmake#version#verNewerOrEq([3, 13])
-        " Change work directory to old work directory
-        silent exec 'cd' l:cw_dir
+        silent exec 'cd' fnameescape(l:cw_dir)
     endif
 
     " Collect CMake Information
     call utils#cmake#common#collectCMakeInfo(l:build_dir)
+
+    " Warn if a compilation database was requested but the generator cannot
+    " produce one (only Makefile and Ninja generators support it)
+    if g:cmake_compile_commands
+        let l:generator = utils#gen#common#getGenerator()
+        if !utils#gen#common#supportsCompileCommands(l:generator)
+            call utils#common#Warning(printf('compile_commands.json is not produced by the "%s" generator. Use a Makefile or Ninja generator.', l:generator))
+        endif
+    endif
 
     " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
@@ -91,8 +98,9 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    " CMake 3.24 supports the same functionality
-    " call utils#common#executeCommand('cmake --fresh -B ' . utils#fs#fnameescape(l:build_dir), 0, getcwd(), s:getCMakeErrorFormat())
+    " Remove the whole build directory before regenerating. 'cmake --fresh'
+    " only wipes the cache and would leave stale build artifacts (e.g. the
+    " binaries of targets that were removed from CMakeLists.txt) behind.
     silent call cmake4vim#ResetCMakeCache()
     call call('cmake4vim#GenerateCMake', a:000)
 endfunction
@@ -185,7 +193,6 @@ function! cmake4vim#CompileSource(...) abort
     " it seems ninja doesn't work with relative paths with newest cmake
     " and with cmake v2.8.12.2 it doesn't work with absolute paths
     " TODO: find the middle point
-
     let l:generator = l:cache_info['cmake']['generator']
 
     let l:target_name = ''
@@ -196,15 +203,15 @@ function! cmake4vim#CompileSource(...) abort
         let l:build_dir = l:cache_info['cmake']['build_dir']
         " build folder is below getcwd()
         if l:generator =~# 'Ninja' && stridx(l:build_dir, getcwd()) == 0
-                let l:subfolders = split(trim(split(l:build_dir, getcwd())[0], '/'), '/')
-                for i in range(len(l:subfolders))
-                    let l:prefix .= '../'
-                endfor
-                if utils#cmake#version#verNewerOrEq([3, 13])
-                    let l:target_name = '"' . l:prefix . l:source_name . '^' . '"'
-                else
-                    let l:target_name = l:prefix . fnameescape(l:source_name) . '^'
-                endif
+            let l:subfolders = split(trim(split(l:build_dir, getcwd())[0], '/'), '/')
+            for i in range(len(l:subfolders))
+                let l:prefix .= '../'
+            endfor
+            if utils#cmake#version#verNewerOrEq([3, 13])
+                let l:target_name = '"' . l:prefix . l:source_name . '^' . '"'
+            else
+                let l:target_name = l:prefix . fnameescape(l:source_name) . '^'
+            endif
         endif
     endif
 
@@ -224,7 +231,6 @@ function! cmake4vim#CTest(bang, ...) abort
         call utils#common#Warning('CMake project was not found!')
         return
     endif
-    let l:cw_dir = getcwd()
     let l:cmd = 'ctest'
     let l:args = []
     call extend(l:args, a:000)
@@ -236,20 +242,27 @@ function! cmake4vim#CTest(bang, ...) abort
         endif
     endif
 
-    " Use --test-dir for modern CMake versions, otherwise use directory change
-    if utils#cmake#version#verNewerOrEq([3, 20])
+    " --test-dir is available since CMake 3.20; on older versions ctest must be
+    " run from inside the build directory instead.
+    let l:has_test_dir = utils#cmake#version#verNewerOrEq([3, 20])
+    if l:has_test_dir
         call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
-    else
-        " Change work directory
-        silent exec 'cd' l:build_dir
+    endif
+
+    " Multi-config generators need the configuration selected explicitly
+    let l:build_type = utils#cmake#getBuildType()
+    if utils#gen#common#isMultiConfig(utils#gen#common#getGenerator()) && !empty(l:build_type)
+        call extend(l:args, ['-C', l:build_type])
     endif
 
     " Run
+    let l:cw_dir = getcwd()
+    if !l:has_test_dir
+        silent exec 'cd' utils#fs#fnameescape(l:build_dir)
+    endif
     call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
-
-    if !utils#cmake#version#verNewerOrEq([3, 20])
-        " Change work directory to old work directory
-        silent exec 'cd' l:cw_dir
+    if !l:has_test_dir
+        silent exec 'cd' utils#fs#fnameescape(l:cw_dir)
     endif
 endfunction
 
@@ -344,6 +357,10 @@ function! cmake4vim#init() abort
     let g:cmake_change_build_command  = get(g:, 'cmake_change_build_command' , 1             )
     let g:cmake_compile_commands      = get(g:, 'cmake_compile_commands'     , 0             )
     let g:cmake_compile_commands_link = get(g:, 'cmake_compile_commands_link', ''            )
+    " Value for -DCMAKE_POLICY_VERSION_MINIMUM. Useful to configure old
+    " projects (cmake_minimum_required < 3.5) with CMake 4.x, which otherwise
+    " errors out. Empty means the flag is not passed.
+    let g:cmake_compat_policy_version = get(g:, 'cmake_compat_policy_version', ''            )
     let g:cmake_vimspector_support    = get(g:, 'cmake_vimspector_support'   , 0             )
     let g:cmake_vimspector_default_configuration = get(g:, 'cmake_vimspector_default_configuration', {
                 \ 'adapter': '',
