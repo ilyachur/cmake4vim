@@ -90,9 +90,8 @@ Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
 
 Execute ([CMakeRun] run command builds and executes target):
     if utils#cmake#version#verNewerOrEq([3, 14])
-        " CMakeResetAndReload uses --fresh on CMake 3.24+, which keeps already
-        " built artifacts, so remove the build dir first for a clean slate.
-        silent CMakeReset
+        " CMakeResetAndReload removes the build dir, so it starts from a clean
+        " slate with no previously built artifacts.
         silent CMakeResetAndReload
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         if !has('win32')

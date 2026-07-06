@@ -89,14 +89,11 @@ endfunction
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    " CMake 3.24+ can wipe the cache in place with --fresh, which is faster
-    " than removing and recreating the whole build directory.
-    if utils#cmake#version#verNewerOrEq([3, 24])
-        call call('cmake4vim#GenerateCMake', ['--fresh'] + a:000)
-    else
-        silent call cmake4vim#ResetCMakeCache()
-        call call('cmake4vim#GenerateCMake', a:000)
-    endif
+    " Remove the whole build directory before regenerating. 'cmake --fresh'
+    " only wipes the cache and would leave stale build artifacts (e.g. the
+    " binaries of targets that were removed from CMakeLists.txt) behind.
+    silent call cmake4vim#ResetCMakeCache()
+    call call('cmake4vim#GenerateCMake', a:000)
 endfunction
 
 " The function is called when user saves cmake scripts
@@ -210,8 +207,12 @@ function! cmake4vim#CTest(bang, ...) abort
         endif
     endif
 
-    " --test-dir is available since CMake 3.20
-    call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
+    " --test-dir is available since CMake 3.20; on older versions ctest must be
+    " run from inside the build directory instead.
+    let l:has_test_dir = utils#cmake#version#verNewerOrEq([3, 20])
+    if l:has_test_dir
+        call extend(l:args, ['--test-dir', utils#fs#fnameescape(l:build_dir)])
+    endif
 
     " Multi-config generators need the configuration selected explicitly
     let l:build_type = utils#cmake#getBuildType()
@@ -220,7 +221,14 @@ function! cmake4vim#CTest(bang, ...) abort
     endif
 
     " Run
+    let l:cw_dir = getcwd()
+    if !l:has_test_dir
+        silent exec 'cd' utils#fs#fnameescape(l:build_dir)
+    endif
     call utils#common#executeCommand(printf('%s %s', l:cmd, join(l:args)), 1)
+    if !l:has_test_dir
+        silent exec 'cd' utils#fs#fnameescape(l:cw_dir)
+    endif
 endfunction
 
 function! cmake4vim#CTestCurrent(bang, ...) abort

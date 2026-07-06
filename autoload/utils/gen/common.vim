@@ -43,9 +43,10 @@ function! utils#gen#common#isMultiConfig(generator) abort
 endfunction
 
 " Returns 1 if the generator can emit compile_commands.json. Only the
-" Makefile and Ninja generators support CMAKE_EXPORT_COMPILE_COMMANDS.
+" Makefile and Ninja generators support CMAKE_EXPORT_COMPILE_COMMANDS. Match
+" 'Make' (not 'Makefiles') so the generic make fallback name is covered too.
 function! utils#gen#common#supportsCompileCommands(generator) abort
-    return a:generator =~# 'Makefiles' || a:generator =~# 'Ninja'
+    return a:generator =~# 'Make' || a:generator =~# 'Ninja'
 endfunction
 
 " Returns the default target for current CMake generator
@@ -105,10 +106,11 @@ endfunction
 
 " Returns the cmake target for a single source file
 function! utils#gen#common#getSingleUnitTargetName( generator, filename ) abort
-    if a:generator ==# 'Unix Makefiles'
+    if a:generator =~# 'Unix Makefiles'
         " make replaces all spaces with underscores in filepaths when creating build targets
         return fnameescape( substitute( fnamemodify( a:filename, ':r' ) . '.o', ' ', '_', 'g' ) )
-    elseif a:generator ==# 'Ninja'
+    elseif a:generator =~# 'Ninja'
+        " Matches both 'Ninja' and the multi-config 'Ninja Multi-Config'
         return fnameescape( fnamemodify( a:filename, ':p' ) . '^' )
     endif
 

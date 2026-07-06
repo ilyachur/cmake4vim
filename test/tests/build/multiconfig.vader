@@ -2,7 +2,7 @@ Before:
     silent call OpenTestProject()
     silent call RemoveCMakeDirs()
     silent call ResetPluginOptions()
-    let g:cmake_kits = { "NMC": { "generator": "Ninja Multi-Config" } }
+    let g:cmake_kits = { "NMC": { "generator": "Ninja Multi-Config" }, "NJ": { "generator": "Ninja" } }
     silent on
 
 After:
@@ -34,6 +34,10 @@ Execute ([CMake multiconfig] build command uses --config for Ninja Multi-Config)
     Assert isdirectory("cmake-build-Release/app/Release") || filereadable("cmake-build-Release/app/Release/test_app"), "Release config dir should exist"
 
 Execute ([CMake multiconfig] single-config generator does not use --config):
+    " Pick a single-config generator explicitly. The platform default differs
+    " (e.g. Visual Studio on Windows is multi-config), so relying on it would
+    " make this assertion platform dependent.
+    silent CMakeSelectKit NJ
     silent CMakeSelectBuildType Release
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
     let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')

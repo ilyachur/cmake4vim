@@ -42,8 +42,15 @@ jobs:
       matrix:
         vim_type: ['Vim', 'Neovim']
         vim_version: ['stable']
-        cmake_version: ['3.21.7', ''] # empty means the latest version Need to support the latest cmake
+        cmake_version: ['3.16.9', ''] # empty means the latest version Need to support the latest cmake
         platform: ['Linux', 'MacOS', 'Windows']
+
+        exclude:
+          # The minimum supported CMake predates the Visual Studio generator
+          # installed on the Windows runners, and no MSVC dev environment is set
+          # up here, so validate the old-CMake path on Linux/macOS only.
+          - platform: 'Windows'
+            cmake_version: '3.16.9'
 
         include:
           - platform: 'Linux'
@@ -91,6 +98,13 @@ jobs:
           which ninja
           ninja --version
     - name: Run tests
+      # On the Windows runners cmake's default generator is unreliable: older
+      # cmake (e.g. 3.21.7) falls back to "NMake Makefiles", but nmake/cl are
+      # not on PATH (no MSVC developer environment is set up here), so builds
+      # fail. Force the Visual Studio generator, which drives MSBuild and needs
+      # no vcvars, matching the multi-config layout the Windows tests expect.
+      env:
+        CMAKE_GENERATOR: ${{ matrix.platform == 'Windows' && 'Visual Studio 17 2022' || '' }}
       run: |
         python test/local_run.py --editor ${{ matrix.vim_executable }} --out_dir . # --profile
     # - name: Upload artifacts
