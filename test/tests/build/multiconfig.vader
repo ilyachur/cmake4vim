@@ -25,13 +25,16 @@ Execute ([CMake multiconfig] supportsCompileCommands helper):
     Assert !utils#gen#common#supportsCompileCommands('Xcode'), 'Xcode should not support compile_commands'
 
 Execute ([CMake multiconfig] build command uses --config for Ninja Multi-Config):
-    silent CMakeSelectKit NMC
-    silent CMakeSelectBuildType Release
-    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-    let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
-    Assert build_cmd =~# '--config Release', 'Build command should contain --config Release: ' . build_cmd
-    silent CMakeBuild
-    Assert isdirectory("cmake-build-Release/app/Release") || filereadable("cmake-build-Release/app/Release/test_app"), "Release config dir should exist"
+    " The Ninja Multi-Config generator is only available since CMake 3.17
+    if utils#cmake#version#verNewerOrEq([3, 17])
+        silent CMakeSelectKit NMC
+        silent CMakeSelectBuildType Release
+        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
+        Assert build_cmd =~# '--config Release', 'Build command should contain --config Release: ' . build_cmd
+        silent CMakeBuild
+        Assert isdirectory("cmake-build-Release/app/Release") || filereadable("cmake-build-Release/app/Release/test_app"), "Release config dir should exist"
+    endif
 
 Execute ([CMake multiconfig] single-config generator does not use --config):
     " Pick a single-config generator explicitly. The platform default differs
