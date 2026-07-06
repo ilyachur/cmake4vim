@@ -65,8 +65,17 @@ function! cmake4vim#GenerateCMake(...) abort
     " Generates a command for CMake
     let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
 
-    " Generates CMake project (uses -B/-S, available since CMake 3.13)
+    " For old CMake versions the directory must be changed to generate the
+    " project, since the -B option was introduced only in CMake 3.13
+    let l:cw_dir = getcwd()
+    if !utils#cmake#version#verNewerOrEq([3, 13])
+        silent exec 'cd' fnameescape(l:build_dir)
+    endif
+    " Generates CMake project
     call utils#common#executeCommand(l:cmake_cmd, 0, getcwd(), s:getCMakeErrorFormat())
+    if !utils#cmake#version#verNewerOrEq([3, 13])
+        silent exec 'cd' fnameescape(l:cw_dir)
+    endif
 
     " Collect CMake Information
     call utils#cmake#common#collectCMakeInfo(l:build_dir)
@@ -181,9 +190,35 @@ function! cmake4vim#CompileSource(...) abort
         return
     endif
 
-    " Detect the generator and build a single translation unit
+    " it seems ninja doesn't work with relative paths with newest cmake
+    " and with cmake v2.8.12.2 it doesn't work with absolute paths
+    " TODO: find the middle point
     let l:generator = l:cache_info['cmake']['generator']
-    let l:target_name = utils#gen#common#getSingleUnitTargetName(l:generator, l:source_name)
+
+    let l:target_name = ''
+    if l:generator =~# 'Unix Makefiles' || utils#cmake#version#verNewerOrEq([ 3, 14 ])
+        let l:target_name = utils#gen#common#getSingleUnitTargetName(l:generator, l:source_name)
+    else
+        let l:prefix = ''
+        let l:build_dir = l:cache_info['cmake']['build_dir']
+        " build folder is below getcwd()
+        if l:generator =~# 'Ninja' && stridx(l:build_dir, getcwd()) == 0
+            let l:subfolders = split(trim(split(l:build_dir, getcwd())[0], '/'), '/')
+            for i in range(len(l:subfolders))
+                let l:prefix .= '../'
+            endfor
+            if utils#cmake#version#verNewerOrEq([3, 13])
+                let l:target_name = '"' . l:prefix . l:source_name . '^' . '"'
+            else
+                let l:target_name = l:prefix . fnameescape(l:source_name) . '^'
+            endif
+        endif
+    endif
+
+    " TODO: find the middle point
+    if !utils#cmake#version#verNewerOrEq([ 3, 13 ])
+        let l:target_name = printf('"%s"', l:target_name)
+    endif
 
     let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:target_name)
     call utils#common#executeCommand(l:cmd, 1)

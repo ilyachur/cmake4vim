@@ -124,6 +124,11 @@ endfunction
 " }}} Private functions "
 
 function! utils#cmake#fileapi#prepare(build_dir) abort
+    " The CMake file API is only available since CMake 3.14. On older versions
+    " the plugin falls back to parsing the cache and generator target lists.
+    if !(utils#cmake#version#verNewerOrEq([3, 14]))
+        return
+    endif
     let l:reply_folder = s:getReplyFolder(a:build_dir)
     if !empty(l:reply_folder)
         call utils#fs#removeDirectory(l:reply_folder)

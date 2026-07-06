@@ -116,9 +116,10 @@ Execute ([Ninja] Update g:cmake_executable option):
     endif
 
 Execute ([Ninja] Build single unit with build in source):
-    " In-source single-file Ninja compilation resolves the object via an
-    " absolute source target, which only works reliably since CMake 3.17.
-    if !has('win32') && utils#cmake#version#verNewerOrEq([3, 17]) " skip for windows
+    " In-source single-file Ninja compilation uses a relative target on
+    " CMake < 3.14 and an absolute one on 3.17+. The 3.14-3.16 range uses an
+    " absolute target that does not resolve for in-source builds, so skip it.
+    if !has('win32') && (!utils#cmake#version#verNewerOrEq([3, 14]) || utils#cmake#version#verNewerOrEq([3, 17])) " skip for windows
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"

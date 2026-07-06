@@ -12,8 +12,7 @@ At the current moment plugins supports next CMake generators:
   * Visual Studio
   * Ninja
 
-The plugin requires CMake 3.16 or newer (the CMake file API it relies on is
-available since 3.14).
+The plugin supports all CMake versions since 2.8.
 
 The plugin uses the CMake file API, this feature helps to have more information
 about the CMake project and implement a smart detection of executable files for

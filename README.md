@@ -290,7 +290,7 @@ command!                                                 FZFCMakeSelectKit call 
 
 ## Supported CMake version
 
-The plugin requires CMake 3.16 or newer (the CMake file API it relies on is available since 3.14).
+The plugin supports all CMake versions since 2.8.
 
 The plugin uses the CMake file API, this feature helps to have more information about the CMake project and implements a smart
 detection of executable files for the `:CMakeRun` command.
