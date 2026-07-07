@@ -62,7 +62,7 @@ function! utils#window#PrepareInfo(cache) abort
                 let l:info += [printf('    %-8s compiler:   %s', l:lang, a:cache['toolchains'][l:lang])]
             endfor
         endif
-        let l:info += ['    generation command: ' . utils#cmake#getCMakeGenerationCommand()]
+        let l:info += ['    generation command: ' . utils#cmake#getActiveGenerationCommand()]
         let l:info += ['    build command:      ' . utils#cmake#getBuildCommand(a:cache['cmake']['build_dir'], g:cmake_build_target)]
     endif
     return l:info

@@ -192,6 +192,18 @@ function! utils#cmake#getBuildCommand(build_dir, target) abort
         call utils#fs#createLink(l:src, l:dst)
     endif
 
+    " Build through the selected build preset when set
+    if !empty(g:cmake_build_preset)
+        let l:cmd = printf('%s --build --preset %s', g:cmake_executable, g:cmake_build_preset)
+        if !empty(a:target)
+            let l:cmd .= ' --target ' . a:target
+        endif
+        if !empty(g:cmake_build_args)
+            let l:cmd .= ' ' . g:cmake_build_args
+        endif
+        return l:cmd
+    endif
+
     " For multi-config generators the build type is selected at build time via
     " --config, since CMAKE_BUILD_TYPE is ignored at configure time.
     let l:build_args = g:cmake_build_args
@@ -201,6 +213,31 @@ function! utils#cmake#getBuildCommand(build_dir, target) abort
     endif
 
     return utils#gen#common#getBuildCommand(a:build_dir, a:target, l:build_args, g:make_arguments)
+endfunction
+
+" Returns the configuration command that would actually be run: the preset
+" based one when a configure preset is selected, otherwise the generator one.
+function! utils#cmake#getActiveGenerationCommand() abort
+    if !empty(g:cmake_configure_preset)
+        return utils#cmake#getCMakePresetGenerationCommand()
+    endif
+    return utils#cmake#getCMakeGenerationCommand()
+endfunction
+
+" Generates the CMake configuration command using the selected configure preset
+" Additional cmake arguments can be passed as arguments of this function
+function! utils#cmake#getCMakePresetGenerationCommand(...) abort
+    let l:cmake_args = ['--preset', g:cmake_configure_preset]
+
+    if g:cmake_compile_commands
+        let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
+    endif
+    if !empty(g:cmake_compat_policy_version)
+        let l:cmake_args += ['-DCMAKE_POLICY_VERSION_MINIMUM=' . g:cmake_compat_policy_version]
+    endif
+
+    let l:cmake_args += a:000
+    return printf('%s %s', g:cmake_executable, join(l:cmake_args))
 endfunction
 
 " Generates the command line for CMake generator
