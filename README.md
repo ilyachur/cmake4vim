@@ -44,10 +44,21 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
 
 ### Installation
 
-You can use VimPlug for installation:
+[lazy.nvim](https://github.com/folke/lazy.nvim) (Neovim):
+```lua
+{ 'ilyachur/cmake4vim', cmd = { 'CMake', 'CMakeBuild', 'CMakeRun', 'CTest' } }
+```
+
+[vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
 Plug 'ilyachur/cmake4vim'
 ```
+
+Neovim's built-in package manager (`vim.pack`):
+```lua
+vim.pack.add({ 'https://github.com/ilyachur/cmake4vim' })
+```
+
 Or Pathogen:
 ```sh
 cd ~/.vim/bundle
@@ -89,6 +100,20 @@ All of these commands complete preset names with `<Tab>`.
  - **`:CTest!`** same as `:CTest` but ignores `g:cmake_ctest_args`.
  - **`:CTestCurrent`** same as `:CTest` but run tests with `-R current_cmake_target`.
  - **`:CTestCurrent!`** same as `:CTest!` but run tests with `-R current_cmake_target`.
+
+#### Status line
+
+The plugin exposes lightweight getters (cheap enough to call on redraw) for status line integration: `cmake4vim#statusline#Status()`, `IsCMakeProject()`, `GetBuildTarget()`, `GetBuildType()`, `GetKit()`, `GetConfigurePreset()`.
+
+```vim
+" native status line
+set statusline+=%{cmake4vim#statusline#Status()}
+```
+
+```lua
+-- lualine.nvim
+sections = { lualine_x = { { function() return vim.fn['cmake4vim#statusline#Status']() end } } }
+```
 
 #### Integration
 
@@ -301,6 +326,10 @@ endfunction
 command! -nargs=1 -complete=custom,cmake4vim#CompleteKit CMakeSelectKit    call s:customSelectKit(<f-args>)
 command!                                                 FZFCMakeSelectKit call s:FZFSelectKit()
 ```
+
+## Health check
+
+On Neovim run `:checkhealth cmake4vim` to verify your environment: it checks that `cmake` (>= 3.6) and `ctest` are available, whether `ninja` is installed, and reports the active kit/preset and target.
 
 ## Supported CMake version
 
