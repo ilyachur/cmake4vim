@@ -26,8 +26,8 @@ function! s:createQuery() abort
     let l:requests += [{'kind': 'cache', 'version': 2}]
     let l:requests += [{'kind': 'cmakeFiles', 'version': 1}]
     " The toolchains object exposes the per-language compilers without
-    " scraping the cache. It is available since CMake 3.27.
-    if utils#cmake#version#verNewerOrEq([3, 27])
+    " scraping the cache. It is available since CMake 3.20.
+    if utils#cmake#version#verNewerOrEq([3, 20])
         let l:requests += [{'kind': 'toolchains', 'version': 1}]
     endif
     let l:query['requests'] = l:requests

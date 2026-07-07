@@ -253,7 +253,7 @@ g:cmake_test_preset                 currently selected test preset. When not
 HEALTH CHECK                                                      *cmake-health*
 
 On Neovim run `:checkhealth cmake4vim` to verify the environment: it checks
-that cmake (>= 3.21) and ctest are available, whether ninja is installed, and
+that cmake (>= 3.6) and ctest are available, whether ninja is installed, and
 reports the active kit/preset and target.
 
 STATUS LINE                                                  *cmake-statusline*

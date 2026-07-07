@@ -16,12 +16,12 @@ Execute ([CMake info] Get CMake info):
     let info = utils#cmake#common#getInfo()
     let result = utils#window#PrepareInfo(info)
     " One extra line per detected compiler when the toolchains file API object
-    " is available (CMake 3.27+)
+    " is available (CMake 3.20+)
     let expected = 10 + (has_key(info, 'toolchains') ? len(info['toolchains']) : 0)
     Assert len(result) == expected, "test project should contain " . expected . " lines with cmake info, got " . len(result)
 
-Execute ([CMake info] Toolchains compilers are detected on CMake 3.27+):
-    if utils#cmake#version#verNewerOrEq([3, 27])
+Execute ([CMake info] Toolchains compilers are detected on CMake 3.20+):
+    if utils#cmake#version#verNewerOrEq([3, 20])
         silent CMake
         let info = utils#cmake#common#getInfo()
         Assert has_key(info, 'toolchains'), "toolchains info should be present"
