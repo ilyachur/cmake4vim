@@ -160,7 +160,7 @@ Execute ([Vimspector] Read vimspector config with a commented out section):
     endif
 
 Execute ([Vimspector] Preserve comments when writing config):
-    if !has('win32') && has('python3')
+    if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         silent call writefile( [
             \ '{',
@@ -193,7 +193,7 @@ Execute ([Vimspector] Preserve comments when writing config):
     endif
 
 Execute ([Vimspector] Preserve a commented out section when writing config):
-    if !has('win32') && has('python3')
+    if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         silent call writefile( [
             \ '{',
@@ -254,7 +254,7 @@ Execute ([Vimspector] Preserve a commented out section when writing config):
     endif
 
 Execute ([Vimspector] Preserve structural-line and trailing comments when writing config):
-    if !has('win32') && has('python3')
+    if !has('win32')
         Assert !filereadable(".vimspector.json"), "Vimspector config should not be generated"
         silent call writefile( [
             \ '{',
@@ -481,10 +481,10 @@ Execute ([Vimspector] Read vimspector config containing backslashes):
         Assert has_key(config['configurations'], 'with_backslashes' ), 'Config should have the target with_backslashes'
         AssertEqual config['configurations']['with_backslashes']['configuration']['args'], ["--gtest_filter=\"Hello\""]
 
-        if !has('nvim') && !has('win32') && has('python3')
+        if !has('win32')
             let written = map(readfile('.vimspector.json'), 'trim(v:val)')
-            " The escaped arg must survive verbatim on its own line ...
-            let filter_idx = index(written, '"--gtest_filter=\"Hello\""')
+            " The original inline array must survive verbatim.
+            let filter_idx = index(written, '"args": ["--gtest_filter=\"Hello\""],')
             Assert filter_idx >= 0, "Backslashes should be preserved in the written config"
             " ... and it must stay inside the with_backslashes target rather than
             " migrate to another target or nesting level on rewrite.

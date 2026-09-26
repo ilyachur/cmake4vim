@@ -69,264 +69,172 @@ function! s:readVimspectorConfig() abort
     endtry
 endfunction
 
-function! s:writeJson(json_content) abort
-    " Apply pretty format if vim supports python3 (vimspector requires py3).
-    " The python3 branch keeps the original key order and carries over '//' and
-    " '/* */' comments from the previous file content, attaching each comment to
-    " the JSON path (including array indices) of the key it belongs to.
-    if has('python3')
-py3 << EOF
-import json
-import os
-import vim
-from collections import OrderedDict
+" Keep byte offsets into the original JSONC text; comments are never edits.
+function! s:jsonTokens(text) abort
+    let l:tokens = []
+    let l:pos = 0
+    let l:pattern = '\%(\_s\|\r\)\+\|//.\{-}\ze\%(\n\|$\)\|/\*\_.\{-}\*/\|"\%([^"\\]\|\\.\)*"\|[{}\[\],:]' .
+                \ '\|-\=\d\+\%(\.\d\+\)\=\%([eE][+-]\=\d\+\)\=\|true\|false\|null'
+    while l:pos < strlen(a:text)
+        let [l:value, l:start, l:end] = matchstrpos(a:text, l:pattern, l:pos)
+        if l:start != l:pos
+            throw 'Unsupported JSON token'
+        endif
+        if l:value !~# '^\%(\_s\|\r\)' && l:value !~# '^/[/\*]'
+            call add(l:tokens, {'text': l:value, 'start': l:start, 'end': l:end})
+        endif
+        let l:pos = l:end
+    endwhile
+    return l:tokens
+endfunction
 
-
-# Scan text line by line, tracking the JSON path. For every line it reports the
-# stripped code, the comment (if any), the paths of the keys declared on it and
-# the paths of the containers whose closing bracket appears on it. Paths are
-# tuples of dict keys and array indices, so every position is unique.
-def _scan_lines(text):
-    stack = []
-    pending = None
-    last_str = None
-    in_string = escaped = in_block = False
-    cur = []
-    results = []
-    for raw in text.split('\n'):
-        block_start = in_block
-        code = []
-        comment = []
-        keys = []
-        closes = []
-        i, n = 0, len(raw)
-        while i < n:
-            ch = raw[i]
-            if in_block:
-                if ch == '*' and i + 1 < n and raw[i + 1] == '/':
-                    comment.append('*/')
-                    in_block = False
-                    i += 2
-                    continue
-                comment.append(ch)
-                i += 1
-                continue
-            if in_string:
-                code.append(ch)
-                if escaped:
-                    escaped = False
-                    cur.append(ch)
-                elif ch == '\\':
-                    escaped = True
-                    cur.append(ch)
-                elif ch == '"':
-                    in_string = False
-                    last_str = ''.join(cur)
-                else:
-                    cur.append(ch)
-                i += 1
-                continue
-            if ch == '"':
-                in_string = True
-                cur = []
-                code.append(ch)
-                i += 1
-                continue
-            if ch == '/' and i + 1 < n and raw[i + 1] == '/':
-                comment.append(raw[i:])
-                break
-            if ch == '/' and i + 1 < n and raw[i + 1] == '*':
-                in_block = True
-                comment.append('/*')
-                i += 2
-                continue
-            if ch in '{[':
-                parent = stack[-1] if stack else None
-                if parent is not None and parent['type'] == 'array':
-                    component = parent['idx']
-                elif pending is not None:
-                    component = pending
-                else:
-                    component = None
-                parent_path = parent['path'] if parent is not None else ()
-                path = parent_path + (component,) if component is not None else parent_path
-                stack.append({'type': 'dict' if ch == '{' else 'array',
-                              'path': path, 'idx': 0})
-                pending = None
-                last_str = None
-                code.append(ch)
-                i += 1
-                continue
-            if ch in '}]':
-                if stack:
-                    closes.append(stack.pop()['path'])
-                pending = None
-                last_str = None
-                code.append(ch)
-                i += 1
-                continue
-            if ch == ':':
-                if last_str is not None:
-                    parent_path = stack[-1]['path'] if stack else ()
-                    pending = last_str
-                    keys.append(parent_path + (last_str,))
-                    last_str = None
-                code.append(ch)
-                i += 1
-                continue
-            if ch == ',':
-                last_str = None
-                if stack and stack[-1]['type'] == 'array':
-                    stack[-1]['idx'] += 1
-                code.append(ch)
-                i += 1
-                continue
-            code.append(ch)
-            i += 1
-        results.append({
-            'raw': raw,
-            'code': ''.join(code).strip(),
-            'comment': ''.join(comment).strip(),
-            'keys': keys,
-            'closes': closes,
-            'block_start': block_start,
-        })
-    return results
-
-
-# Strip '//' and '/* */' comments, reusing the single tokenizer in _scan_lines
-# so the read and write paths can never disagree on what a comment is.
-def _strip_json_comments(text):
-    return '\n'.join(line['code'] for line in _scan_lines(text))
-
-
-def _flush_buffered(buffered):
-    # Drop blank lines that trail the group right before its anchor.
-    while buffered and not buffered[-1].strip():
-        buffered.pop()
-    return buffered
-
-
-def _extract_comments(text):
-    # leading[path]        comments printed above the key's line
-    # inline[path]         comment appended to the key's line
-    # trailing[container]  comments printed just before the container's close
-    # close_inline[cont]   comment appended to the container's closing line
-    leading = {}
-    inline = {}
-    trailing = {}
-    close_inline = {}
-    buffered = []
-    for line in _scan_lines(text):
-        if line['keys']:
-            if _flush_buffered(buffered):
-                leading.setdefault(line['keys'][0], []).extend(buffered)
-            buffered = []
-            if line['comment']:
-                inline[line['keys'][-1]] = line['comment']
-        elif line['closes']:
-            # A structural line (closing bracket). Comments buffered before it
-            # belong to the container being closed, not to the next sibling key.
-            if _flush_buffered(buffered):
-                trailing.setdefault(line['closes'][0], []).extend(buffered)
-            buffered = []
-            if line['comment']:
-                close_inline[line['closes'][-1]] = line['comment']
-        elif line['comment'] and not line['code']:
-            # Keep the original line (with its leading whitespace) so the
-            # relative indentation can be restored on write.
-            buffered.append(line['raw'].rstrip())
-        elif not line['code'] and not line['comment'] and (line['block_start'] or buffered):
-            # Blank line inside a commented out block: keep the formatting
-            buffered.append('')
-    return leading, inline, trailing, close_inline
-
-
-def _emit_group(out, group, indent):
-    # Drop the common leading whitespace and re-indent the whole group to the
-    # anchor, keeping the relative indentation between its lines. Blank lines are
-    # emitted empty and ignored when measuring the base.
-    base = min((len(c) - len(c.lstrip()) for c in group if c.strip()), default=0)
-    for comment in group:
-        out.append(indent + comment[base:] if comment.strip() else '')
-
-
-def _reinsert_comments(body, leading, inline, trailing, close_inline):
-    if not (leading or inline or trailing or close_inline):
-        return body
-    out = []
-    for line in _scan_lines(body):
-        raw = line['raw']
-        indent = raw[:len(raw) - len(raw.lstrip())]
-        if line['closes'] and line['closes'][0] in trailing:
-            # Trailing comments sit inside the container, one level deeper than
-            # its closing bracket.
-            _emit_group(out, trailing[line['closes'][0]], indent + '    ')
-        if line['keys'] and line['keys'][0] in leading:
-            _emit_group(out, leading[line['keys'][0]], indent)
-        suffix = ''
-        if line['keys'] and line['keys'][-1] in inline:
-            suffix = ' ' + inline[line['keys'][-1]]
-        elif line['closes'] and line['closes'][-1] in close_inline:
-            suffix = ' ' + close_inline[line['closes'][-1]]
-        out.append(raw + suffix)
-    return '\n'.join(out)
-
-
-# Rebuild the object taking values from the freshly generated config while
-# keeping the key order of the previous file; brand new keys are appended in a
-# stable sorted order so a fresh config is written deterministically.
-def _merge_order(new_value, old_value):
-    if isinstance(new_value, dict):
-        old_value = old_value if isinstance(old_value, dict) else {}
-        result = OrderedDict()
-        for key in old_value:
-            if key in new_value:
-                result[key] = _merge_order(new_value[key], old_value[key])
-        for key in sorted(k for k in new_value if k not in result):
-            result[key] = _merge_order(new_value[key], None)
-        return result
-    return new_value
-
-
-def _warn(message):
-    vim.command("call utils#common#Warning('" + message.replace("'", "''") + "')")
-
-
-_cfg_path = vim.eval('s:getVimspectorConfig()')
-_new_obj = vim.eval('a:json_content')
-_old_raw = ''
-if os.path.exists(_cfg_path):
-    try:
-        with open(_cfg_path, encoding='utf-8') as _f:
-            _old_raw = _f.read()
-    except Exception as _e:
-        _warn('Could not read existing vimspector config: ' + str(_e))
-
-try:
-    _old_obj = (json.loads(_strip_json_comments(_old_raw), object_pairs_hook=OrderedDict)
-                if _old_raw.strip() else None)
-except Exception:
-    _old_obj = None
-
-# ensure_ascii=False keeps non-ASCII keys/values literal so they match the
-# comment paths extracted from the original (UTF-8) file.
-_body = json.dumps(_merge_order(_new_obj, _old_obj), indent=4, ensure_ascii=False)
-
-try:
-    _body = _reinsert_comments(_body, *_extract_comments(_old_raw))
-except Exception as _e:
-    _warn('Could not preserve comments in vimspector config: ' + str(_e))
-
-with open(_cfg_path, 'w', encoding='utf-8') as _f:
-    _f.write(_body)
-EOF
-    else " nvim doesn't have python3
-        silent call writefile([json_encode(a:json_content)], s:getVimspectorConfig())
+function! s:jsonNode(state) abort
+    let l:first = a:state.pos
+    let l:token = a:state.tokens[l:first].text
+    let a:state.pos += 1
+    let l:children = []
+    if l:token ==# '{' || l:token ==# '['
+        let l:close = l:token ==# '{' ? '}' : ']'
+        while a:state.tokens[a:state.pos].text !=# l:close
+            let l:key = len(l:children)
+            if l:token ==# '{'
+                let l:key = json_decode(a:state.tokens[a:state.pos].text)
+                let a:state.pos += 2 " key and colon (input has already been decoded)
+            endif
+            let l:child = s:jsonNode(a:state)
+            let l:child.key = l:key
+            call add(l:children, l:child)
+            if a:state.tokens[a:state.pos].text ==# ','
+                let a:state.pos += 1
+            endif
+        endwhile
+        let a:state.pos += 1
     endif
+    return {'first': l:first, 'last': a:state.pos - 1, 'children': l:children, 'kind': l:token}
+endfunction
 
+function! s:jsonIndent(text, pos) abort
+    return matchstr(split(strpart(a:text, 0, a:pos), "\n", 1)[-1], '^\s*')
+endfunction
+
+" Only new objects need formatting; existing text retains its own layout.
+function! s:formatJson(value, indent, step) abort
+    if type(a:value) != v:t_dict || empty(a:value)
+        return json_encode(a:value)
+    endif
+    let l:lines = []
+    for l:key in sort(keys(a:value))
+        call add(l:lines, a:indent . a:step . json_encode(l:key) . ': ' .
+                    \ s:formatJson(a:value[l:key], a:indent . a:step, a:step))
+    endfor
+    return "{\n" . join(l:lines, ",\n") . "\n" . a:indent . '}'
+endfunction
+
+function! s:patchJson(text, tokens, node, value, edits) abort
+    let l:start = a:tokens[a:node.first].start
+    let l:end = a:tokens[a:node.last].end
+    let l:old = json_decode(join(s:stripJsonComments(split(strpart(a:text, l:start, l:end - l:start), "\n", 1)), "\n"))
+    if type(l:old) == type(a:value) && l:old ==# a:value
+        return
+    endif
+    if (a:node.kind ==# '{' && type(a:value) == v:t_dict) || (a:node.kind ==# '[' && type(a:value) == v:t_list)
+        for l:child in a:node.children
+            if type(a:value) == v:t_dict || l:child.key < len(a:value)
+                call s:patchJson(a:text, a:tokens, l:child, a:value[l:child.key], a:edits)
+            else
+                " Removing array values must leave their surrounding comments intact.
+                for l:index in range(l:child.first, l:child.last)
+                    call add(a:edits, [a:tokens[l:index].start, a:tokens[l:index].end, ''])
+                endfor
+            endif
+        endfor
+        if type(a:value) == v:t_list && len(a:value) < len(a:node.children)
+            for l:index in range(len(a:node.children) - 1)
+                if l:index >= len(a:value) - 1
+                    let l:comma = a:tokens[a:node.children[l:index].last + 1]
+                    call add(a:edits, [l:comma.start, l:comma.end, ''])
+                endif
+            endfor
+        endif
+        let l:indent = s:jsonIndent(a:text, l:start)
+        let l:step = matchstr(a:text, '\n\zs[ \t]\+\ze"')
+        if empty(l:step)
+            let l:step = '    '
+        endif
+        if !empty(a:node.children)
+            let l:child_indent = s:jsonIndent(a:text, a:tokens[a:node.children[0].first].start)
+            if strlen(l:child_indent) > strlen(l:indent)
+                let l:step = strpart(l:child_indent, strlen(l:indent))
+            endif
+        endif
+        let l:added = []
+        if type(a:value) == v:t_dict
+            for l:key in sort(keys(a:value))
+                if !has_key(l:old, l:key)
+                    call add(l:added, json_encode(l:key) . ': ' . s:formatJson(a:value[l:key], l:indent . l:step, l:step))
+                endif
+            endfor
+        elseif len(a:value) > len(a:node.children)
+            let l:added = map(copy(a:value[len(a:node.children):]), 'json_encode(v:val)')
+        endif
+        if !empty(l:added)
+            let l:newline = stridx(a:text, "\r\n") >= 0 ? "\r\n" : "\n"
+            let l:added = map(l:added, 'substitute(v:val, "\n", l:newline, "g")')
+            let l:separator = l:newline . l:indent . l:step
+            if !empty(a:node.children)
+                let l:pos = a:tokens[a:node.children[-1].last].end
+                call add(a:edits, [l:pos, l:pos, ','])
+            endif
+            " Append after existing comments, so an inline comment stays with its value.
+            let l:pos = a:tokens[a:node.last].start
+            let l:prefix = split(strpart(a:text, 0, l:pos), "\n", 1)[-1]
+            let l:insert = l:indent . l:step . join(l:added, ',' . l:separator) . l:newline
+            if l:prefix =~# '^[ \t]*$'
+                let l:pos -= strlen(l:prefix)
+            else
+                let l:insert = l:newline . l:insert . l:indent
+            endif
+            if !empty(a:node.children) && l:pos == a:tokens[a:node.children[-1].last].end
+                let a:edits[-1][2] .= l:insert
+            else
+                call add(a:edits, [l:pos, l:pos, l:insert])
+            endif
+        endif
+    else
+        call add(a:edits, [l:start, l:end, json_encode(a:value)])
+    endif
+endfunction
+
+function! s:writeJson(json_content) abort
+    let l:path = s:getVimspectorConfig()
+    try
+        if filereadable(l:path)
+            let l:original = join(readfile(l:path, 'b'), "\n")
+            let l:state = {'tokens': s:jsonTokens(l:original), 'pos': 0}
+            let l:root = s:jsonNode(l:state)
+            let l:edits = []
+            call s:patchJson(l:original, l:state.tokens, l:root, a:json_content, l:edits)
+            let l:body = l:original
+            " Apply from the end so the original byte offsets remain valid.
+            for l:edit in sort(l:edits, {left, right -> right[0] - left[0]})
+                let l:body = strpart(l:body, 0, l:edit[0]) . l:edit[2] . strpart(l:body, l:edit[1])
+            endfor
+        else
+            let l:original = ''
+            let l:body = s:formatJson(a:json_content, '', '    ') . "\n"
+        endif
+        if json_decode(join(s:stripJsonComments(split(l:body, "\n", 1)), "\n")) !=# a:json_content
+            throw 'Updated JSON does not match the requested configuration'
+        endif
+        if l:body !=# l:original
+            call writefile(split(l:body, "\n", 1), l:path, 'b')
+        endif
+    catch
+        call utils#common#Warning('Could not update vimspector config: ' . v:exception)
+        return
+    endtry
     let l:bufnr = bufnr('.vimspector.json')
-    if  l:bufnr != -1
+    if l:bufnr != -1
         execute 'checktime ' . l:bufnr
     endif
 endfunction
@@ -341,7 +249,7 @@ function! s:updateConfig(vimspector_config, targets_config) abort
     let l:res_config = a:vimspector_config
     for [target, config] in items(a:targets_config)
         if !has_key(l:res_config, target)
-            let l:res_config[target] = g:cmake_vimspector_default_configuration
+            let l:res_config[target] = deepcopy(g:cmake_vimspector_default_configuration)
         endif
         " Each target should have configuration section
         if !has_key(l:res_config[target], 'configuration') || !has_key(config, 'app') || !has_key(config, 'args')

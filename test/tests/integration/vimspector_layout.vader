@@ -1,0 +1,118 @@
+Before:
+    silent call OpenTestProject()
+    silent call RemoveFile('.vimspector.json')
+    silent call ResetPluginOptions()
+    let g:cmake_vimspector_support = 1
+
+After:
+    silent call RemoveFile('.vimspector.json')
+
+Execute ([Vimspector] Change only requested values and preserve JSONC text):
+    let original = [
+        \ '{',
+        \ '  "configurations": {',
+        \ '    // target: тест',
+        \ '    "test_app": {',
+        \ '      "adapter": "CodeLLDB",',
+        \ '',
+        \ '      "configuration": {',
+        \ '        "program": "old", /* note',
+        \ '          continued */ "args": [',
+        \ '          "one", // first argument',
+        \ '          "two" /* second argument */',
+        \ '        ],',
+        \ '        "cwd": "http://example.com/тест"',
+        \ '      }',
+        \ '    },',
+        \ '    // "disabled": { "configuration": { "program": "old" } },',
+        \ '    "untouched": { "configuration": { "program": "old", "args": ["one"] } }',
+        \ '  }',
+        \ '}',
+        \ ]
+    call writefile(original, '.vimspector.json', 'b')
+    let expected = copy(original)
+    let expected[7] = substitute(expected[7], '"old"', '"new"', '')
+    let expected[9] = substitute(expected[9], '"one"', '"new arg"', '')
+    let update = {'test_app': {'app': 'new', 'args': ['new arg', 'two']}}
+    call utils#config#vimspector#updateConfig(update)
+    AssertEqual expected, readfile('.vimspector.json', 'b')
+    let reread = utils#config#vimspector#updateConfig({})
+    AssertEqual ['new arg', 'two'], reread.configurations.test_app.configuration.args
+    call utils#config#vimspector#updateConfig(update)
+    AssertEqual expected, readfile('.vimspector.json', 'b'), 'Repeated saves must not reformat the file'
+
+Execute ([Vimspector] Grow and shrink arguments without dropping comments):
+    call writefile(['{ "configurations": { "test_app": { "configuration": {',
+        \ '  "program": "old", "args": [',
+        \ '    "one", // first argument',
+        \ '    "two" /* second argument */',
+        \ '  ]',
+        \ '} } } }'], '.vimspector.json')
+    for args in [['a', 'b', 'c'], ['a'], [], ['http://x', '"quoted"', 'C:\path\file']]
+        call utils#config#vimspector#updateConfig({'test_app': {'app': 'new', 'args': args}})
+        let reread = utils#config#vimspector#updateConfig({})
+        AssertEqual args, reread.configurations.test_app.configuration.args
+        let written = join(readfile('.vimspector.json'), "\n")
+        Assert stridx(written, '// first argument') >= 0
+        Assert stridx(written, '/* second argument */') >= 0
+        if len(args) == 3 && args[0] ==# 'a'
+            Assert index(readfile('.vimspector.json'), '    "b", /* second argument */') >= 0,
+                \ 'The existing comment must stay next to the second argument'
+        endif
+    endfor
+
+Execute ([Vimspector] Add missing fields and targets while keeping existing text):
+    call writefile(['{', '  "configurations": {',
+        \ '    "test_app": { "configuration": { /* keep empty */ } },',
+        \ '    "untouched": { "adapter": "CodeLLDB" } // keep trailing',
+        \ '  }', '}'], '.vimspector.json')
+    let update = {'test_app': {'app': 'first', 'args': []}, 'new_app': {'app': 'second', 'args': ['a']}}
+    call utils#config#vimspector#updateConfig(update)
+    let reread = utils#config#vimspector#updateConfig({})
+    AssertEqual 'first', reread.configurations.test_app.configuration.program
+    AssertEqual 'second', reread.configurations.new_app.configuration.program
+    let written = join(readfile('.vimspector.json'), "\n")
+    Assert stridx(written, '/* keep empty */') >= 0
+    Assert stridx(written, '// keep trailing') >= 0
+    Assert stridx(written, '"untouched": { "adapter": "CodeLLDB" }') >= 0
+
+Execute ([Vimspector] Preserve CRLF and escaped keys):
+    let original = ["{\r", '  "configurations": { "тест\"app": { "configuration": { "program": "old", "args": [] } } }' . "\r", "}\r", '']
+    call writefile(original, '.vimspector.json', 'b')
+    call utils#config#vimspector#updateConfig({'тест"app': {'app': 'new', 'args': []}})
+    let original[1] = substitute(original[1], '"old"', '"new"', '')
+    AssertEqual original, readfile('.vimspector.json', 'b')
+
+Execute ([Vimspector] New targets have independent configurations):
+    let defaults = deepcopy(g:cmake_vimspector_default_configuration)
+    call utils#config#vimspector#updateConfig({
+        \ 'first': {'app': 'first_bin', 'args': ['one']},
+        \ 'second': {'app': 'second_bin', 'args': ['two']}})
+    let reread = utils#config#vimspector#updateConfig({})
+    AssertEqual 'first_bin', reread.configurations.first.configuration.program
+    AssertEqual ['one'], reread.configurations.first.configuration.args
+    AssertEqual 'second_bin', reread.configurations.second.configuration.program
+    AssertEqual ['two'], reread.configurations.second.configuration.args
+    AssertEqual defaults, g:cmake_vimspector_default_configuration
+
+Execute ([Vimspector] New fields keep CRLF and existing indentation):
+    call writefile(["{\r", '  "configurations": {}' . "\r", "}\r", ''], '.vimspector.json', 'b')
+    call utils#config#vimspector#updateConfig({'test_app': {'app': 'new', 'args': ['a']}})
+    let written = readfile('.vimspector.json', 'b')
+    for line in written[:-2]
+        Assert line =~# "\r$", 'Inserted lines must use CRLF too'
+    endfor
+    Assert index(written, '    "test_app": {' . "\r") >= 0, 'Use the existing two-space indentation'
+    let reread = utils#config#vimspector#updateConfig({})
+    AssertEqual 'new', reread.configurations.test_app.configuration.program
+
+Execute ([Vimspector] Insert into compact objects and arrays):
+    call writefile(['{"configurations":{"test_app":{"configuration":{"program":"old"}}}}'], '.vimspector.json')
+    call utils#config#vimspector#updateConfig({'test_app': {'app': 'new', 'args': ['a']}})
+    let reread = utils#config#vimspector#updateConfig({})
+    AssertEqual ['a'], reread.configurations.test_app.configuration.args
+    AssertEqual 'new', reread.configurations.test_app.configuration.program
+    call writefile(['{"configurations":{"test_app":{"configuration":{"program":"old","args":["a"]}}}}'], '.vimspector.json')
+    call utils#config#vimspector#updateConfig({'test_app': {'app': 'new', 'args': ['a', 'b']}})
+    let reread = utils#config#vimspector#updateConfig({})
+    AssertEqual ['a', 'b'], reread.configurations.test_app.configuration.args
