@@ -118,7 +118,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                 \ 'err_fmt': a:err_fmt
                 \ }
     if has('nvim')
-        execute utils#common#getWindowSize() . g:cmake_build_executor_split_mode
+        silent execute printf('keepalt botright %d %s', utils#common#getWindowSize(), g:cmake_build_executor_split_mode)
         execute 'enew'
         let l:job = termopen(a:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
