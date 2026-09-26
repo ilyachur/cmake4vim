@@ -1,0 +1,43 @@
+Before:
+    Save &splitbelow, &splitright, &winheight, &winwidth
+    Save g:cmake_build_executor, g:cmake_build_executor_split_mode, g:cmake_build_executor_window_size
+    let g:cmake_build_executor = 'term'
+    let g:cmake_build_executor_window_size = 5
+    set winheight=1 winwidth=1
+    silent only
+
+After:
+    silent cclose
+    silent only
+    Restore
+
+Execute ([Term executor] Open below or right regardless of split preferences):
+    if !has('win32')    " sleep is also used by the other terminal executor tests
+        for mode in ['sp', 'vsp']
+            for preferences in [[0, 0], [0, 1], [1, 0], [1, 1]]
+                let &splitbelow = preferences[0]
+                let &splitright = preferences[1]
+                let g:cmake_build_executor_split_mode = mode
+                let origin = win_getid()
+                let context = mode . ' splitbelow/splitright=' . string(preferences)
+                try
+                    call utils#exec#term#run('sleep 1', 0, getcwd(), '')
+                    let terminals = filter(getwininfo(), 'getbufvar(v:val.bufnr, "&buftype") ==# "terminal"')
+                    AssertEqual 1, len(terminals), context
+                    let terminal = terminals[0].winnr
+                    let original_pos = win_screenpos(win_id2win(origin))
+                    let terminal_pos = win_screenpos(terminal)
+                    if mode ==# 'sp'
+                        Assert terminal_pos[0] > original_pos[0], context
+                        AssertEqual 5, winheight(terminal), context
+                    else
+                        Assert terminal_pos[1] > original_pos[1], context
+                        AssertEqual 5, winwidth(terminal), context
+                    endif
+                    AssertEqual origin, win_getid(), 'Keep focus in the original window: ' . context
+                finally
+                    call WaitForJob()
+                endtry
+            endfor
+        endfor
+    endif
