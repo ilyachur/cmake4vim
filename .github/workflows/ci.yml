@@ -66,6 +66,8 @@ jobs:
           # installed on the Windows runners, and no MSVC dev environment is set
           # up here, so validate the old-CMake path on Linux/macOS only.
           - platform: 'Windows'
+            cmake_version: '3.6.x'
+          - platform: 'Windows'
             cmake_version: '3.16.9'
 
         include:

@@ -22,15 +22,15 @@ I created this plugin in order to improve integration CMake to the Vim editor. I
   * Visual Studio
   * Ninja
 * The plugin shows cmake results using quickfix list. If you have installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, plugin will use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window. In other case plugin will use `jobs` to async run if your Vim editor supports it.
-* The plugin shows cmake results using quickfix list. If you have installed **[vim-dispatch](https://github.com/tpope/vim-dispatch)** plugin, plugin will use it, this means that if you are using vim with tmux, cmake output will be printed in a separate window. In other case plugin will use `jobs` to async run if your Vim editor supports it.  * The plugin allows to specify cmake targets in order to avoid building of all project.
 * The plugin has an integration with next fuzzy finder plugins:
    * **[CtrlP](https://github.com/ctrlpvim/ctrlp.vim)**
    * **[FZF](https://github.com/junegunn/fzf.vim)**
    * **[Telescope](https://github.com/nvim-telescope/telescope.nvim)** is supported through [extension](./README.md#extensions).
 * The plugin allows to specify make arguments for native build system (for example *-jN* and something else for Unix Make).
 * The plugin parses the output of cmake command and supports jump to warnings or errors.
+* Select individual CMake targets instead of building the whole project.
 * Supports work with multiple build types
-* For CMake newer than 3.13 the plugin uses the CMake file API
+* For CMake 3.14 and newer the plugin uses the CMake file API
 * Plugin allows to find and run executable file for selected target.
 * Plugin supports [Vimspector](https://github.com/puremourning/vimspector) plugin. Plugin can generate and modify Vimspector configuration file in order to save command line arguments and allows to debug application. `//` and `/* */` comments in the Vimspector config are supported: they are ignored while reading and preserved when updating the file in both Vim and Neovim. Existing formatting and key order are retained.
 
@@ -333,7 +333,31 @@ On Neovim run `:checkhealth cmake4vim` to verify your environment: it checks tha
 
 ## Supported CMake version
 
-The plugin supports all CMake versions since 2.8.
+The minimum supported CMake version is **3.6**. Some features require newer versions:
+
+| Feature | CMake version |
+| --- | --- |
+| Basic configure, build and test commands | 3.6+ |
+| File API for project and executable information | 3.14+ |
+| Configure presets | 3.19+ (depends on the preset schema version) |
+| Build/test presets | 3.20+ (the test fixtures use schema version 3, requiring 3.21+) |
+| Workflow presets | 3.25+ |
+
+CI runs the stable versions of both Vim and Neovim against this matrix:
+
+| Platform | CMake versions |
+| --- | --- |
+| Linux, macOS | 3.6.x, 3.16.9, latest |
+| Windows | latest |
+
+The matrix is defined in [ci.yml](.github/workflows/ci.yml). It runs for pushes to
+`master` and pull requests targeting `master` when plugin, test or CI files change.
+Older CMake versions are not covered on Windows because the runners' Visual Studio
+generator is newer than those versions support.
+
+Configure results and the selected target are refreshed only after CMake exits
+successfully, including when using `job`, `term`, or `dispatch`. Existing File API
+replies are preserved; CMake owns and updates those files.
 
 The plugin uses the CMake file API, this feature helps to have more information about the CMake project and implements a smart
 detection of executable files for the `:CMakeRun` command.

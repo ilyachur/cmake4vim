@@ -5,7 +5,8 @@
 let s:cmake4vim_term = {}
 let s:cmake4vim_jobs_pool = []
 
-function! s:createQuickFix() abort
+function! s:createQuickFix(status) abort
+    let l:Callback = get(s:cmake4vim_term, 'on_exit', 0)
     let l:old_error = &errorformat
     if !empty(s:cmake4vim_term['err_fmt'])
         let &errorformat = s:cmake4vim_term['err_fmt']
@@ -19,9 +20,10 @@ function! s:createQuickFix() abort
     endif
     " Remove cmake4vim job
     let s:cmake4vim_term = {}
+    call utils#common#complete(l:Callback, a:status)
     if !empty(s:cmake4vim_jobs_pool)
         let [l:next_job; s:cmake4vim_jobs_pool] = s:cmake4vim_jobs_pool
-        call utils#exec#term#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
+        call utils#exec#term#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'], l:next_job['on_exit'])
     endif
 endfunction
 
@@ -45,7 +47,7 @@ function! s:vimClose(channel, status) abort
     if a:status != 0
         let s:cmake4vim_jobs_pool = []
     endif
-    call s:createQuickFix()
+    call s:createQuickFix(a:status)
 
     if l:open_qf == 0
         silent execute printf('%sbotright %d cwindow', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
@@ -64,16 +66,19 @@ endfunction
 
 " nvim functions {{{ "
 function! s:nVimOut(job_id, data, event) abort
-    if !empty(s:cmake4vim_term)
-        " Collect outputs
-        for val in filter(a:data, '!empty(v:val)')
-            let s:cmake4vim_term['cout'] += s:prepareOut(val)
-        endfor
+    if empty(s:cmake4vim_term) || a:job_id != get(s:cmake4vim_term, 'job', -1)
+        return
     endif
+    " Collect outputs
+    for val in filter(a:data, '!empty(v:val)')
+        let s:cmake4vim_term['cout'] += s:prepareOut(val)
+    endfor
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
-    let l:job = s:cmake4vim_term['job']
+    if empty(s:cmake4vim_term) || a:job_id != get(s:cmake4vim_term, 'job', -1)
+        return
+    endif
     let l:cmd = s:cmake4vim_term['cmd']
 
     let l:open_qf = get(s:cmake4vim_term, 'open_qf', 0)
@@ -83,7 +88,7 @@ function! s:nVimExit(job_id, data, event) abort
     if a:data != 0
         let s:cmake4vim_jobs_pool = []
     endif
-    call s:createQuickFix()
+    call s:createQuickFix(a:data)
 
     if a:data != 0 || l:open_qf != 0
         silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
@@ -97,7 +102,7 @@ endfunction
 " }}} nvim functions "
 " }}} Private functions "
 
-function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
+function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt, ...) abort
     " if there is a job or if the buffer is open, abort
     if !empty(s:cmake4vim_term)
         call utils#common#Warning('Async execute is already running')
@@ -115,7 +120,8 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt) abort
                 \ 'cmd': a:cmd,
                 \ 'open_qf': a:open_qf,
                 \ 'cout': [],
-                \ 'err_fmt': a:err_fmt
+                \ 'err_fmt': a:err_fmt,
+                \ 'on_exit': get(a:, 1, 0)
                 \ }
     if has('nvim')
         silent execute printf('keepalt botright %d %s', utils#common#getWindowSize(), g:cmake_build_executor_split_mode)
@@ -157,17 +163,18 @@ function! utils#exec#term#status() abort
     return s:cmake4vim_term
 endfunction
 
-function! utils#exec#term#append(cmd, open_qf, cwd, err_fmt) abort
+function! utils#exec#term#append(cmd, open_qf, cwd, err_fmt, ...) abort
     if !empty(s:cmake4vim_term)
         let s:cmake4vim_jobs_pool += [
                     \ {
                         \ 'cmd': a:cmd,
                         \ 'cwd': a:cwd,
                         \ 'open_qf': a:open_qf,
-                        \ 'err_fmt': a:err_fmt
+                        \ 'err_fmt': a:err_fmt,
+                        \ 'on_exit': get(a:, 1, 0)
                     \ }
                 \]
         return 0
     endif
-    return utils#exec#term#run(a:cmd, a:open_qf, a:cwd, a:err_fmt)
+    return utils#exec#term#run(a:cmd, a:open_qf, a:cwd, a:err_fmt, get(a:, 1, 0))
 endfunction

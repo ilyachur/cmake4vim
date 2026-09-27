@@ -146,8 +146,11 @@ Execute ([CMake generate] Call prepare file API after project generation):
     silent CMake
     Assert isdirectory("cmake-build-Release"), "Build directory should exist"
     if isdirectory("cmake-build-Release/.cmake/api/v1/reply")
+        let replies = glob('cmake-build-Release/.cmake/api/v1/reply/*', 0, 1)
+        let contents = map(copy(replies), 'readfile(v:val)')
         silent call utils#cmake#fileapi#prepare('cmake-build-Release')
-        Assert !isdirectory("cmake-build-Release/.cmake/api/v1/reply"), "Reply directory shouldn't exist"
+        AssertEqual replies, glob('cmake-build-Release/.cmake/api/v1/reply/*', 0, 1)
+        AssertEqual contents, map(copy(replies), 'readfile(v:val)'), 'CMake reply files must remain unchanged'
     endif
 
 Execute ([CMake generate] Generate cmake project in custom source folder):

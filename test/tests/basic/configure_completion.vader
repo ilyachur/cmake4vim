@@ -1,0 +1,120 @@
+Before:
+    Save &makeprg, g:cmake_build_executor, g:cmake_build_dir, g:cmake_build_type
+    let original_cwd = getcwd()
+    let project = tempname()
+    call mkdir(project, 'p')
+    execute 'cd' fnameescape(project)
+    call ResetPluginOptions()
+    let g:cmake_build_dir = project . '/build'
+    let g:cmake_build_type = 'Release'
+    call writefile(['cmake_minimum_required(VERSION 3.6)',
+        \ 'project(completion_check NONE)',
+        \ 'execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)',
+        \ 'add_custom_target(ready)'], 'CMakeLists.txt')
+    silent only
+
+After:
+    call WaitForJob()
+    silent cclose
+    execute 'cd' fnameescape(original_cwd)
+    call delete(project, 'rf')
+    call utils#cmake#common#resetCache()
+    Restore
+
+Execute ([Configure] Refresh only after success in job, term and automatic modes):
+    for executor in ['job', 'term', '']
+        call delete(g:cmake_build_dir, 'rf')
+        let g:cmake_build_executor = executor
+        let &makeprg = 'unchanged-until-completion'
+        silent CMake
+        AssertEqual 'unchanged-until-completion', &makeprg
+        " A second configure must not invalidate the running configure's completion.
+        silent CMake
+        call WaitForJob()
+        let info = utils#cmake#common#getInfo()
+        AssertEqual 'completion_check', info.cmake.project_name
+        Assert &makeprg !=# 'unchanged-until-completion'
+    endfor
+
+Execute ([Configure] Failed reconfigure does not publish old replies or change target):
+    for executor in ['system', 'job', 'term']
+        let g:cmake_build_executor = executor
+        call writefile(['cmake_minimum_required(VERSION 3.6)', 'project(completion_check NONE)'], 'CMakeLists.txt')
+        silent CMake
+        call WaitForJob()
+        let replies = glob(g:cmake_build_dir . '/.cmake/api/v1/reply/index-*.json', 0, 1)
+        call writefile(['cmake_minimum_required(VERSION 3.6)', 'message(FATAL_ERROR "expected configure failure")'], 'CMakeLists.txt')
+        let &makeprg = 'keep-on-failure'
+        silent CMake
+        call WaitForJob()
+        AssertEqual 'keep-on-failure', &makeprg
+        for reply in replies
+            Assert filereadable(reply), 'Previous File API reply must be retained'
+        endfor
+    endfor
+
+Execute ([Configure] Cancelled job does not update the selected target):
+    let g:cmake_build_executor = 'job'
+    let &makeprg = 'keep-on-cancel'
+    silent CMake
+    call utils#exec#job#stop()
+    sleep 200m
+    AssertEqual 'keep-on-cancel', &makeprg
+    Assert empty(utils#common#executeStatus())
+
+Execute ([File API] Preserve existing replies and another client's query):
+    if utils#cmake#version#verNewerOrEq([3, 14])
+        let api = g:cmake_build_dir . '/.cmake/api/v1'
+        call mkdir(api . '/reply', 'p')
+        call mkdir(api . '/query/client-other', 'p')
+        call writefile(['original reply'], api . '/reply/index-000.json')
+        call writefile(['other query'], api . '/query/client-other/query.json')
+        call utils#cmake#fileapi#prepare(g:cmake_build_dir)
+        AssertEqual ['original reply'], readfile(api . '/reply/index-000.json')
+        AssertEqual ['other query'], readfile(api . '/query/client-other/query.json')
+        Assert filereadable(api . '/query/client-cmake4vim/query.json')
+    endif
+
+Execute ([File API] Read the newest index when older indexes remain):
+    if utils#cmake#version#verNewerOrEq([3, 14])
+        let g:cmake_build_executor = 'system'
+        silent CMake
+        call writefile(['{}'], g:cmake_build_dir . '/.cmake/api/v1/reply/index-000.json')
+        let info = utils#cmake#fileapi#parseReply(g:cmake_build_dir)
+        AssertEqual 'completion_check', info.cmake.project_name
+    endif
+
+Execute ([Configure] Ignore completion after switching projects):
+    let g:cmake_build_executor = 'job'
+    let &makeprg = 'other-project-command'
+    silent CMake
+    execute 'cd' fnameescape(original_cwd)
+    call WaitForJob()
+    AssertEqual 'other-project-command', &makeprg
+    Assert empty(utils#cmake#common#getInfo())
+
+Execute ([Configure] Job cancellation delivers completion exactly once):
+    let g:cmake_build_executor = 'job'
+    let results = []
+    call utils#exec#job#run(g:cmake_executable . ' -E sleep 1', 0, getcwd(), '', function('add', [results]))
+    call utils#exec#job#stop()
+    sleep 200m
+    AssertEqual [-1], results
+
+Execute ([Configure] Dispatch publishes successful completion and ignores failures):
+    if !has('win32')
+        Save &rtp, g:dispatch_handlers
+        set rtp+=$HOME/.vim/plugged/vim-dispatch
+        runtime plugin/dispatch.vim
+        let g:dispatch_handlers = ['job']
+        let g:cmake_build_executor = 'dispatch'
+        silent CMake
+        call WaitForJob()
+        AssertEqual 'completion_check', utils#cmake#common#getInfo().cmake.project_name
+        call writefile(['cmake_minimum_required(VERSION 3.6)', 'message(FATAL_ERROR "expected configure failure")'], 'CMakeLists.txt')
+        let &makeprg = 'keep-dispatch-failure'
+        silent CMake
+        call WaitForJob()
+        AssertEqual 'keep-dispatch-failure', &makeprg
+    endif
+

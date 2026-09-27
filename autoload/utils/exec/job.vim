@@ -28,11 +28,17 @@ function! s:removeANSI(buffer) abort
     endfor
 endfunction
 
-function! s:createQuickFix() abort
-    " just to be sure all messages were processed
-    sleep 100m
-    let l:bufnr = bufnr(s:cmake4vim_buf)
+function! s:createQuickFix(status) abort
+    if empty(s:cmake4vim_job) || get(s:cmake4vim_job, 'finishing', 0)
+        return
+    endif
+    let s:cmake4vim_job.finishing = 1
+    let l:status = get(s:cmake4vim_job, 'cancelled', 0) ? -1 : a:status
+    let l:Callback = get(s:cmake4vim_job, 'on_exit', 0)
     try
+        " just to be sure all messages were processed
+        sleep 100m
+        let l:bufnr = bufnr(s:cmake4vim_buf)
         " The output buffer may be gone (e.g. closed by a window command) - in
         " that case there is nothing to collect, but we must still finalize the
         " job below so the async status does not dangle.
@@ -58,14 +64,18 @@ function! s:createQuickFix() abort
         " WaitForJob in the tests, or a chained run target) would hang.
         let s:cmake4vim_job = {}
         call s:closeBuffer()
+        call utils#common#complete(l:Callback, l:status)
         if !empty(s:cmake4vim_jobs_pool)
             let [l:next_job; s:cmake4vim_jobs_pool] = s:cmake4vim_jobs_pool
-            call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'])
+            call utils#exec#job#run(l:next_job['cmd'], l:next_job['open_qf'], l:next_job['cwd'], l:next_job['err_fmt'], l:next_job['on_exit'])
         endif
     endtry
 endfunction
 
 function! s:vimClose(channel) abort
+    if empty(s:cmake4vim_job) || get(s:cmake4vim_job, 'finishing', 0) || a:channel != s:cmake4vim_job['channel']
+        return
+    endif
     let l:open_qf = get(s:cmake4vim_job, 'open_qf', 0)
 
     let l:ret_code = job_info(s:cmake4vim_job['job'])['exitval']
@@ -79,7 +89,7 @@ function! s:vimClose(channel) abort
     if l:ret_code != 0
         let s:cmake4vim_jobs_pool = []
     endif
-    call s:createQuickFix()
+    call s:createQuickFix(l:ret_code)
 
     if l:open_qf == 0
         silent execute printf('%sbotright %d cwindow', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
@@ -90,6 +100,9 @@ function! s:vimClose(channel) abort
 endfunction
 
 function! s:nVimOut(job_id, data, event) abort
+    if empty(s:cmake4vim_job) || a:job_id != get(s:cmake4vim_job, 'job', -1)
+        return
+    endif
     let l:bufnr = bufnr(s:cmake4vim_buf)
     call setbufvar(l:bufnr, '&modifiable', 1)
     for val in filter(a:data, '!empty(v:val)')
@@ -100,6 +113,9 @@ function! s:nVimOut(job_id, data, event) abort
 endfunction
 
 function! s:nVimExit(job_id, data, event) abort
+    if empty(s:cmake4vim_job) || get(s:cmake4vim_job, 'finishing', 0) || a:job_id != get(s:cmake4vim_job, 'job', -1)
+        return
+    endif
     let l:open_qf = s:cmake4vim_job['open_qf']
 
     " using only appendbufline results in an empty first line
@@ -112,7 +128,7 @@ function! s:nVimExit(job_id, data, event) abort
     if a:data != 0
         let s:cmake4vim_jobs_pool = []
     endif
-    call s:createQuickFix()
+    call s:createQuickFix(a:data)
     if a:data != 0 || l:open_qf != 0
         silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
     endif
@@ -149,6 +165,7 @@ function! utils#exec#job#stop() abort
         call s:closeBuffer()
         return
     endif
+    let s:cmake4vim_job.cancelled = 1
     let l:job = s:cmake4vim_job['job']
     if has('nvim')
         call jobstop(l:job)
@@ -156,12 +173,12 @@ function! utils#exec#job#stop() abort
         call job_stop(l:job)
     endif
     let s:cmake4vim_jobs_pool = []
-    call s:createQuickFix()
+    call s:createQuickFix(-1)
     silent execute printf('%sbotright %d copen', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
     call utils#common#Warning('Job is cancelled!')
 endfunction
 
-function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt) abort
+function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt, ...) abort
     " if there is a job or if the buffer is open, abort
     if !empty(s:cmake4vim_job) || bufnr(s:cmake4vim_buf) != -1
         call utils#common#Warning('Async execute is already running')
@@ -172,7 +189,7 @@ function! utils#exec#job#run(cmd, open_qf, cwd, err_fmt) abort
         return -1
     endif
     let l:outbufnr = s:createJobBuf()
-    let s:cmake4vim_job = { 'cmd': a:cmd, 'open_qf': a:open_qf, 'err_fmt': a:err_fmt }
+    let s:cmake4vim_job = { 'cmd': a:cmd, 'open_qf': a:open_qf, 'err_fmt': a:err_fmt, 'on_exit': get(a:, 1, 0) }
     if has('nvim')
         let l:job = jobstart(a:cmd, {
                     \ 'on_stdout': function('s:nVimOut'),
@@ -203,17 +220,18 @@ function! utils#exec#job#status() abort
     return s:cmake4vim_job
 endfunction
 
-function! utils#exec#job#append(cmd, open_qf, cwd, err_fmt) abort
+function! utils#exec#job#append(cmd, open_qf, cwd, err_fmt, ...) abort
     if !empty(s:cmake4vim_job)
         let s:cmake4vim_jobs_pool += [
                     \ {
                         \ 'cmd': a:cmd,
                         \ 'cwd': a:cwd,
                         \ 'open_qf': a:open_qf,
-                        \ 'err_fmt': a:err_fmt
+                        \ 'err_fmt': a:err_fmt,
+                        \ 'on_exit': get(a:, 1, 0)
                     \ }
                 \ ]
         return 0
     endif
-    return utils#exec#job#run(a:cmd, a:open_qf, a:cwd, a:err_fmt)
+    return utils#exec#job#run(a:cmd, a:open_qf, a:cwd, a:err_fmt, get(a:, 1, 0))
 endfunction
