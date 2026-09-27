@@ -25,7 +25,8 @@ function! utils#common#executeCommands(cmds, open_result) abort
         call add(l:commands, {
                     \ 'cmd': l:cmd['cmd'],
                     \ 'cwd': get( l:cmd, 'cwd', getcwd() ),
-                    \ 'errFormat': get( l:cmd, 'errFormat', '' )
+                    \ 'errFormat': get( l:cmd, 'errFormat', '' ),
+                    \ 'on_exit': get(l:cmd, 'on_exit', 0)
                     \ })
     endfor
     if (g:cmake_build_executor ==# 'dispatch') || (empty(g:cmake_build_executor) && exists(':Dispatch'))
@@ -53,21 +54,21 @@ function! utils#common#executeCommands(cmds, open_result) abort
         if l:pcwd != getcwd()
             let l:cmd_line .= ' && cd ' . utils#fs#fnameescape(getcwd())
         endif
-        call utils#exec#dispatch#run(l:cmd_line, a:open_result, l:errFormat)
+        call utils#exec#dispatch#run(l:cmd_line, a:open_result, l:errFormat, l:commands[-1]['on_exit'])
     elseif (g:cmake_build_executor ==# 'job') || (empty(g:cmake_build_executor) && ((has('job') && has('channel')) || has('nvim')))
         " job#run behaves differently if the qflist is open or closed
         let [l:cmd; l:cmds] = l:commands
 
-        call utils#exec#job#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
+        call utils#exec#job#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'], l:cmd['on_exit'])
         for l:command in l:cmds
-            call utils#exec#job#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
+            call utils#exec#job#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'], l:command['on_exit'])
         endfor
     elseif (g:cmake_build_executor ==# 'term') || (empty(g:cmake_build_executor) && (has('terminal') || has('nvim')))
         let [l:cmd; l:cmds] = l:commands
 
-        call utils#exec#term#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'])
+        call utils#exec#term#run(s:add_noglob(l:cmd['cmd']), a:open_result, l:cmd['cwd'], l:cmd['errFormat'], l:cmd['on_exit'])
         for l:command in l:cmds
-            call utils#exec#term#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'])
+            call utils#exec#term#append(s:add_noglob(l:command['cmd']), a:open_result, l:command['cwd'], l:command['errFormat'], l:command['on_exit'])
         endfor
     else
         " Close quickfix list to discard custom error format
@@ -81,6 +82,7 @@ function! utils#common#executeCommands(cmds, open_result) abort
                 let l:cmd = 'cd ' . utils#fs#fnameescape(l:cwd) . ' && ' . l:cmd . ' && cd ' . utils#fs#fnameescape(getcwd())
             endif
             let l:ret_code = utils#exec#system#run(l:cmd, a:open_result, l:errFormat)
+            call utils#common#complete(l:cmd_dict['on_exit'], l:ret_code)
             if l:ret_code != 0
                 break
             endif
@@ -92,14 +94,22 @@ function! utils#common#executeCommand(cmd, open_result, ...) abort
     let l:cwd = get(a:, 1, getcwd())
     let l:errFormat = get(a:, 2, '')
 
-    call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat}], a:open_result)
+    call utils#common#executeCommands([{'cmd': a:cmd, 'cwd': l:cwd, 'errFormat': l:errFormat, 'on_exit': get(a:, 3, 0)}], a:open_result)
+endfunction
+
+function! utils#common#complete(callback, status) abort
+    if type(a:callback) == v:t_func
+        call call(a:callback, [a:status])
+    endif
 endfunction
 
 function! utils#common#executeStatus() abort
     let l:status = {}
-    if g:cmake_build_executor ==# 'job'
+    if g:cmake_build_executor ==# 'dispatch' || (empty(g:cmake_build_executor) && exists(':Dispatch'))
+        return utils#exec#dispatch#status()
+    elseif g:cmake_build_executor ==# 'job' || (empty(g:cmake_build_executor) && ((has('job') && has('channel')) || has('nvim')))
         let l:status = utils#exec#job#status()
-    elseif g:cmake_build_executor ==# 'term'
+    elseif g:cmake_build_executor ==# 'term' || (empty(g:cmake_build_executor) && has('terminal'))
         let l:status = utils#exec#term#status()
     endif
     return l:status

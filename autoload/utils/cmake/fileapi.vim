@@ -129,10 +129,7 @@ function! utils#cmake#fileapi#prepare(build_dir) abort
     if !(utils#cmake#version#verNewerOrEq([3, 14]))
         return
     endif
-    let l:reply_folder = s:getReplyFolder(a:build_dir)
-    if !empty(l:reply_folder)
-        call utils#fs#removeDirectory(l:reply_folder)
-    endif
+    " Reply files belong to CMake and may be shared with other clients.
     let l:client_folder = s:getClientFolder(a:build_dir)
     call s:createFile(l:client_folder . '/query.json', json_encode(s:createQuery()))
 endfunction
@@ -142,14 +139,14 @@ function! utils#cmake#fileapi#parseReply(build_dir) abort
     if empty(l:reply_folder)
         return {}
     endif
-    let l:index_file = globpath(l:reply_folder, 'index*')
-    if empty(l:index_file)
+    let l:index_files = sort(globpath(l:reply_folder, 'index-*.json', 0, 1))
+    if empty(l:index_files)
         return {}
     endif
     " A malformed or partial reply (e.g. an error-*.json produced by a failed
     " generation) must not throw and abort the calling command.
     try
-        return s:parseAll(l:reply_folder, l:index_file)
+        return s:parseAll(l:reply_folder, l:index_files[-1])
     catch
         return {}
     endtry

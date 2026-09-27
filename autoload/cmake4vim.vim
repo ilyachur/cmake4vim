@@ -24,6 +24,8 @@ function! s:getCMakeErrorFormat() abort
                 \ .'%Z  %m,'
 endfunction
 " }}} Private functions
+let s:configure_id = 0
+
 " Public functions {{{ "
 
 " Completes CMake target names
@@ -54,39 +56,38 @@ endfunction
 " Generates CMake project
 " Additional cmake arguments can be passed as arguments of this function
 function! cmake4vim#GenerateCMake(...) abort
+    if !empty(utils#common#executeStatus())
+        call utils#common#Warning('Async execute is already running')
+        return
+    endif
+    let s:configure_id += 1
     " Reset old cmake cache
     call utils#cmake#common#resetCache()
 
-    " When a configure preset is selected drive CMake through it
+    let l:build_dir = utils#cmake#getBuildDir()
+    call utils#cmake#common#makeRequests(l:build_dir)
     if !empty(g:cmake_configure_preset)
-        let l:build_dir = utils#cmake#getBuildDir()
-        call utils#cmake#common#makeRequests(l:build_dir)
         let l:cmake_cmd = call('utils#cmake#getCMakePresetGenerationCommand', a:000)
     else
-        " Creates build directory
-        let l:build_dir = utils#cmake#getBuildDir()
-
-        " Prepare requests to CMake system
-        call utils#cmake#common#makeRequests(l:build_dir)
-
-        " Generates a command for CMake
         let l:cmake_cmd = call('utils#cmake#getCMakeGenerationCommand', a:000)
     endif
 
     " For old CMake versions the directory must be changed to generate the
     " project, since the -B option was introduced only in CMake 3.13
     let l:cw_dir = getcwd()
-    if !utils#cmake#version#verNewerOrEq([3, 13])
-        silent exec 'cd' fnameescape(l:build_dir)
-    endif
+    let l:execution_dir = utils#cmake#version#verNewerOrEq([3, 13]) ? l:cw_dir : l:build_dir
     " Generates CMake project
-    call utils#common#executeCommand(l:cmake_cmd, 0, getcwd(), s:getCMakeErrorFormat())
-    if !utils#cmake#version#verNewerOrEq([3, 13])
-        silent exec 'cd' fnameescape(l:cw_dir)
-    endif
+    call utils#common#executeCommand(l:cmake_cmd, 0, l:execution_dir, s:getCMakeErrorFormat(),
+                \ function('s:configured', [s:configure_id, l:cw_dir, fnamemodify(l:build_dir, ':p'), g:cmake_build_dir]))
+endfunction
 
+function! s:configured(id, cwd, build_dir, selected_dir, status) abort
+    " A failed/cancelled configure or an obsolete project must not publish results.
+    if a:status != 0 || a:id != s:configure_id || a:cwd !=# getcwd() || a:selected_dir !=# g:cmake_build_dir
+        return
+    endif
     " Collect CMake Information
-    call utils#cmake#common#collectCMakeInfo(l:build_dir)
+    call utils#cmake#common#collectCMakeInfo(a:build_dir)
 
     " Warn if a compilation database was requested but the generator cannot
     " produce one (only Makefile and Ninja generators support it)
