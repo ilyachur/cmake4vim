@@ -1,0 +1,136 @@
+Before:
+    silent call ResetPluginOptions()
+    let original_cwd = getcwd()
+    let project = tempname()
+    let project_alias = project
+    call mkdir(project, 'p')
+    if has('win32') && has('nvim')
+        let project = luaeval('(vim.uv or vim.loop).fs_realpath(_A)', project)
+    endif
+    execute 'cd' fnameescape(project)
+    let project = getcwd()
+    call writefile(['cmake_minimum_required(VERSION 3.5)', 'project(safe_reset NONE)'], 'CMakeLists.txt')
+    let g:cmake_usr_args = '-GNinja'
+
+After:
+    silent! cclose
+    call utils#cmake#common#resetCache()
+    execute 'cd' fnameescape(original_cwd)
+    call delete(project, 'rf')
+    silent call ResetPluginOptions()
+
+Execute ([Reset] In-source reset preserves sources and unrelated files):
+    let g:cmake_build_dir = project
+    silent CMake
+    call writefile(['keep'], 'source.txt')
+    Assert filereadable('CMakeCache.txt')
+    silent CMakeReset
+    AssertEqual ['keep'], readfile('source.txt')
+    Assert filereadable('CMakeLists.txt')
+    Assert !filereadable('CMakeCache.txt')
+    Assert !isdirectory('CMakeFiles')
+    Assert empty(glob('.cmake/api/v1/reply/index-*.json'))
+    silent CMakeResetAndReload
+    Assert filereadable('CMakeCache.txt')
+    AssertEqual ['keep'], readfile('source.txt')
+
+Execute ([Reset] A build directory containing the source directory is preserved):
+    call mkdir('src', 'p')
+    call rename('CMakeLists.txt', 'src/CMakeLists.txt')
+    call writefile(['keep'], 'src/source.txt')
+    let g:cmake_src_dir = project . '/src'
+    " On Windows tempname() may use an 8.3 alias while the source path is long.
+    let g:cmake_build_dir = project_alias
+    call writefile(['CMAKE_PROJECT_NAME:STATIC=ancestor'], 'CMakeCache.txt')
+    call mkdir('CMakeFiles', 'p')
+    silent CMakeReset
+    AssertEqual ['keep'], readfile('src/source.txt')
+    Assert filereadable('src/CMakeLists.txt')
+    Assert !filereadable('CMakeCache.txt')
+    Assert !isdirectory('CMakeFiles')
+
+Execute ([Reset] Separate build directories are removed even with a shared name prefix):
+    call mkdir('build', 'p')
+    call mkdir('build-source', 'p')
+    call rename('CMakeLists.txt', 'build-source/CMakeLists.txt')
+    let g:cmake_src_dir = project . '/build-source'
+    let g:cmake_build_dir = project . '/build'
+    call writefile(['stale'], 'build/stale-output')
+    silent CMakeReset
+    Assert !isdirectory('build')
+    Assert filereadable('build-source/CMakeLists.txt')
+
+Execute ([Reset] A symlink to the source directory does not cause source removal):
+    if !has('win32')
+        call mkdir('src', 'p')
+        call rename('CMakeLists.txt', 'src/CMakeLists.txt')
+        call system('ln -s src build-link')
+        AssertEqual 0, v:shell_error
+        let g:cmake_src_dir = project . '/src'
+        let g:cmake_build_dir = project . '/build-link'
+        call writefile(['CMAKE_PROJECT_NAME:STATIC=linked'], 'src/CMakeCache.txt')
+        silent CMakeReset
+        Assert filereadable('src/CMakeLists.txt')
+        Assert !filereadable('src/CMakeCache.txt')
+    endif
+
+Execute ([Cache] Switching build directories returns each project's information):
+    for name in ['first', 'second']
+        execute 'cd' fnameescape(project)
+        call mkdir(name, 'p')
+        call writefile(['cmake_minimum_required(VERSION 3.5)', 'project(' . name . ' NONE)',
+            \ 'add_custom_target(' . name . '_target)'], name . '/CMakeLists.txt')
+        let g:cmake_src_dir = project . '/' . name
+        let g:cmake_build_dir = project . '/' . name . '/build'
+        execute 'cd' fnameescape(g:cmake_src_dir)
+        silent CMake
+    endfor
+    execute 'cd' fnameescape(project)
+    call utils#cmake#common#collectCMakeInfo(project . '/first/build')
+    AssertEqual 'first', utils#cmake#common#getInfo().cmake.project_name
+    AssertEqual 'second', utils#cmake#common#getInfo(project . '/second/build').cmake.project_name
+    AssertEqual 'first', utils#cmake#common#getInfo(project . '/first/build').cmake.project_name
+    AssertEqual {}, utils#cmake#common#getInfo(project . '/missing')
+    call utils#cmake#common#collectCMakeInfo(project . '/first/build')
+    execute 'cd' fnameescape(project . '/second')
+    AssertEqual {}, utils#cmake#common#getInfo()
+
+Execute ([Presets] Names with spaces and preset targets survive actual configure, build and test):
+    if utils#cmake#version#verNewerOrEq([3, 21])
+        call writefile(['cmake_minimum_required(VERSION 3.5)', 'project(preset_targets NONE)',
+            \ 'add_custom_target(wanted COMMAND "${CMAKE_COMMAND}" -E touch wanted)',
+            \ 'add_custom_target(unwanted ALL COMMAND "${CMAKE_COMMAND}" -E touch unwanted)',
+            \ 'enable_testing()', 'add_test(NAME check COMMAND "${CMAKE_COMMAND}" -E touch tested)'], 'CMakeLists.txt')
+        let presets = {'version': 3,
+            \ 'configurePresets': [{'name': 'configure space', 'generator': 'Ninja', 'binaryDir': '${sourceDir}/build'}],
+            \ 'buildPresets': [{'name': 'build space', 'configurePreset': 'configure space', 'targets': ['wanted']}],
+            \ 'testPresets': [{'name': 'test space', 'configurePreset': 'configure space'}]}
+        call writefile([json_encode(presets)], 'CMakePresets.json')
+        silent CMakeSelectConfigurePreset configure space
+        Assert filereadable('build/CMakeCache.txt'), string(g:cmake_configure_preset) . ' ' . string(getqflist())
+        silent CMakeSelectBuildPreset build space
+        Assert &makeprg !~# '--target'
+        silent CMake
+        Assert &makeprg !~# '--target'
+        silent CMakeBuild
+        Assert filereadable('build/wanted')
+        Assert !filereadable('build/unwanted')
+        silent CMakeBuild unwanted
+        Assert filereadable('build/unwanted')
+        silent CMakeSelectTestPreset test space
+        silent CTest
+        Assert filereadable('build/tested')
+        if utils#cmake#version#verNewerOrEq([3, 25])
+            let presets.version = 6
+            let presets.workflowPresets = [{'name': 'workflow space', 'steps': [
+                \ {'type': 'configure', 'name': 'configure space'},
+                \ {'type': 'build', 'name': 'build space'},
+                \ {'type': 'test', 'name': 'test space'}]}]
+            call writefile([json_encode(presets)], 'CMakePresets.json')
+            call delete('build/wanted')
+            call delete('build/tested')
+            silent CMakeWorkflow workflow space
+            Assert filereadable('build/wanted')
+            Assert filereadable('build/tested')
+        endif
+    endif

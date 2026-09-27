@@ -194,7 +194,7 @@ function! utils#cmake#getBuildCommand(build_dir, target) abort
 
     " Build through the selected build preset when set
     if !empty(g:cmake_build_preset)
-        let l:cmd = printf('%s --build --preset %s', g:cmake_executable, g:cmake_build_preset)
+        let l:cmd = printf('%s --build --preset %s', g:cmake_executable, shellescape(g:cmake_build_preset))
         if !empty(a:target)
             let l:cmd .= ' --target ' . a:target
         endif
@@ -227,7 +227,7 @@ endfunction
 " Generates the CMake configuration command using the selected configure preset
 " Additional cmake arguments can be passed as arguments of this function
 function! utils#cmake#getCMakePresetGenerationCommand(...) abort
-    let l:cmake_args = ['--preset', g:cmake_configure_preset]
+    let l:cmake_args = ['--preset', shellescape(g:cmake_configure_preset)]
 
     if g:cmake_compile_commands
         let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
