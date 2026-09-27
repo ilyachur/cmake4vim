@@ -10,6 +10,10 @@ Before:
     let original_cwd = getcwd()
     let project = tempname()
     call mkdir(project . '/presets/nested', 'p')
+    if has('win32') && has('nvim')
+        " Expand tempname()'s Windows 8.3 aliases before CMake changes cwd spelling.
+        let project = luaeval('(vim.uv or vim.loop).fs_realpath(_A)', project)
+    endif
     execute 'cd' fnameescape(project)
     let project = getcwd()
     let g:cmake_build_executor = 'system'
