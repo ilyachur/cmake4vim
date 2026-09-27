@@ -78,11 +78,10 @@ function! s:resolveConfigure(name, all, chain) abort
     if type(l:inherits) == v:t_string
         let l:inherits = [l:inherits]
     endif
-    let l:result = {'environment': {}, 'envFiles': {}}
+    let l:result = {'environment': {}}
     for l:parent in reverse(copy(l:inherits))
         let l:base = s:resolveConfigure(l:parent, a:all, a:chain + [a:name])
         call extend(l:result.environment, remove(l:base, 'environment'))
-        call extend(l:result.envFiles, remove(l:base, 'envFiles'))
         call extend(l:result, l:base)
     endfor
     for l:field in ['binaryDir', 'generator']
@@ -90,15 +89,14 @@ function! s:resolveConfigure(name, all, chain) abort
             let l:result[l:field] = l:preset[l:field]
         endif
     endfor
-    " Version 12 expands fileDir at the field's origin; older schemas use
-    " the file defining the selected preset, including for inherited fields.
+    " CMake 4.4's immediate pass expands fileDir at its origin only when
+    " binaryDir contains no deferred macros. Environment is expanded later,
+    " in the selected preset's context, even for schema 12.
     if has_key(l:preset, 'binaryDir')
-        let l:result.binaryFile = l:entry.version >= 12 ? l:entry.file : ''
+        let l:deferred = substitute(l:preset.binaryDir, '\${fileDir}', '', 'g') =~# '\$\w*{'
+        let l:result.binaryFile = l:entry.version >= 12 && !l:deferred ? l:entry.file : ''
     endif
     call extend(l:result.environment, get(l:preset, 'environment', {}))
-    for l:name in keys(get(l:preset, 'environment', {}))
-        let l:result.envFiles[l:name] = l:entry.version >= 12 ? l:entry.file : ''
-    endfor
     return l:result
 endfunction
 
@@ -123,8 +121,7 @@ function! s:expandMacro(namespace, name, context, chain, file) abort
         if index(a:chain, a:name) >= 0
             throw 'cmake4vim: cyclic preset environment'
         endif
-        let l:file = get(a:context.envFiles, a:name, '')
-        return s:expandMacros(l:value, a:context, a:chain + [a:name], empty(l:file) ? a:context.file : l:file)
+        return s:expandMacros(l:value, a:context, a:chain + [a:name], a:context.file)
     elseif !empty(a:namespace)
         throw 'cmake4vim: unsupported preset macro'
     endif

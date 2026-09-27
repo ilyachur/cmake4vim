@@ -1,5 +1,12 @@
 Before:
     Save &makeprg, g:cmake_build_executor, g:cmake_build_dir, g:cmake_configure_preset
+    function! AssertPresetPath(expected, actual) abort
+        if has('win32')
+            AssertEqual substitute(a:expected, '\\', '/', 'g'), substitute(a:actual, '\\', '/', 'g')
+        else
+            AssertEqual a:expected, a:actual
+        endif
+    endfunction
     let original_cwd = getcwd()
     let project = tempname()
     call mkdir(project . '/presets/nested', 'p')
@@ -13,6 +20,7 @@ Before:
     call writefile(['cmake_minimum_required(VERSION 3.21)', 'project(preset_resolution NONE)'], 'CMakeLists.txt')
 
 After:
+    delfunction AssertPresetPath
     call setenv('CMAKE4VIM_PRESET_TEST', parent_env)
     call utils#cmake#common#resetCache()
     execute 'cd' fnameescape(original_cwd)
@@ -32,10 +40,10 @@ Execute ([Presets] Nested includes, repeated includes and user inheritance confi
         \ {'name': 'user', 'inherits': 'included', 'environment': {'SUFFIX': 'user'}}]})], 'CMakeUserPresets.json')
     for name in ['included', 'user']
         let expected = project . '/build/' . name . '-' . (name ==# 'user' ? 'user' : 'base')
-        AssertEqual expected, utils#cmake#presets#getConfigureBinaryDir(name)
+        call AssertPresetPath(expected, utils#cmake#presets#getConfigureBinaryDir(name))
         if utils#cmake#version#verNewerOrEq([3, 23])
             execute 'silent CMakeSelectConfigurePreset' name
-            AssertEqual expected, g:cmake_build_dir
+            call AssertPresetPath(expected, g:cmake_build_dir)
             Assert filereadable(expected . '/CMakeCache.txt')
             Assert !empty(glob(expected . '/.cmake/api/v1/reply/index-*.json'))
             AssertEqual 'preset_resolution', utils#cmake#common#getInfo().cmake.project_name
@@ -51,7 +59,7 @@ Execute ([Presets] Environment maps merge by key, with child and first-parent pr
         \ {'name': 'merged', 'inherits': ['first', 'second'], 'environment': {'B': '$env{A}-child', 'CMAKE4VIM_PRESET_TEST': v:null}}]
     call writefile([json_encode(presets)], 'CMakePresets.json')
     let expected = project . '/build/first/first-child/merged/from-process/from-process'
-    AssertEqual expected, utils#cmake#presets#getConfigureBinaryDir('merged')
+    call AssertPresetPath(expected, utils#cmake#presets#getConfigureBinaryDir('merged'))
     if utils#cmake#version#verNewerOrEq([3, 23])
         silent CMakeSelectConfigurePreset merged
         Assert filereadable(expected . '/CMakeCache.txt')
@@ -66,7 +74,7 @@ Execute ([Presets] Inherited macros use the selected preset and its file directo
         \ {'name': 'base', 'generator': 'Ninja', 'binaryDir': '${fileDir}/build/${presetName}'}]})], 'presets/shared.json')
     for name in ['base', 'derived']
         let expected = project . (name ==# 'base' ? '/presets' : '') . '/build/' . name
-        AssertEqual expected, utils#cmake#presets#getConfigureBinaryDir(name)
+        call AssertPresetPath(expected, utils#cmake#presets#getConfigureBinaryDir(name))
         if utils#cmake#version#verNewerOrEq([3, 23])
             execute 'silent CMakeSelectConfigurePreset' name
             Assert filereadable(expected . '/CMakeCache.txt')
@@ -81,7 +89,7 @@ Execute ([Presets] Include macros follow the containing file's schema version):
         let presets.version = schema_version
         let presets.include = [schema_version == 7 ? '$penv{CMAKE4VIM_PRESET_TEST}/shared.json' : '${fileDir}/presets/shared.json']
         call writefile([json_encode(presets)], 'CMakePresets.json')
-        AssertEqual project . '/build/included', utils#cmake#presets#getConfigureBinaryDir('included')
+        call AssertPresetPath(project . '/build/included', utils#cmake#presets#getConfigureBinaryDir('included'))
         if utils#cmake#version#verNewerOrEq(schema_version == 7 ? [3, 27] : [3, 30])
             silent CMakeSelectConfigurePreset included
             Assert filereadable(project . '/build/included/CMakeCache.txt')
@@ -92,15 +100,15 @@ Execute ([Presets] Macro expansion does not reinterpret environment values or li
     let $CMAKE4VIM_PRESET_TEST = '${presetName}-${dollar}'
     let presets.configurePresets = [{'name': 'literal', 'binaryDir': 'build/$penv{CMAKE4VIM_PRESET_TEST}/${dollar}env{UNSET}'}]
     call writefile([json_encode(presets)], 'CMakePresets.json')
-    AssertEqual project . '/build/${presetName}-${dollar}/$env{UNSET}', utils#cmake#presets#getConfigureBinaryDir('literal')
+    call AssertPresetPath(project . '/build/${presetName}-${dollar}/$env{UNSET}', utils#cmake#presets#getConfigureBinaryDir('literal'))
 
 Execute ([Presets] Missing or empty binaryDir uses the source directory, as CMake does):
     let presets.configurePresets = [{'name': 'in-source', 'generator': 'Ninja'}]
     call writefile([json_encode(presets)], 'CMakePresets.json')
-    AssertEqual project, utils#cmake#presets#getConfigureBinaryDir('in-source')
+    call AssertPresetPath(project, utils#cmake#presets#getConfigureBinaryDir('in-source'))
     let presets.configurePresets[0].binaryDir = ''
     call writefile([json_encode(presets)], 'CMakePresets.json')
-    AssertEqual project, utils#cmake#presets#getConfigureBinaryDir('in-source')
+    call AssertPresetPath(project, utils#cmake#presets#getConfigureBinaryDir('in-source'))
     if utils#cmake#version#verNewerOrEq([3, 23])
         silent CMakeSelectConfigurePreset in-source
         Assert filereadable(project . '/CMakeCache.txt')
@@ -131,23 +139,31 @@ Execute ([Presets] CMake refreshes the binary directory when the selected preset
         let presets.configurePresets[0].binaryDir = 'build/second'
         call writefile([json_encode(presets)], 'CMakePresets.json')
         silent CMake
-        AssertEqual project . '/build/second', g:cmake_build_dir
+        call AssertPresetPath(project . '/build/second', g:cmake_build_dir)
         Assert filereadable(project . '/build/second/CMakeCache.txt')
         Assert !empty(glob(project . '/build/second/.cmake/api/v1/reply/index-*.json'))
     endif
 
-Execute ([Presets] Schema 12 fileDir retains the origin of inherited fields):
+Execute ([Presets] Schema 12 matches CMake's immediate and deferred fileDir expansion):
     let presets.include = ['presets/shared.json']
     let presets.configurePresets = [{'name': 'derived', 'inherits': 'base'}]
     call writefile([json_encode(presets)], 'CMakePresets.json')
-    call writefile([json_encode({'version': 12, 'configurePresets': [
-        \ {'name': 'base', 'generator': 'Ninja', 'binaryDir': '$env{ROOT}/build/${presetName}',
-        \  'environment': {'ROOT': '${fileDir}'}}]})], 'presets/shared.json')
-    AssertEqual project . '/presets/build/derived', utils#cmake#presets#getConfigureBinaryDir('derived')
-    if utils#cmake#version#verNewerOrEq([4, 4])
-        silent CMakeSelectConfigurePreset derived
-        Assert filereadable(project . '/presets/build/derived/CMakeCache.txt')
-    endif
+    for [binary_dir, relative_dir] in [
+        \ ['${fileDir}/build/direct', '/presets/build/direct'],
+        \ ['${fileDir}/build/${presetName}', '/build/derived'],
+        \ ['$env{ROOT}/build/environment', '/build/environment']]
+        call writefile([json_encode({'version': 12, 'configurePresets': [
+            \ {'name': 'base', 'generator': 'Ninja', 'binaryDir': binary_dir,
+            \  'environment': {'ROOT': '${fileDir}'}}]})], 'presets/shared.json')
+        let expected = project . relative_dir
+        call AssertPresetPath(expected, utils#cmake#presets#getConfigureBinaryDir('derived'))
+        if utils#cmake#version#verNewerOrEq([4, 4])
+            silent CMakeSelectConfigurePreset derived
+            call AssertPresetPath(expected, g:cmake_build_dir)
+            Assert filereadable(expected . '/CMakeCache.txt'), 'CMake must configure in ' . expected
+            Assert !empty(glob(expected . '/.cmake/api/v1/reply/index-*.json')), 'File API reply must be in ' . expected
+        endif
+    endfor
 
 Execute ([Presets] Platform and generator macros resolve without changing literal separators):
     let presets.version = 5
@@ -155,5 +171,5 @@ Execute ([Presets] Platform and generator macros resolve without changing litera
         \ 'binaryDir': '${sourceParentDir}/${sourceDirName}/build/${hostSystemName}/${generator}/a${pathListSep}b'}]
     call writefile([json_encode(presets)], 'CMakePresets.json')
     let host_system = has('win32') ? 'Windows' : trim(system('uname -s'))
-    AssertEqual project . '/build/' . host_system . '/Ninja/a' . (has('win32') ? ';' : ':') . 'b',
-        \ utils#cmake#presets#getConfigureBinaryDir('macros')
+    call AssertPresetPath(project . '/build/' . host_system . '/Ninja/a' . (has('win32') ? ';' : ':') . 'b',
+        \ utils#cmake#presets#getConfigureBinaryDir('macros'))
