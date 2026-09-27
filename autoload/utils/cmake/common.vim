@@ -20,6 +20,8 @@ endfunction
 
 " Collect information from CMake reply and cache
 function! utils#cmake#common#collectCMakeInfo(build_dir) abort
+    let s:cmake_cache_dir = fnamemodify(a:build_dir, ':p')
+    let s:cmake_cache_cwd = getcwd()
     let s:cmake_cache_info = utils#cmake#fileapi#parseReply(a:build_dir)
     if empty(s:cmake_cache_info)
         let s:cmake_cache_info = utils#cmake#cache#collectInfo(a:build_dir)
@@ -28,13 +30,17 @@ endfunction
 
 " Returns the dictionary with CMake information
 function! utils#cmake#common#getInfo(...) abort
+    if get(s:, 'cmake_cache_cwd', '') !=# getcwd()
+        let s:cmake_cache_info = {}
+    endif
     let l:build_dir = ''
     if exists('a:1') && !empty(a:1)
         let l:build_dir = a:1
     endif
     " Recall collecting information if cmake info doesn't contain information
     " about targets
-    if !empty(l:build_dir) && (empty(s:cmake_cache_info) || !has_key(s:cmake_cache_info, 'targets'))
+    if !empty(l:build_dir) && (empty(s:cmake_cache_info) || !has_key(s:cmake_cache_info, 'targets')
+                \ || fnamemodify(l:build_dir, ':p') !=# s:cmake_cache_dir)
         call utils#cmake#common#collectCMakeInfo(l:build_dir)
     endif
     if !executable('cmake') || empty(s:cmake_cache_info)

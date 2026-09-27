@@ -73,7 +73,7 @@ The current version of the plugin supports next commands:
 
  - **`:CMake`** creates a build directory (if it is necessary) and generates cmake project.
  - **`:CMakeResetAndReload`** removes cmake cache and re-generates cmake project.
- - **`:CMakeReset`** removes cmake cache (this command removes the cmake build directory).
+ - **`:CMakeReset`** removes cmake cache (this command removes the build directory; if it contains project sources, only the CMake cache, internal files and File API replies are removed).
  - **`:CMakeBuild`** builds current cmake project. The command allows to specify cmake target.
  - **`:CMakeSelectTarget`** selects a target for project. You should put target name as a command line argument.
  - **`:CMakeSelectBuildType`** changes the cmake build type with argument passed and call **`:CMake`**.
@@ -86,7 +86,7 @@ The current version of the plugin supports next commands:
 The plugin understands `CMakePresets.json` / `CMakeUserPresets.json`. Preset names are listed via `cmake --list-presets`, so CMake resolves `hidden`, `inherits` and `condition`. Kits and variants keep working for projects without preset files.
 
  - **`:CMakeSelectConfigurePreset {name}`** selects a configure preset and configures the project with `cmake --preset {name}`. The plugin uses the preset binary directory for target selection, building and running.
- - **`:CMakeSelectBuildPreset {name}`** selects a build preset; `:CMakeBuild` then uses `cmake --build --preset {name}`.
+ - **`:CMakeSelectBuildPreset {name}`** selects a build preset; `:CMakeBuild` then uses `cmake --build --preset {name}` and preserves the preset’s targets. An explicit `:CMakeBuild {target}` overrides them.
  - **`:CMakeSelectTestPreset {name}`** selects a test preset; `:CTest` then uses `ctest --preset {name}`.
  - **`:CMakeWorkflow {name}`** runs a workflow preset with `cmake --workflow --preset {name}` (CMake 3.25+).
 

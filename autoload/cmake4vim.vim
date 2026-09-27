@@ -43,11 +43,27 @@ function! cmake4vim#CompleteKit(arg_lead, cmd_line, cursor_pos) abort
     return join(sort(keys(utils#cmake#kits#getCMakeKits()), 'i'), "\n")
 endfunction
 
-" Method remove build directory and reset the cmake cache
+" Remove build output without deleting a directory containing project sources.
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#findBuildDir()
     if !empty(l:build_dir)
-        call utils#fs#removeDirectory(l:build_dir)
+        let l:build_path = substitute(resolve(fnamemodify(l:build_dir, ':p')), '\\', '/', 'g')
+        let l:src_path = substitute(resolve(fnamemodify(utils#cmake#findSrcDir(), ':p')), '\\', '/', 'g')
+        if has('win32')
+            if has('nvim')
+                let l:build_path = substitute(luaeval('(vim.uv or vim.loop).fs_realpath(_A)', l:build_path), '\\', '/', 'g')
+                let l:src_path = substitute(luaeval('(vim.uv or vim.loop).fs_realpath(_A)', l:src_path), '\\', '/', 'g')
+            endif
+            let l:build_path = tolower(l:build_path)
+            let l:src_path = tolower(l:src_path)
+        endif
+        if filereadable(l:build_dir . '/CMakeLists.txt') || stridx(l:src_path . '/', substitute(l:build_path, '/$', '', '') . '/') == 0
+            call delete(l:build_dir . '/CMakeCache.txt')
+            call delete(l:build_dir . '/CMakeFiles', 'rf')
+            call delete(l:build_dir . '/.cmake/api/v1/reply', 'rf')
+        else
+            call utils#fs#removeDirectory(l:build_dir)
+        endif
     endif
     call utils#cmake#common#resetCache()
     echon 'Cmake cache was removed!'
@@ -108,16 +124,18 @@ function! s:configured(id, cwd, build_dir, selected_dir, status) abort
 
     " Select the cmake target if plugin changes the build command
     if g:cmake_change_build_command
-        silent call cmake4vim#SelectTarget(g:cmake_build_target)
+        if !empty(g:cmake_build_preset)
+            let &makeprg = utils#cmake#getBuildCommand(a:build_dir, '')
+        else
+            silent call cmake4vim#SelectTarget(g:cmake_build_target)
+        endif
     endif
 endfunction
 
 " Reset and reload cmake project. Reset the current build directory and
 " generate cmake project
 function! cmake4vim#ResetAndReloadCMake(...) abort
-    " Remove the whole build directory before regenerating. 'cmake --fresh'
-    " only wipes the cache and would leave stale build artifacts (e.g. the
-    " binaries of targets that were removed from CMakeLists.txt) behind.
+    " ResetCMakeCache preserves sources when the build directory contains them.
     silent call cmake4vim#ResetCMakeCache()
     call call('cmake4vim#GenerateCMake', a:000)
 endfunction
@@ -177,10 +195,13 @@ function! cmake4vim#CMakeBuild(...) abort
         call utils#common#Warning('CMake project was not found!')
         return
     endif
-    let l:cmake_target = a:0 ? a:1 : g:cmake_build_target
-
-    " Select target
-    let l:result = cmake4vim#SelectTarget(l:cmake_target)
+    if !empty(g:cmake_build_preset) && !a:0
+        " Let CMake use the preset's targets instead of the selected/default target.
+        let l:result = utils#cmake#getBuildCommand(utils#cmake#findBuildDir(), '')
+    else
+        let l:cmake_target = a:0 ? a:1 : g:cmake_build_target
+        let l:result = cmake4vim#SelectTarget(l:cmake_target)
+    endif
     " Build
     call utils#common#executeCommand(l:result, 0)
 endfunction
@@ -262,7 +283,7 @@ function! cmake4vim#CTest(bang, ...) abort
     let l:has_test_dir = utils#cmake#version#verNewerOrEq([3, 20])
     if !empty(g:cmake_test_preset)
         " The test preset already carries the test directory and configuration
-        call insert(l:args, g:cmake_test_preset)
+        call insert(l:args, shellescape(g:cmake_test_preset))
         call insert(l:args, '--preset')
     else
         " --test-dir is available since CMake 3.20; on older versions ctest must
@@ -356,6 +377,9 @@ function! cmake4vim#SelectBuildPreset(name) abort
         return
     endif
     let g:cmake_build_preset = a:name
+    if g:cmake_change_build_command
+        let &makeprg = utils#cmake#getBuildCommand(utils#cmake#findBuildDir(), '')
+    endif
     echon 'CMake build preset: ' . a:name . ' selected!'
 endfunction
 
@@ -380,7 +404,7 @@ function! cmake4vim#CMakeWorkflow(...) abort
         call utils#common#Warning(printf("CMake workflow preset '%s' not found", l:name))
         return
     endif
-    call utils#common#executeCommand(printf('%s --workflow --preset %s', g:cmake_executable, l:name), 0, getcwd(), s:getCMakeErrorFormat())
+    call utils#common#executeCommand(printf('%s --workflow --preset %s', g:cmake_executable, shellescape(l:name)), 0, getcwd(), s:getCMakeErrorFormat())
 endfunction
 
 function! cmake4vim#RunTarget(bang, ...) abort
