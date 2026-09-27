@@ -27,61 +27,128 @@ function! s:listPresets(type) abort
     return l:names
 endfunction
 
-" Loads configurePresets from CMakePresets.json and CMakeUserPresets.json into
-" a dictionary keyed by preset name. The `include` field is not expanded.
+" Read includes relative to their containing file. A completed file may be
+" included again, but a file on the current include chain would form a cycle.
+function! s:loadFile(file, all, loaded, chain) abort
+    let l:file = simplify(fnamemodify(a:file, ':p'))
+    if index(a:chain, l:file) >= 0
+        throw 'cmake4vim: cyclic preset include'
+    endif
+    if has_key(a:loaded, l:file)
+        return
+    endif
+    let l:data = json_decode(join(readfile(l:file), "\n"))
+    let l:context = {'file': l:file, 'includeVersion': l:data.version}
+    for l:include in get(l:data, 'include', [])
+        let l:path = l:data.version >= 7 ? s:expandMacros(l:include, l:context, [], l:file) : l:include
+        if l:path !~# '^[/\\]' && l:path !~# '^\a:[/\\]'
+            let l:path = fnamemodify(l:file, ':h') . '/' . l:path
+        endif
+        call s:loadFile(l:path, a:all, a:loaded, a:chain + [l:file])
+    endfor
+    for l:preset in get(l:data, 'configurePresets', [])
+        if has_key(a:all, l:preset.name)
+            throw 'cmake4vim: duplicate configure preset'
+        endif
+        let a:all[l:preset.name] = {'preset': l:preset, 'file': l:file, 'version': l:data.version}
+    endfor
+    let a:loaded[l:file] = 1
+endfunction
+
 function! s:loadConfigurePresets() abort
     let l:presets = {}
+    let l:loaded = {}
     for l:file in ['CMakePresets.json', 'CMakeUserPresets.json']
-        if !filereadable(l:file)
-            continue
+        if filereadable(l:file)
+            call s:loadFile(l:file, l:presets, l:loaded, [])
         endif
-        try
-            let l:data = json_decode(join(readfile(l:file), "\n"))
-        catch
-            continue
-        endtry
-        for l:preset in get(l:data, 'configurePresets', [])
-            if has_key(l:preset, 'name')
-                let l:presets[l:preset['name']] = l:preset
-            endif
-        endfor
     endfor
     return l:presets
 endfunction
 
-" Resolves a configure preset applying `inherits` (child overrides parent,
-" earlier parents override later ones).
-function! s:resolveConfigure(name, all) abort
-    if !has_key(a:all, a:name)
-        return {}
+" Resolve only fields needed for binaryDir. Environment entries inherit
+" individually; null blocks inherited values and falls back to the process.
+function! s:resolveConfigure(name, all, chain) abort
+    if !has_key(a:all, a:name) || index(a:chain, a:name) >= 0
+        throw 'cmake4vim: missing or cyclic configure preset'
     endif
-    let l:preset = a:all[a:name]
+    let l:entry = a:all[a:name]
+    let l:preset = l:entry.preset
     let l:inherits = get(l:preset, 'inherits', [])
     if type(l:inherits) == v:t_string
         let l:inherits = [l:inherits]
     endif
-
-    let l:result = {}
+    let l:result = {'environment': {}}
     for l:parent in reverse(copy(l:inherits))
-        call extend(l:result, s:resolveConfigure(l:parent, a:all))
+        let l:base = s:resolveConfigure(l:parent, a:all, a:chain + [a:name])
+        call extend(l:result.environment, remove(l:base, 'environment'))
+        call extend(l:result, l:base)
     endfor
-    call extend(l:result, l:preset)
+    for l:field in ['binaryDir', 'generator']
+        if has_key(l:preset, l:field)
+            let l:result[l:field] = l:preset[l:field]
+        endif
+    endfor
+    " CMake 4.4's immediate pass expands fileDir at its origin only when
+    " binaryDir contains no deferred macros. Environment is expanded later,
+    " in the selected preset's context, even for schema 12.
+    if has_key(l:preset, 'binaryDir')
+        let l:deferred = substitute(l:preset.binaryDir, '\${fileDir}', '', 'g') =~# '\$\w*{'
+        let l:result.binaryFile = l:entry.version >= 12 && !l:deferred ? l:entry.file : ''
+    endif
+    call extend(l:result.environment, get(l:preset, 'environment', {}))
     return l:result
 endfunction
 
-" Expands the subset of preset macros that can appear in binaryDir.
-function! s:expandMacros(value, name, source_dir, generator) abort
-    let l:result = a:value
-    let l:result = substitute(l:result, '${sourceDir}', escape(a:source_dir, '\&~'), 'g')
-    let l:result = substitute(l:result, '${sourceParentDir}', escape(fnamemodify(a:source_dir, ':h'), '\&~'), 'g')
-    let l:result = substitute(l:result, '${sourceDirName}', escape(fnamemodify(a:source_dir, ':t'), '\&~'), 'g')
-    let l:result = substitute(l:result, '${presetName}', escape(a:name, '\&~'), 'g')
-    let l:result = substitute(l:result, '${generator}', escape(a:generator, '\&~'), 'g')
-    let l:result = substitute(l:result, '${hostSystemName}', escape(substitute(system('uname -s'), '\n', '', 'g'), '\&~'), 'g')
-    let l:result = substitute(l:result, '$penv{\([^}]\+\)}', '\=getenv(submatch(1)) isnot v:null ? getenv(submatch(1)) : ""', 'g')
-    let l:result = substitute(l:result, '$env{\([^}]\+\)}', '\=getenv(submatch(1)) isnot v:null ? getenv(submatch(1)) : ""', 'g')
-    let l:result = substitute(l:result, '${dollar}', '$', 'g')
-    return l:result
+function! s:parentEnvironment(name) abort
+    let l:value = getenv(a:name)
+    return l:value is v:null ? '' : l:value
+endfunction
+
+function! s:expandMacro(namespace, name, context, chain, file) abort
+    let l:include_version = get(a:context, 'includeVersion', 0)
+    if l:include_version && (a:namespace ==# 'env' || (empty(a:namespace) && index(['presetName', 'generator'], a:name) >= 0)
+                \ || (l:include_version < 9 && a:namespace !=# 'penv'))
+        throw 'cmake4vim: unsupported include macro'
+    endif
+    if a:namespace ==# 'penv'
+        return s:parentEnvironment(a:name)
+    elseif a:namespace ==# 'env'
+        let l:value = get(a:context.environment, a:name, v:null)
+        if l:value is v:null
+            return s:parentEnvironment(a:name)
+        endif
+        if index(a:chain, a:name) >= 0
+            throw 'cmake4vim: cyclic preset environment'
+        endif
+        return s:expandMacros(l:value, a:context, a:chain + [a:name], a:context.file)
+    elseif !empty(a:namespace)
+        throw 'cmake4vim: unsupported preset macro'
+    endif
+    let l:source_dir = getcwd()
+    let l:macros = {
+        \ 'sourceDir': l:source_dir,
+        \ 'sourceParentDir': fnamemodify(l:source_dir, ':h'),
+        \ 'sourceDirName': fnamemodify(l:source_dir, ':t'),
+        \ 'presetName': get(a:context, 'name', ''),
+        \ 'generator': get(a:context, 'generator', ''),
+        \ 'fileDir': fnamemodify(a:file, ':h'),
+        \ 'dollar': '$',
+        \ 'pathListSep': has('win32') ? ';' : ':'}
+    if a:name ==# 'hostSystemName'
+        return has('win32') ? 'Windows' : trim(system('uname -s'))
+    endif
+    if !has_key(l:macros, a:name)
+        throw 'cmake4vim: unknown preset macro'
+    endif
+    return l:macros[a:name]
+endfunction
+
+" Expand each original token once: literal dollars and process environment
+" values must not accidentally become new macros during later replacements.
+function! s:expandMacros(value, context, chain, file) abort
+    return substitute(a:value, '\$\(\w*\){\([^}]*\)}',
+        \ '\=s:expandMacro(submatch(1), submatch(2), a:context, a:chain, a:file)', 'g')
 endfunction
 " }}} Private functions "
 
@@ -108,17 +175,17 @@ endfunction
 
 " Resolves the absolute binary directory of a configure preset
 function! utils#cmake#presets#getConfigureBinaryDir(name) abort
-    let l:all = s:loadConfigurePresets()
-    let l:resolved = s:resolveConfigure(a:name, l:all)
-    if empty(l:resolved)
+    try
+        let l:all = s:loadConfigurePresets()
+        let l:resolved = s:resolveConfigure(a:name, l:all, [])
+        let l:resolved.name = a:name
+        let l:resolved.file = l:all[a:name].file
+        let l:file = get(l:resolved, 'binaryFile', '')
+        let l:binary_dir = s:expandMacros(get(l:resolved, 'binaryDir', getcwd()),
+            \ l:resolved, [], empty(l:file) ? l:resolved.file : l:file)
+        " CMake interprets relative paths (and an omitted binaryDir) at the source.
+        return simplify(fnamemodify((empty(l:binary_dir) ? getcwd() : l:binary_dir) . '/', ':p:h'))
+    catch
         return ''
-    endif
-
-    let l:source_dir = getcwd()
-    let l:generator  = get(l:resolved, 'generator', '')
-    let l:binary_dir = get(l:resolved, 'binaryDir', l:source_dir . '/build')
-    let l:binary_dir = s:expandMacros(l:binary_dir, a:name, l:source_dir, l:generator)
-    " Make absolute without dropping the last path component (':h' would)
-    let l:binary_dir = fnamemodify(l:binary_dir, ':p')
-    return substitute(l:binary_dir, '[\\/]$', '', '')
+    endtry
 endfunction

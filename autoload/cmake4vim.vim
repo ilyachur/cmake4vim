@@ -60,6 +60,14 @@ function! cmake4vim#GenerateCMake(...) abort
         call utils#common#Warning('Async execute is already running')
         return
     endif
+    if !empty(g:cmake_configure_preset)
+        let l:binary_dir = utils#cmake#presets#getConfigureBinaryDir(g:cmake_configure_preset)
+        if empty(l:binary_dir)
+            call utils#common#Warning(printf("Cannot resolve binary directory for preset '%s'", g:cmake_configure_preset))
+            return
+        endif
+        let g:cmake_build_dir = l:binary_dir
+    endif
     let s:configure_id += 1
     " Reset old cmake cache
     call utils#cmake#common#resetCache()

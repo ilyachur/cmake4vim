@@ -92,6 +92,14 @@ The plugin understands `CMakePresets.json` / `CMakeUserPresets.json`. Preset nam
 
 All of these commands complete preset names with `<Tab>`.
 
+The configure preset's build directory is resolved from nested `include` files,
+`inherits`, and the merged `environment` map, including `$env{}` and `$penv{}`.
+Relative include paths are resolved from the containing file; relative build
+paths are resolved from the project root. The directory is refreshed on each
+`:CMake` invocation, so edits to the preset also update the File API query location.
+Include files require CMake 3.23+; macros in includes require 3.27+ for `$penv{}`
+and 3.30+ for other supported macros.
+
 #### Execute
 
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file.
