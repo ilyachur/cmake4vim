@@ -1,7 +1,6 @@
 from glob import glob
 import argparse
 import os
-import sys
 import re
 import shutil
 import platform

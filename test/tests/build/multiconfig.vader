@@ -33,7 +33,11 @@ Execute ([CMake multiconfig] build command uses --config for Ninja Multi-Config)
         let build_cmd = utils#cmake#getBuildCommand(utils#cmake#getBuildDir(), 'all')
         Assert build_cmd =~# '--config Release', 'Build command should contain --config Release: ' . build_cmd
         silent CMakeBuild
-        Assert isdirectory("cmake-build-Release/app/Release") || filereadable("cmake-build-Release/app/Release/test_app"), "Release config dir should exist"
+        let binary = 'cmake-build-Release/app/Release/test_app' . (has('win32') ? '.exe' : '')
+        Assert filereadable(binary), 'Release executable should be built: ' . binary
+        let output = system(shellescape(fnamemodify(binary, ':p')))
+        AssertEqual 0, v:shell_error, output
+        AssertEqual 'F1 test proj', trim(output)
     endif
 
 Execute ([CMake multiconfig] single-config generator does not use --config):
