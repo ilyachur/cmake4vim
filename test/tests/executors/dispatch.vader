@@ -1,58 +1,85 @@
 Before:
+    Save &rtp, g:dispatch_handlers
     silent call OpenTestProject()
-    silent call RemoveFile(".vimspector.json")
+    silent call RemoveFile('.vimspector.json')
     silent call RemoveCMakeDirs()
-
     silent call ResetPluginOptions()
     let g:cmake_build_executor = 'dispatch'
-    " Use on in order to close all windows and avoid E36 error
+    let configure_hook = tempname() . '.cmake'
+    if !has('win32')
+        set rtp+=$HOME/.vim/plugged/vim-dispatch
+        runtime plugin/dispatch.vim
+        let g:dispatch_handlers = ['job']
+    endif
+    function! WaitForDispatch() abort
+        let request = dispatch#request()
+        Assert !empty(request), 'Dispatch must start a request'
+        let started = reltime()
+        while !dispatch#completed(request) || !empty(utils#exec#dispatch#status())
+            if reltimefloat(reltime(started)) > 200
+                throw 'Dispatch did not finish: ' . request.command
+            endif
+            sleep 100m
+        endwhile
+        AssertEqual ['0'], readfile(request.file . '.complete'),
+            \ request.command . "\n" . join(readfile(request.file), "\n")
+        return request
+    endfunction
     silent on
 
 After:
-    silent call RemoveFile(".vimspector.json")
+    if isdirectory('cmake-build-Release')
+        call writefile([], 'cmake-build-Release/continue-configure')
+    endif
+    if !has('win32') && !empty(utils#exec#dispatch#status())
+        call WaitForDispatch()
+    endif
+    delfunction WaitForDispatch
+    call delete(configure_hook)
+    silent cclose
+    silent call RemoveFile('.vimspector.json')
     silent call RemoveCMakeDirs()
+    Restore
 
-Execute ([Dispatch executor] Generate cmake project with default settings):
-    if !has('win32')    " Skip for Windows
-        let old_rtp = &rtp
-        set rtp+=$HOME/.vim/plugged/vim-dispatch
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
-        source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake
-        let iter = 0
-        while iter < 100 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 2
-            let iter += 1
+Execute ([Dispatch executor] Wait for configure completion even when the cache appears early):
+    if !has('win32')
+        " Make the early-cache race reproducible without changing the project sources.
+        call writefile(['file(WRITE "${CMAKE_BINARY_DIR}/CMakeCache.txt" "# configuring\n")',
+            \ 'foreach(attempt RANGE 200)',
+            \ '  if(EXISTS "${CMAKE_BINARY_DIR}/continue-configure")',
+            \ '    break()',
+            \ '  endif()',
+            \ '  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 0.1)',
+            \ 'endforeach()',
+            \ 'if(NOT EXISTS "${CMAKE_BINARY_DIR}/continue-configure")',
+            \ '  message(FATAL_ERROR "Test did not release configure")',
+            \ 'endif()'], configure_hook)
+        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
+        call cmake4vim#GenerateCMake('-DCMAKE_PROJECT_test_proj_INCLUDE=' . utils#fs#fnameescape(configure_hook))
+        let started = reltime()
+        while !filereadable('cmake-build-Release/CMakeCache.txt') && reltimefloat(reltime(started)) < 200
+            sleep 50m
         endwhile
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        let &rtp = old_rtp
+        Assert filereadable('cmake-build-Release/CMakeCache.txt'), 'The configure hook should create an early cache'
+        Assert !empty(utils#exec#dispatch#status()), 'A cache file does not mean configure is complete'
+        call writefile([], 'cmake-build-Release/continue-configure')
+        call WaitForDispatch()
+        AssertEqual 'test_proj', utils#cmake#common#getInfo().cmake.project_name
+        Assert &makeprg =~# '--build', 'Configure completion should publish the build command'
     endif
 
-Execute ([Dispatch executor] Build and run target):
-    if !has('win32') && utils#cmake#version#verNewerOrEq([3, 14])  " Skip for Windows and old CMake versions
-        let old_rtp = &rtp
-        set rtp+=$HOME/.vim/plugged/vim-dispatch
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/autoload
-        set rtp+=$HOME/.vim/plugged/vim-dispatch/plugin
-        source $HOME/.vim/plugged/vim-dispatch/plugin/dispatch.vim
+Execute ([Dispatch executor] Build and run target after configure completion):
+    if !has('win32') && utils#cmake#version#verNewerOrEq([3, 14])
         let g:cmake_vimspector_support = 1
-        silent call writefile( readfile( '../../tests/integration/.vimspector.json' ), '.vimspector.json' )
+        silent call writefile(readfile('../../tests/integration/.vimspector.json'), '.vimspector.json')
         silent CMake
-        let iter = 0
-        while iter < 100 && !filereadable("cmake-build-Release/CMakeCache.txt")
-            sleep 2
-            let iter += 1
-        endwhile
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+        let configure_request = WaitForDispatch()
+        Assert filereadable('cmake-build-Release/CMakeCache.txt'), 'CMakeCache.txt should be generated'
         silent CMakeSelectTarget test_app
-        silent CMakeRun --gtest_filter=Test*
-        let iter = 0
-        while iter < 100 && !filereadable("cmake-build-Release/app/test_app")
-            sleep 2
-            let iter += 1
-        endwhile
-        Assert filereadable("cmake-build-Release/app/test_app"), "test_app should be built"
-        let &rtp = old_rtp
+        silent execute 'CMakeRun ' . shellescape('--gtest_filter=Test*')
+        Assert dispatch#request().id != configure_request.id, 'CMakeRun should start a new request'
+        let run_request = WaitForDispatch()
+        Assert filereadable('cmake-build-Release/app/test_app'), 'test_app should be built'
+        Assert stridx(join(readfile(run_request.file), "\n"), '--gtest_filter=Test* F1 app') >= 0,
+            \ 'The built executable must run with the requested arguments'
     endif
