@@ -15,16 +15,11 @@ function! s:getReplyFolder(build_dir) abort
     return l:reply_folder
 endfunction
 
-function! s:createFile(filename, content) abort
-    silent call writefile([a:content], a:filename)
-endfunction
-
 function! s:createQuery() abort
     let l:query = {}
     let l:requests = []
     let l:requests += [{'kind': 'codemodel', 'version': 2}]
     let l:requests += [{'kind': 'cache', 'version': 2}]
-    let l:requests += [{'kind': 'cmakeFiles', 'version': 1}]
     " The toolchains object exposes the per-language compilers without
     " scraping the cache. It is available since CMake 3.20.
     if utils#cmake#version#verNewerOrEq([3, 20])
@@ -78,11 +73,6 @@ function! s:parseToolchains(path, hash) abort
     return l:common
 endfunction
 
-function! s:parseCMakeFiles(path, hash) abort
-    let l:cmakeFiles = json_decode(join(readfile(a:path), ''))
-    return a:hash
-endfunction
-
 function! s:parseCache(path, hash) abort
     let l:cache = json_decode(join(readfile(a:path), ''))['entries']
     let l:common = a:hash
@@ -112,9 +102,6 @@ function! s:parseAll(reply_folder, index) abort
         if l:resp['kind'] ==# 'cache'
             let l:common = s:parseCache(a:reply_folder . '/' . l:resp['jsonFile'], l:common)
         endif
-        if l:resp['kind'] ==# 'cmakeFiles'
-            let l:common = s:parseCMakeFiles(a:reply_folder . '/' . l:resp['jsonFile'], l:common)
-        endif
         if l:resp['kind'] ==# 'toolchains'
             let l:common = s:parseToolchains(a:reply_folder . '/' . l:resp['jsonFile'], l:common)
         endif
@@ -131,7 +118,7 @@ function! utils#cmake#fileapi#prepare(build_dir) abort
     endif
     " Reply files belong to CMake and may be shared with other clients.
     let l:client_folder = s:getClientFolder(a:build_dir)
-    call s:createFile(l:client_folder . '/query.json', json_encode(s:createQuery()))
+    call writefile([json_encode(s:createQuery())], l:client_folder . '/query.json')
 endfunction
 
 function! utils#cmake#fileapi#parseReply(build_dir) abort

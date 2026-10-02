@@ -73,6 +73,13 @@ Execute ([File API] Preserve existing replies and another client's query):
         AssertEqual ['original reply'], readfile(api . '/reply/index-000.json')
         AssertEqual ['other query'], readfile(api . '/query/client-other/query.json')
         Assert filereadable(api . '/query/client-cmake4vim/query.json')
+        let query = json_decode(join(readfile(api . '/query/client-cmake4vim/query.json'), "\n"))
+        let kinds = map(copy(query.requests), 'v:val.kind')
+        let expected = ['cache', 'codemodel']
+        if utils#cmake#version#verNewerOrEq([3, 20])
+            call add(expected, 'toolchains')
+        endif
+        AssertEqual expected, sort(kinds), 'Request only the File API objects used by the plugin'
     endif
 
 Execute ([File API] Read the newest index when older indexes remain):

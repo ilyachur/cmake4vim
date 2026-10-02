@@ -1,0 +1,73 @@
+Before:
+    Save &errorformat
+    if !has('nvim')
+        call utils#exec#term#status()
+        let script = filter(getscriptinfo(), 'v:val.name =~# "autoload[/\\\\]utils[/\\\\]exec[/\\\\]term.vim$"')[0]
+        let VimExit = function('<SNR>' . script.sid . '_vimExit')
+        let VimClose = function('<SNR>' . script.sid . '_vimClose')
+        let VimOut = function('<SNR>' . script.sid . '_vimOut')
+        let job = job_start([g:cmake_executable, '-E', 'sleep', '10'])
+        let channel = job_getchannel(job)
+        let completed = []
+        call extend(utils#exec#term#status(), {'cmd': 'callback-order-test', 'cout': [],
+            \ 'channel': channel, 'err_fmt': '%m', 'open_qf': 0,
+            \ 'on_exit': function('add', [completed])})
+    endif
+
+After:
+    if !has('nvim')
+        call job_stop(job)
+        let state = utils#exec#term#status()
+        for key in keys(state)
+            call remove(state, key)
+        endfor
+        silent! cclose
+    endif
+    Restore
+
+Execute ([Term callbacks] Exit before final output waits for channel closure):
+    if !has('nvim')
+        call VimExit(job, 0)
+        AssertEqual [], completed, 'Process exit must not publish incomplete output'
+        call VimOut(channel, "last output\n")
+        call VimClose(channel)
+        AssertEqual [0], completed
+        AssertEqual ['last output'], map(getqflist(), 'v:val.text')
+        Assert empty(utils#exec#term#status())
+        call VimOut(channel, "obsolete output\n")
+        call VimExit(job, 0)
+        call VimClose(channel)
+        AssertEqual [0], completed, 'Completion must be delivered exactly once'
+        AssertEqual ['last output'], map(getqflist(), 'v:val.text')
+    endif
+
+Execute ([Term callbacks] Channel closure before exit waits for the real failure status):
+    if !has('nvim')
+        call VimOut(channel, "failure output\n")
+        call VimClose(channel)
+        AssertEqual [], completed, 'Channel closure does not establish the exit status'
+        call VimExit(job, 7)
+        AssertEqual [7], completed
+        AssertEqual ['failure output'], map(getqflist(), 'v:val.text')
+        Assert empty(utils#exec#term#status())
+    endif
+
+Execute ([Term callbacks] Callbacks from another channel cannot alter the active execution):
+    if !has('nvim')
+        let other_job = job_start([g:cmake_executable, '-E', 'sleep', '10'])
+        try
+            call VimOut(job_getchannel(other_job), "obsolete output\n")
+            call VimExit(other_job, 9)
+            call VimClose(job_getchannel(other_job))
+            AssertEqual [], utils#exec#term#status().cout
+            AssertEqual [], completed
+            Assert !has_key(utils#exec#term#status(), 'exit_status')
+            call VimOut(channel, "current output\n")
+            call VimExit(job, 0)
+            call VimClose(channel)
+            AssertEqual [0], completed
+            AssertEqual ['current output'], map(getqflist(), 'v:val.text')
+        finally
+            call job_stop(other_job)
+        endtry
+    endif

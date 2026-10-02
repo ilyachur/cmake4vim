@@ -1,0 +1,88 @@
+Before:
+    call utils#cmake#common#resetCache()
+    let build_dir = tempname()
+    let reply_dir = build_dir . '/.cmake/api/v1/reply'
+    call mkdir(reply_dir, 'p')
+    function! WriteApiJson(path, value) abort
+        call writefile([json_encode(a:value)], a:path)
+    endfunction
+    let cache = {'entries': [
+        \ {'name': 'CMAKE_PROJECT_NAME', 'value': 'api_project'},
+        \ {'name': 'CMAKE_BUILD_TYPE', 'value': 'Debug'}]}
+    let model = {'paths': {'build': build_dir}, 'configurations': [
+        \ {'name': 'Debug', 'targets': [
+        \ {'name': 'app', 'jsonFile': 'app.json'},
+        \ {'name': 'check', 'jsonFile': 'check.json'}]}]}
+    let index = {'cmake': {'version': {'string': '3.20.0'}, 'generator': {'name': 'Ninja'}},
+        \ 'reply': {'client-cmake4vim': {'query.json': {'responses': [
+        \ {'kind': 'cache', 'jsonFile': 'cache.json'},
+        \ {'kind': 'codemodel', 'jsonFile': 'codemodel.json'},
+        \ {'kind': 'toolchains', 'jsonFile': 'toolchains.json'}]}}}}
+    call WriteApiJson(reply_dir . '/cache.json', cache)
+    call WriteApiJson(reply_dir . '/codemodel.json', model)
+    call WriteApiJson(reply_dir . '/app.json', {'type': 'EXECUTABLE', 'artifacts': [{'path': 'bin/app'}]})
+    call WriteApiJson(reply_dir . '/check.json', {'type': 'UTILITY'})
+    call WriteApiJson(reply_dir . '/toolchains.json', {'toolchains': [
+        \ {'language': 'CXX', 'compiler': {'path': '/compiler/c++', 'id': 'Clang'}},
+        \ {'language': 'ASM'}]})
+    call WriteApiJson(reply_dir . '/index-001.json', index)
+
+After:
+    delfunction WriteApiJson
+    call utils#cmake#common#resetCache()
+    call delete(build_dir, 'rf')
+
+Execute ([File API] Read project, targets, artifacts and compiler information):
+    let info = utils#cmake#fileapi#parseReply(build_dir)
+    AssertEqual {'version': '3.20.0', 'generator': 'Ninja', 'project_name': 'api_project',
+        \ 'build_type': 'Debug', 'build_dir': build_dir}, info.cmake
+    AssertEqual {'Debug': {
+        \ 'app': {'type': 'EXECUTABLE', 'pathes': ['bin/app']},
+        \ 'check': {'type': 'UTILITY'}}}, info.targets
+    AssertEqual {'CXX': '/compiler/c++'}, info.toolchains
+
+Execute ([File API] Old replies with unused objects do not require their files):
+    call add(index.reply['client-cmake4vim']['query.json'].responses,
+        \ {'kind': 'cmakeFiles', 'jsonFile': 'unused-missing.json'})
+    call WriteApiJson(reply_dir . '/index-001.json', index)
+    let info = utils#cmake#fileapi#parseReply(build_dir)
+    AssertEqual 'api_project', info.cmake.project_name
+    AssertEqual 'EXECUTABLE', info.targets.Debug.app.type
+
+Execute ([File API] Prefer the newest index over stale but valid replies):
+    let newer_cache = deepcopy(cache)
+    let newer_cache.entries[0].value = 'new_project'
+    call WriteApiJson(reply_dir . '/new-cache.json', newer_cache)
+    let index.reply['client-cmake4vim']['query.json'].responses[0].jsonFile = 'new-cache.json'
+    call WriteApiJson(reply_dir . '/index-002.json', index)
+    AssertEqual 'new_project', utils#cmake#fileapi#parseReply(build_dir).cmake.project_name
+
+Execute ([File API] Reject a corrupt newest index instead of publishing stale information):
+    call writefile(['{broken'], reply_dir . '/index-002.json')
+    AssertEqual {}, utils#cmake#fileapi#parseReply(build_dir)
+
+Execute ([File API] Missing target files fall back to the CMake cache without partial targets):
+    call delete(reply_dir . '/app.json')
+    AssertEqual {}, utils#cmake#fileapi#parseReply(build_dir)
+    call writefile(['CMAKE_PROJECT_NAME:STATIC=cache_fallback', 'CMAKE_GENERATOR:INTERNAL=Ninja',
+        \ 'CMAKE_BUILD_TYPE:STRING=Release'], build_dir . '/CMakeCache.txt')
+    call utils#cmake#common#collectCMakeInfo(build_dir)
+    let info = utils#cmake#common#getInfo()
+    AssertEqual 'cache_fallback', info.cmake.project_name
+    AssertEqual 'Release', info.cmake.build_type
+    Assert !has_key(info, 'targets'), 'Incomplete targets must not escape into the cache'
+
+Execute ([File API] Error responses and replies for other clients return no project):
+    let index.reply['client-cmake4vim']['query.json'].responses = [
+        \ {'kind': 'codemodel', 'error': 'unsupported version'}]
+    call WriteApiJson(reply_dir . '/index-001.json', index)
+    AssertEqual {}, utils#cmake#fileapi#parseReply(build_dir)
+    let index.reply = {'client-other': {'query.json': {}}}
+    call WriteApiJson(reply_dir . '/index-001.json', index)
+    AssertEqual {}, utils#cmake#fileapi#parseReply(build_dir)
+
+Execute ([File API] No index or no reply directory returns no project):
+    call delete(reply_dir . '/index-001.json')
+    AssertEqual {}, utils#cmake#fileapi#parseReply(build_dir)
+    call delete(reply_dir, 'rf')
+    AssertEqual {}, utils#cmake#fileapi#parseReply(build_dir)
