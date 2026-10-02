@@ -36,18 +36,45 @@ endfunction
 
 " Vim functions {{{ "
 function! s:vimOut(channel, msg) abort
+    if empty(s:cmake4vim_term) || a:channel != get(s:cmake4vim_term, 'channel', a:channel)
+        return
+    endif
     " Collect outputs
     let s:cmake4vim_term['cout'] += s:prepareOut(a:msg)
 endfunction
 
-function! s:vimClose(channel, status) abort
+function! s:vimExit(job, status) abort
+    if empty(s:cmake4vim_term) || job_getchannel(a:job) != get(s:cmake4vim_term, 'channel', job_getchannel(a:job))
+        return
+    endif
+    let s:cmake4vim_term.exit_status = a:status
+    call s:vimFinish()
+endfunction
+
+function! s:vimClose(channel) abort
+    if empty(s:cmake4vim_term) || a:channel != get(s:cmake4vim_term, 'channel', a:channel)
+        return
+    endif
+    let s:cmake4vim_term.channel_closed = 1
+    call s:vimFinish()
+endfunction
+
+function! s:vimFinish() abort
+    " Process exit and channel closure can arrive in either order. Both are
+    " needed: exit provides the status, closure guarantees all output was read.
+    if !has_key(s:cmake4vim_term, 'exit_status') || !get(s:cmake4vim_term, 'channel_closed', 0)
+                \ || get(s:cmake4vim_term, 'finishing', 0)
+        return
+    endif
+    let s:cmake4vim_term.finishing = 1
+    let l:status = s:cmake4vim_term.exit_status
     let l:open_qf = get(s:cmake4vim_term, 'open_qf', 0)
 
     let l:cmd = s:cmake4vim_term['cmd']
-    if a:status != 0
+    if l:status != 0
         let s:cmake4vim_jobs_pool = []
     endif
-    call s:createQuickFix(a:status)
+    call s:createQuickFix(l:status)
 
     if l:open_qf == 0
         silent execute printf('%sbotright %d cwindow', g:cmake_build_executor_split_mode ==# 'sp' ? '' : 'vert ', utils#common#getWindowSize())
@@ -56,7 +83,7 @@ function! s:vimClose(channel, status) abort
     endif
     cbottom
 
-    if a:status == 0
+    if l:status == 0
         silent echon 'Success! ' . l:cmd
     else
         silent echon 'Failure! ' . l:cmd
@@ -139,7 +166,8 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt, ...) abort
         silent execute printf('keepalt botright %d %s', utils#common#getWindowSize(), g:cmake_build_executor_split_mode)
         let l:options = {
                     \ 'term_name': l:cmake4vim_term,
-                    \ 'exit_cb': function('s:vimClose'),
+                    \ 'exit_cb': function('s:vimExit'),
+                    \ 'close_cb': function('s:vimClose'),
                     \ 'out_cb': function('s:vimOut'),
                     \ 'term_finish': 'close',
                     \ g:cmake_build_executor_split_mode ==# 'sp' ? 'term_rows' : 'term_cols': utils#common#getWindowSize(),
@@ -150,6 +178,7 @@ function! utils#exec#term#run(cmd, open_qf, cwd, err_fmt, ...) abort
                     \ 'cwd': a:cwd
                     \ }
         let l:job = term_start(l:cmd, l:options)
+        let s:cmake4vim_term.channel = job_getchannel(term_getjob(l:job))
     endif
     if has('nvim')
         let s:cmake4vim_term['termbuf'] = l:termbufnr
