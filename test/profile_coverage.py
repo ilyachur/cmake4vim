@@ -60,6 +60,10 @@ def read_profile(path, root):
         if source not in coverage:
             continue
         script = scripts[source]
+        # Built-ins such as popup_notification attribute generated lambdas to
+        # their call site. Their synthetic bodies are not source file lines.
+        if not re.match(r'^\s*fu\w*!?\s+', script[definition - 1][1]):
+            continue
         position = definition
         for count, text in rows:
             start = position

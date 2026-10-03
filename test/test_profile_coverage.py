@@ -94,6 +94,18 @@ class ProfileCoverageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Function/source mismatch'):
             read_profile(profile, self.root)
 
+    def test_generated_popup_lambda_does_not_map_to_call_site(self):
+        profile = self.profile()
+        contents = profile.read_text(encoding='utf-8')
+        contents += ('\nFUNCTION  <lambda>1()\n'
+                     f'    Defined: {self.source}:3\n'
+                     'Called 0 times\nTotal time: 0.000000000\n Self time: 0.000000000\n\n'
+                     'count     total (s)      self (s)\n'
+                     + self.row('      return popup_close(1001)') + '\n\n')
+        profile.write_text(contents, encoding='utf-8')
+        coverage = read_profile(profile, self.root)[self.source]
+        self.assertEqual({2: 1, 3: 2, 4: 2, 5: 2, 6: 2, 7: 0, 8: 0, 11: 1}, coverage)
+
     def test_function_without_source_location_fails(self):
         profile = self.profile()
         contents = '\n'.join(line for line in profile.read_text(encoding='utf-8').splitlines()
