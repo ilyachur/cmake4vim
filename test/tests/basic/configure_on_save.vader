@@ -1,0 +1,111 @@
+Before:
+    Save g:cmake_build_executor, g:cmake_build_dir, g:cmake_reload_after_save, &makeprg
+    let original_cwd = getcwd()
+    let project = tempname()
+    call mkdir(project, 'p')
+    execute 'cd' fnameescape(project)
+    call ResetPluginOptions()
+    let g:cmake_build_dir = project . '/build'
+    let g:cmake_reload_after_save = 1
+    call writefile(['cmake_minimum_required(VERSION 3.6)',
+        \ 'project(save_check NONE)',
+        \ 'set(SAVED_VALUE first CACHE STRING "" FORCE)',
+        \ 'file(APPEND "${CMAKE_SOURCE_DIR}/runs.txt" "${SAVED_VALUE}\n")',
+        \ 'execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)'], 'CMakeLists.txt')
+    execute 'edit' fnameescape(project . '/CMakeLists.txt')
+    let source_buffer = bufnr('%')
+
+After:
+    call WaitForJob()
+    silent cclose
+    silent bwipeout!
+    execute 'cd' fnameescape(original_cwd)
+    call delete(project, 'rf')
+    call utils#cmake#common#resetCache()
+    Restore
+
+Execute ([Save] Configure reads newly written CMakeLists.txt and cmake scripts):
+    let g:cmake_build_executor = 'system'
+    call setline(3, 'set(SAVED_VALUE saved CACHE STRING "" FORCE)')
+    silent write
+    AssertEqual ['saved'], readfile('runs.txt')
+    call append('$', 'include(settings.cmake)')
+    call writefile(['set(FROM_SCRIPT old CACHE STRING "" FORCE)'], 'settings.cmake')
+    silent write
+    silent edit settings.cmake
+    call setline(1, 'set(FROM_SCRIPT new CACHE STRING "" FORCE)')
+    silent write
+    Assert index(readfile(g:cmake_build_dir . '/CMakeCache.txt'), 'FROM_SCRIPT:STRING=new') >= 0
+
+Execute ([Save] Several saves during configure cause one rerun with latest contents):
+    for executor in ['job', 'term', '']
+        execute 'buffer' source_buffer
+        let g:cmake_build_executor = executor
+        call delete('runs.txt')
+        call setline(3, 'set(SAVED_VALUE first CACHE STRING "" FORCE)')
+        silent write
+        let attempts = 100
+        while !filereadable('runs.txt') && attempts > 0
+            sleep 20m
+            let attempts -= 1
+        endwhile
+        Assert filereadable('runs.txt'), 'Configure must reach the read barrier'
+        execute 'buffer' source_buffer
+        call setline(3, 'set(SAVED_VALUE second CACHE STRING "" FORCE)')
+        silent write
+        execute 'buffer' source_buffer
+        call setline(3, 'set(SAVED_VALUE latest CACHE STRING "" FORCE)')
+        silent write
+        call WaitForJob()
+        AssertEqual ['first', 'latest'], readfile('runs.txt')
+        Assert index(readfile(g:cmake_build_dir . '/CMakeCache.txt'), 'SAVED_VALUE:STRING=latest') >= 0
+    endfor
+
+Execute ([Save] Pending configure is discarded after switching projects):
+    let g:cmake_build_executor = 'job'
+    silent write
+    silent write
+    execute 'cd' fnameescape(original_cwd)
+    call WaitForJob()
+    AssertEqual ['first'], readfile(project . '/runs.txt')
+
+Execute ([Save] Pending configure is discarded on cancellation):
+    let g:cmake_build_executor = 'job'
+    silent write
+    silent write
+    call utils#exec#job#stop()
+    sleep 200m
+    Assert empty(utils#common#executeStatus())
+    Assert !filereadable('runs.txt') || len(readfile('runs.txt')) <= 1
+
+Execute ([Save] Disabled automatic configuration does not start a job):
+    let g:cmake_reload_after_save = 0
+    silent write
+    Assert !filereadable('runs.txt')
+
+Execute ([Save] Saved correction reruns after a failed configure):
+    let g:cmake_build_executor = 'job'
+    call append('$', 'message(FATAL_ERROR "expected failure")')
+    silent write
+    let attempts = 100
+    while !filereadable('runs.txt') && attempts > 0
+        sleep 20m
+        let attempts -= 1
+    endwhile
+    Assert filereadable('runs.txt'), 'Configure must reach the read barrier'
+    execute 'buffer' source_buffer
+    silent $delete _
+    call setline(3, 'set(SAVED_VALUE corrected CACHE STRING "" FORCE)')
+    silent write
+    call WaitForJob()
+    AssertEqual ['first', 'corrected'], readfile('runs.txt')
+    AssertEqual 'save_check', utils#cmake#common#getInfo().cmake.project_name
+
+Execute ([Save] Pending configure is discarded after selecting another build directory):
+    let g:cmake_build_executor = 'job'
+    silent write
+    silent write
+    let g:cmake_build_dir = project . '/other-build'
+    call WaitForJob()
+    Assert !isdirectory(g:cmake_build_dir)
+    AssertEqual ['first'], readfile('runs.txt')
