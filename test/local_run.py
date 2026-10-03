@@ -6,6 +6,8 @@ import shutil
 import platform
 import subprocess
 
+from profile_coverage import write_lcov
+
 def remove_test_files(root_dir):
     cmake_proj_dir = os.path.join(root_dir, 'cmake projects', 'test proj')
     for folder in ['cmake-build-Release', 'cmake-build-Debug', 'cmake-build-RelWithDebInfo', 'cmake-build-MinSizeRel', 'cmake-build']:
@@ -45,23 +47,24 @@ if __name__ == '__main__':
     else:
         test_cases = [y for x in os.walk(test_dir) for y in glob(os.path.join(x[0], '*.vader'))]
 
+    profiles = []
     ret_code = 0
     for test_path in test_cases:
         test_case = os.path.basename(test_path).split('.')[0]
         if args.profile:
-            os.environ['VIM_PROFILE_FILE'] = os.path.join(home_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.txt')
+            profile = os.path.join(out_dir, 'profile_' + test_case + '_' + os.path.basename(args.editor) + '_cmake' + cmake_version + '_' + os_name + '.txt')
+            if os.path.exists(profile):
+                os.remove(profile)
+            os.environ['VIM_PROFILE_FILE'] = profile
+            profiles.append(profile)
         remove_test_files(current_dir)
         res = subprocess.run([args.editor, '-Es', '-Nu', 'vimrc', '+Vader! -q ' + test_path])
         remove_test_files(current_dir)
 
-        if args.profile:
-            os.chdir(os.path.join(current_dir, '..'))
-            subprocess.run(['covimerage', 'write_coverage', os.environ['VIM_PROFILE_FILE']])
-            subprocess.run(['coverage', 'xml'])
-            os.rename('coverage.xml', os.path.join(out_dir, 'provile_' + test_case + '_' + args.editor + '_cmake' + cmake_version + '_' + os_name + '.xml'))
-            os.chdir(current_dir)
-
         if res.returncode != 0:
             ret_code = res.returncode
+
+    if args.profile:
+        write_lcov(profiles, os.path.join(current_dir, '..'), os.path.join(out_dir, 'coverage.info'))
 
     exit(ret_code)

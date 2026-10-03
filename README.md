@@ -363,6 +363,21 @@ The matrix is defined in [ci.yml](.github/workflows/ci.yml). It runs for pushes 
 Older CMake versions are not covered on Windows because the runners' Visual Studio
 generator is newer than those versions support.
 
+CI collects Vimscript line coverage from the editors' built-in profiler and
+uploads the combined reports to Codecov. No coverage Python packages are needed.
+To collect coverage locally, use an editor with `+profile` support:
+
+```sh
+python3 test/local_run.py --editor nvim --out_dir coverage --profile
+```
+
+The runner writes `coverage/coverage.info` in LCOV format and keeps the raw profiles
+in the same directory. Conversion checks run with:
+
+```sh
+python3 -m unittest discover -s test -p 'test_profile_coverage.py' -v
+```
+
 Configure results and the selected target are refreshed only after CMake exits
 successfully, including when using `job`, `term`, or `dispatch`. Existing File API
 replies are preserved; CMake owns and updates those files.
