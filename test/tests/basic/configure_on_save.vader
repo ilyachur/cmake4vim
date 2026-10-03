@@ -64,6 +64,14 @@ Execute ([Save] Several saves during configure cause one rerun with latest conte
 Execute ([Save] Pending configure is discarded after switching projects):
     let g:cmake_build_executor = 'job'
     silent write
+    let attempts = 100
+    while !filereadable('runs.txt') && attempts > 0
+        sleep 20m
+        let attempts -= 1
+    endwhile
+    Assert filereadable('runs.txt'), 'Configure must reach the read barrier'
+    Assert !empty(utils#common#executeStatus()), 'Configure must still be running'
+    execute 'buffer' source_buffer
     silent write
     execute 'cd' fnameescape(original_cwd)
     call WaitForJob()
