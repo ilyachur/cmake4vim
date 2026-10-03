@@ -25,6 +25,11 @@ function! s:getCMakeErrorFormat() abort
 endfunction
 " }}} Private functions
 let s:configure_id = 0
+let s:active_configure = {}
+
+function! s:configureContext() abort
+    return [getcwd(), g:cmake_build_dir, g:cmake_configure_preset, g:cmake_src_dir]
+endfunction
 
 " Public functions {{{ "
 
@@ -100,12 +105,24 @@ function! cmake4vim#GenerateCMake(...) abort
     " project, since the -B option was introduced only in CMake 3.13
     let l:cw_dir = getcwd()
     let l:execution_dir = utils#cmake#version#verNewerOrEq([3, 13]) ? l:cw_dir : l:build_dir
+    let s:active_configure = {'id': s:configure_id, 'context': s:configureContext(),
+                \ 'pending': 0, 'args': a:000}
     " Generates CMake project
     call utils#common#executeCommand(l:cmake_cmd, 0, l:execution_dir, s:getCMakeErrorFormat(),
                 \ function('s:configured', [s:configure_id, l:cw_dir, fnamemodify(l:build_dir, ':p'), g:cmake_build_dir]))
 endfunction
 
 function! s:configured(id, cwd, build_dir, selected_dir, status) abort
+    if get(s:active_configure, 'id', -1) == a:id
+        let l:configure = s:active_configure
+        let s:active_configure = {}
+        " Saved changes need a fresh configure, even if the previous one failed.
+        if l:configure.pending && a:status != -1 && g:cmake_reload_after_save
+                    \ && l:configure.context ==# s:configureContext()
+            call call('cmake4vim#GenerateCMake', l:configure.args)
+            return
+        endif
+    endif
     " A failed/cancelled configure or an obsolete project must not publish results.
     if a:status != 0 || a:id != s:configure_id || a:cwd !=# getcwd() || a:selected_dir !=# g:cmake_build_dir
         return
@@ -143,7 +160,12 @@ endfunction
 " The function is called when user saves cmake scripts
 function! cmake4vim#CMakeFileSaved() abort
     if g:cmake_reload_after_save
-        " Reloads CMake project if it is needed
+        if !empty(utils#common#executeStatus())
+            if !empty(s:active_configure) && s:active_configure.context ==# s:configureContext()
+                let s:active_configure.pending = 1
+            endif
+            return
+        endif
         call cmake4vim#GenerateCMake()
     endif
 endfunction

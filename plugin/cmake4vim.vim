@@ -10,8 +10,8 @@ let g:loaded_cmake4vim_plugin = 1
 silent call cmake4vim#init()
 
 augroup cmake
-    autocmd BufWritePre *.cmake call cmake4vim#CMakeFileSaved()
-    autocmd BufWritePre CMakeLists.txt call cmake4vim#CMakeFileSaved()
+    autocmd BufWritePost *.cmake call cmake4vim#CMakeFileSaved()
+    autocmd BufWritePost CMakeLists.txt call cmake4vim#CMakeFileSaved()
 augroup END
 " }}} Initialization "
 
